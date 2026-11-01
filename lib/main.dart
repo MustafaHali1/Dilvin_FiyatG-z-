@@ -9,9 +9,12 @@ import 'ekranlar/onboarding/renk_korlugu_secim_ekrani.dart';
 import 'ekranlar/onboarding/renk_testi_sorusu_ekrani.dart';
 import 'ekranlar/ana_sayfa/ana_sayfa_ekrani.dart';
 import 'ekranlar/sepet/sepet_ekrani.dart';
+import 'ekranlar/kamera/kamera_tarayici_ekrani.dart';
 import 'ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
 import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
 import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
+import 'bilesenler/sesli_asistan_sayfasi.dart';
+import 'bilesenler/sesli_asistan_butonu.dart';
 import 'modeller/fis_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
@@ -125,11 +128,11 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     final sayfalar = [
       AnaSayfaEkrani(
-        onKameraAc: () => _fiyatOnaySayfasiniAc(context),
+        onKameraAc: () => _kameraSayfasiniAc(context),
         onSepeteGit: () => setState(() => _seciliSayfa = 1),
       ),
       SepetEkrani(
-        onUrunEkle: () => _fiyatOnaySayfasiniAc(context),
+        onUrunEkle: () => _kameraSayfasiniAc(context),
         onAlisverisiBitir: () => _fisDetaySayfasiniAc(context, sepet),
       ),
       const AyarlarEkrani(),
@@ -137,6 +140,9 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     return Scaffold(
       body: sayfalar[_seciliSayfa],
+      floatingActionButton: SesliAsistanButonu(
+        onDokunuldu: () => _sesliAsistaniAc(context),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _seciliSayfa,
         onDestinationSelected: (index) => setState(() => _seciliSayfa = index),
@@ -165,6 +171,21 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
             label: 'Ayarlar',
           ),
         ],
+      ),
+    );
+  }
+
+  void _kameraSayfasiniAc(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => KameraTarayiciEkrani(
+          onKapat: () => Navigator.of(context).pop(),
+          onGaleridenSec: () {},
+          onFotoCekildi: () {
+            Navigator.of(context).pop();
+            _fiyatOnaySayfasiniAc(context);
+          },
+        ),
       ),
     );
   }
@@ -198,6 +219,19 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
           onPaylas: () {},
           onSesliOku: () {},
         ),
+      ),
+    );
+  }
+
+  void _sesliAsistaniAc(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SesliAsistanSayfasi(
+        onHizliKomut: (komut) {
+          Navigator.of(context).pop();
+        },
       ),
     );
   }
