@@ -14,7 +14,6 @@ import 'ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
 import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
 import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
 import 'bilesenler/sesli_asistan_sayfasi.dart';
-import 'bilesenler/sesli_asistan_butonu.dart';
 import 'modeller/fis_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
@@ -130,6 +129,8 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
       AnaSayfaEkrani(
         onKameraAc: () => _kameraSayfasiniAc(context),
         onSepeteGit: () => setState(() => _seciliSayfa = 1),
+        onSesliAsistanAc: () => _sesliAsistaniAc(context),
+        onAyarlaraGit: () => setState(() => _seciliSayfa = 2),
       ),
       SepetEkrani(
         onUrunEkle: () => _kameraSayfasiniAc(context),
@@ -140,9 +141,6 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     return Scaffold(
       body: sayfalar[_seciliSayfa],
-      floatingActionButton: SesliAsistanButonu(
-        onDokunuldu: () => _sesliAsistaniAc(context),
-      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _seciliSayfa,
         onDestinationSelected: (index) => setState(() => _seciliSayfa = index),
