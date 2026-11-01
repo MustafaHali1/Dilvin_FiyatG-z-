@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import '../modeller/profil_modeli.dart';
 
-/// Kullanıcı profilini ve erişilebilirlik ayarlarını yöneten ViewModel
+/// Kullanıcı profilini ve mod geçişlerini yöneten merkezi ViewModel
 class ProfilYoneticisi extends ChangeNotifier {
   ProfilModeli _profil = const ProfilModeli();
 
   ProfilModeli get profil => _profil;
+  ProfilTuru get aktifMod => _profil.profilTuru;
   bool get kolayMod => _profil.profilTuru == ProfilTuru.kolayMod;
   bool get renkKoruModu => _profil.profilTuru == ProfilTuru.renkKoruModu;
+  bool get gormeEngelliModu => _profil.profilTuru == ProfilTuru.gormeEngelliModu;
 
   void profilAyarla(ProfilTuru yeniTur) {
     _profil = _profil.kopyala(profilTuru: yeniTur);
@@ -16,6 +18,16 @@ class ProfilYoneticisi extends ChangeNotifier {
 
   void renkKorluguTuruAyarla(RenkKorluguTuru tur) {
     _profil = _profil.kopyala(renkKorluguTuru: tur);
+    notifyListeners();
+  }
+
+  void yaziBoyutuAyarla(double yeniBoyut) {
+    _profil = _profil.kopyala(yaziBoyutu: yeniBoyut);
+    notifyListeners();
+  }
+
+  void kontrastAyarla(String kontrast) {
+    _profil = _profil.kopyala(kontrastTuru: kontrast);
     notifyListeners();
   }
 

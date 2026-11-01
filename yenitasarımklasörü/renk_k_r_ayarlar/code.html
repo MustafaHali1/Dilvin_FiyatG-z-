@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="tr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>FiyatGöz - Renk Körü Modu</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100%;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 0.5rem);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "tertiary-fixed": "#c6e7ff", "on-surface": "#131b2e", "primary-fixed": "#cee5ff", "on-tertiary": "#ffffff", "secondary": "#7f5600", "on-tertiary-fixed": "#001e2d", "surface-container-lowest": "#ffffff", "on-primary-container": "#e7f1ff", "surface-tint": "#00639b", "outline": "#707881", "on-tertiary-fixed-variant": "#004c6b", "error": "#ba1a1a", "secondary-container": "#fdb323", "on-surface-variant": "#404750", "surface-container": "#eaedff", "on-error": "#ffffff", "surface-dim": "#d2d9f4", "inverse-on-surface": "#eef0ff", "inverse-primary": "#97cbff", "surface": "#faf8ff", "inverse-surface": "#283044", "primary": "#00598c", "on-tertiary-container": "#e4f2ff", "outline-variant": "#c0c7d2", "secondary-fixed": "#ffddae", "on-background": "#131b2e", "secondary-fixed-dim": "#ffba40", "background": "#faf8ff", "error-container": "#ffdad6", "on-secondary-fixed-variant": "#614000", "surface-container-highest": "#dae2fd", "on-secondary-fixed": "#281800", "surface-variant": "#dae2fd", "on-primary-fixed": "#001d33", "surface-container-high": "#e2e7ff", "tertiary-container": "#0075a3", "on-error-container": "#93000a", "on-secondary-container": "#6b4800", "primary-fixed-dim": "#97cbff", "on-primary": "#ffffff", "surface-bright": "#faf8ff", "on-primary-fixed-variant": "#004a76", "surface-container-low": "#f2f3ff", "tertiary-fixed-dim": "#83cfff", "tertiary": "#005b80", "on-secondary": "#ffffff", "primary-container": "#0072b2" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-mobile": "1rem", "margin": "2rem", "gutter": "1.5rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "space-md": "1rem", "margin-mobile": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "label-lg": ["JetBrains Mono"], "label-sm": ["JetBrains Mono"], "headline-md": ["Atkinson Hyperlegible Next"], "body-md": ["Atkinson Hyperlegible Next"], "headline-sm": ["Atkinson Hyperlegible Next"], "headline-xl": ["Atkinson Hyperlegible Next"], "label-md": ["JetBrains Mono"], "headline-lg-mobile": ["Atkinson Hyperlegible Next"], "body-sm": ["Atkinson Hyperlegible Next"], "headline-lg": ["Atkinson Hyperlegible Next"], "headline-xl-mobile": ["Atkinson Hyperlegible Next"], "body-lg": ["Atkinson Hyperlegible Next"] }, "fontSize": { "label-lg": ["15px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "600" }], "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }], "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.03em", "fontWeight": "500" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "700" }], "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.015em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0.01em", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-gutter-mobile flex items-center justify-between"><div class="flex flex-col gap-1"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[22px] font-bold">visibility</span><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight uppercase font-bold">FiyatGöz</span></div><div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container shadow-none"><span class="material-symbols-outlined text-[13px]">visibility</span><span class="font-label-sm text-label-sm tracking-wide uppercase font-bold">👁️ RENK KÖRÜ MODU (Deuteranopi)</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Sesli Asistan" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[24px]">record_voice_over</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 w-full bg-surface pt-20 pb-28 px-gutter-mobile"><div class="flex flex-col w-full pb-8 space-y-6">
+<!-- Interactive Feedback Banner -->
+<div class="hidden transition-all duration-300 rounded-xl bg-secondary-container text-on-secondary-container p-space-md shadow-md items-center justify-between" id="statusToast">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+<span class="font-body-md text-body-md font-bold" id="toastMsg">Ayar güncellendi</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase">KAYDEDİLDİ [✓]</span>
+</div>
+<!-- Page Introduction & Active Badge -->
+<div class="flex flex-col space-y-2">
+<div class="flex items-center justify-between">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold tracking-tight">Ayarlar</h1>
+<span class="px-2.5 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">palette</span>
+        BARİYERSİZ UI
+      </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+      Okabe-Ito spektrum standartlarına göre optimize edilmiş renk ve desen konfigürasyonu.
+    </p>
+</div>
+<!-- Section 1: Renk Körlüğü Profili & Palet -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-6 bg-primary-container rounded-sm"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">🎨 Renk Körlüğü Profili &amp; Palet</h2>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">1 / 3 AKTİF</span>
+</div>
+<!-- Card 1: Active Deuteranopia -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-md flex flex-col space-y-3 transition-all" id="profile-card-deuteranopia">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Deuteranopi</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+              [✓ AKTİF]
+            </span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant mt-0.5">Yeşil Zayıflığı • En Yaygın (%6.0 Erkek)</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">done</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Kırmızı ve yeşil ayrımları yerine yüksek kontrastlı <strong class="text-on-surface">Kobalt Mavi</strong> ve <strong class="text-on-surface">Kehribar Turuncu</strong> eşleştirmesi kullanılır.
+      </p>
+<!-- Color Swatch Strip -->
+<div class="flex flex-col space-y-1.5 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">Kullanılan İkili Kontrast Paleti:</span>
+<div class="grid grid-cols-2 gap-2 h-12 rounded-lg overflow-hidden shadow-inner">
+<div class="bg-primary-container text-on-primary-container flex items-center justify-between px-3">
+<span class="font-label-sm text-label-sm font-bold">Kobalt Mavi</span>
+<span class="font-label-sm text-label-sm opacity-90">#0072B2</span>
+</div>
+<div class="bg-secondary-container text-on-secondary-container flex items-center justify-between px-3">
+<span class="font-label-sm text-label-sm font-bold">Kehribar</span>
+<span class="font-label-sm text-label-sm opacity-90">#E69F00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Protanopia -->
+<div class="w-full bg-surface-container rounded-xl p-space-md shadow-sm flex flex-col space-y-3" id="profile-card-protanopia">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Protanopi</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Kırmızı Zayıflığı (%2.0)</span>
+</div>
+<button class="min-h-[44px] min-w-[72px] px-4 py-2 bg-surface-container-lowest text-primary-container font-label-md text-label-md font-bold rounded-lg shadow-sm hover:bg-surface-container-high transition-colors flex items-center gap-1" onclick="switchProfile('Protanopi')">
+<span class="material-symbols-outlined text-[16px]">touch_app</span>
+          Seç
+        </button>
+</div>
+<div class="grid grid-cols-2 gap-2 h-9 rounded-lg overflow-hidden">
+<div class="bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-between px-2.5">
+<span class="font-label-sm text-label-sm font-bold">Gök Mavisi</span>
+<span class="font-label-sm text-label-sm">#56B4E9</span>
+</div>
+<div class="bg-inverse-surface text-inverse-on-surface flex items-center justify-between px-2.5">
+<span class="font-label-sm text-label-sm font-bold">Koyu Mor</span>
+<span class="font-label-sm text-label-sm">#332288</span>
+</div>
+</div>
+</div>
+<!-- Card 3: Tritanopia -->
+<div class="w-full bg-surface-container rounded-xl p-space-md shadow-sm flex flex-col space-y-3" id="profile-card-tritanopia">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Tritanopi</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mavi-Sarı Zayıflığı (Nadir &lt;%0.1)</span>
+</div>
+<button class="min-h-[44px] min-w-[72px] px-4 py-2 bg-surface-container-lowest text-primary-container font-label-md text-label-md font-bold rounded-lg shadow-sm hover:bg-surface-container-high transition-colors flex items-center gap-1" onclick="switchProfile('Tritanopi')">
+<span class="material-symbols-outlined text-[16px]">touch_app</span>
+          Seç
+        </button>
+</div>
+<div class="grid grid-cols-2 gap-2 h-9 rounded-lg overflow-hidden">
+<div class="bg-surface-dim text-on-surface flex items-center justify-between px-2.5">
+<span class="font-label-sm text-label-sm font-bold">Kül Yeşili</span>
+<span class="font-label-sm text-label-sm">#44AA99</span>
+</div>
+<div class="bg-secondary-fixed text-on-secondary-fixed flex items-center justify-between px-2.5">
+<span class="font-label-sm text-label-sm font-bold">Kızıl Sarı</span>
+<span class="font-label-sm text-label-sm">#D55E00</span>
+</div>
+</div>
+</div>
+<!-- Ishihara Re-test link -->
+<a class="min-h-[48px] w-full bg-surface-container-low hover:bg-surface-container rounded-xl p-space-sm flex items-center justify-between text-on-surface shadow-sm transition-colors" href="#" onclick="showQuickToast('Ishihara testi başlatılıyor...'); return false;">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[22px]">search_check</span>
+<span class="font-body-md text-body-md font-bold">3 Soruluk Renk Testini Tekrar Yap</span>
+</div>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">arrow_forward</span>
+</a>
+</section>
+<!-- Section 2: Görsel Destek ve Desenler -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-6 bg-primary-container rounded-sm"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Görsel Destek ve Desenler</h2>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md flex flex-col space-y-4">
+<!-- Toggle 1: Hatching -->
+<div class="flex items-center justify-between gap-3 min-h-[48px]">
+<div class="flex flex-col flex-1 pr-2">
+<span class="font-body-md text-body-md text-on-surface font-bold">Tüm Çubuklarda Çapraz Desen (Hatching)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Grafik ve dolgularda tek tip renk yerine doku bindirmesi</span>
+</div>
+<button aria-checked="true" class="toggle-btn min-w-[56px] h-8 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end" onclick="toggleSwitch(this, 'Çapraz desen modu')" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-on-primary-container shadow-sm flex items-center justify-center font-label-sm text-[10px] text-primary-container font-bold">✓</span>
+</button>
+</div>
+<!-- Preview Hatching Pattern Bar -->
+<div class="w-full h-4 rounded-md shadow-inner relative overflow-hidden" style="background: repeating-linear-gradient(45deg, #0072b2, #0072b2 8px, #56b4e9 8px, #56b4e9 16px);"></div>
+<!-- Toggle 2: Icon Mandatory -->
+<div class="flex items-center justify-between gap-3 min-h-[48px]">
+<div class="flex flex-col flex-1 pr-2">
+<span class="font-body-md text-body-md text-on-surface font-bold">Durum İfadelerinde Simge Zorunluluğu</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">İndirim/artışlarda sadece renk değil (✓ / ⚠️) simgeleri göster</span>
+</div>
+<button aria-checked="true" class="toggle-btn min-w-[56px] h-8 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end" onclick="toggleSwitch(this, 'Simge zorunluluğu')" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-on-primary-container shadow-sm flex items-center justify-center font-label-sm text-[10px] text-primary-container font-bold">✓</span>
+</button>
+</div>
+<!-- Toggle 3: High Contrast -->
+<div class="flex items-center justify-between gap-3 min-h-[48px]">
+<div class="flex flex-col flex-1 pr-2">
+<span class="font-body-md text-body-md text-on-surface font-bold">Yüksek Kontrastlı Kenarlıklar (3px)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Kart sınırlarını ve butonları kalınlaştır</span>
+</div>
+<button aria-checked="true" class="toggle-btn min-w-[56px] h-8 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end" onclick="toggleSwitch(this, 'Yüksek kontrast')" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end">
+<span class="w-6 h-6 rounded-full bg-on-primary-container shadow-sm flex items-center justify-center font-label-sm text-[10px] text-primary-container font-bold">✓</span>
+</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Bütçe ve Ses Ayarları -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-6 bg-primary-container rounded-sm"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Bütçe ve Ses Ayarları</h2>
+</div>
+<!-- Monthly Budget Selection -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-on-surface font-bold">Aylık Harcama Limiti &amp; Radar</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-bold">KOBALT MAVİ VURGU</span>
+</div>
+<div class="grid grid-cols-3 gap-2" id="budget-chips">
+<!-- 3000 -->
+<button class="budget-chip min-h-[48px] rounded-lg bg-surface-container text-on-surface-variant flex flex-col items-center justify-center p-2 transition-all" onclick="selectBudget(this, '3.000 ₺')" type="button">
+<span class="font-label-md text-label-md font-bold">3.000 ₺</span>
+<span class="font-label-sm text-[10px] opacity-75">Tasarruf</span>
+</button>
+<!-- 5000 (Selected) -->
+<button class="budget-chip min-h-[48px] rounded-lg bg-primary-container text-on-primary-container shadow-md flex flex-col items-center justify-center p-2 transition-all" onclick="selectBudget(this, '5.000 ₺')" type="button">
+<span class="font-label-md text-label-md font-bold">5.000 ₺</span>
+<span class="font-label-sm text-[10px] font-bold">SEÇİLİ [✓]</span>
+</button>
+<!-- 10000 -->
+<button class="budget-chip min-h-[48px] rounded-lg bg-surface-container text-on-surface-variant flex flex-col items-center justify-center p-2 transition-all" onclick="selectBudget(this, '10.000 ₺')" type="button">
+<span class="font-label-md text-label-md font-bold">10.000 ₺</span>
+<span class="font-label-sm text-[10px] opacity-75">Geniş Aile</span>
+</button>
+</div>
+<!-- Audio & Haptic Toggles -->
+<div class="pt-2 flex flex-col space-y-3">
+<div class="flex items-center justify-between gap-3 min-h-[48px]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[24px]">volume_up</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Sesli Rehber &amp; Ekran Okuyucu</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Fiyat farklarını sesli tonla bildir</span>
+</div>
+</div>
+<button aria-checked="true" class="min-w-[56px] h-8 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end" onclick="toggleSwitch(this, 'Sesli rehber')" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-on-primary-container shadow-sm flex items-center justify-center font-label-sm text-[10px] text-primary-container font-bold">✓</span>
+</button>
+</div>
+<div class="flex items-center justify-between gap-3 min-h-[48px]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[24px]">vibration</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Titreşimli Radar / Haptik Geri Bildirim</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">İndirim tespitinde ritmik titreşim</span>
+</div>
+</div>
+<button aria-checked="true" class="min-w-[56px] h-8 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end" onclick="toggleSwitch(this, 'Haptik titreşim')" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-on-primary-container shadow-sm flex items-center justify-center font-label-sm text-[10px] text-primary-container font-bold">✓</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Diğer Modlara Geçiş -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-6 bg-primary-container rounded-sm"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Diğer Modlara Geçiş</h2>
+</div>
+<div class="grid grid-cols-1 gap-2.5">
+<!-- Standart Mod -->
+<button class="min-h-[56px] w-full bg-surface-container-lowest hover:bg-surface-container-low rounded-xl p-space-md shadow-sm flex items-center justify-between text-left transition-colors" onclick="showQuickToast('Standart Moda geçiliyor...')">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[24px]">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Standart Mod</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Varsayılan sistem arayüzü</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<!-- Kolay Mod -->
+<button class="min-h-[56px] w-full bg-surface-container-lowest hover:bg-surface-container-low rounded-xl p-space-md shadow-sm flex items-center justify-between text-left transition-colors" onclick="showQuickToast('Kolay Mod (72dp) etkinleştirildi')">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[24px]">touch_app</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Kolay Mod (72dp Dev Butonlar)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Büyük dokunma hedefleri ve sadeleştirilmiş akış</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<!-- Görme Engelli Mod -->
+<button class="min-h-[56px] w-full bg-surface-container-lowest hover:bg-surface-container-low rounded-xl p-space-md shadow-sm flex items-center justify-between text-left transition-colors" onclick="showQuickToast('Sesli Rehber Moduna geçiliyor...')">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-[24px]">record_voice_over</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Görme Engelli / Tam Sesli Mod</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tamamen sesli komut ve ekran dinleme</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Section 5: Veri ve Güvenlik -->
+<section class="flex flex-col space-y-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-6 bg-primary-container rounded-sm"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Veri ve Güvenlik</h2>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-md flex flex-col space-y-3">
+<!-- Export Receipts -->
+<button class="min-h-[48px] w-full bg-surface-container hover:bg-surface-container-high rounded-xl p-space-sm flex items-center justify-between text-on-surface transition-colors" onclick="showQuickToast('Fişler PDF/Excel formatında hazırlanıyor...')">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary-container text-[22px]">download</span>
+<span class="font-body-md text-body-md font-bold">Fişleri Dışa Aktar (Excel / PDF)</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded bg-surface-container-highest text-on-surface-variant font-bold">32 FİŞ</span>
+</button>
+<!-- Safe Non-Red Destructive Button -->
+<!-- Following Okabe-Ito barrier-free mandate: Kehribar Turuncu / Secondary Container with prominent Warning Triangle -->
+<button class="min-h-[52px] w-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed-dim rounded-xl p-space-sm flex items-center justify-center gap-2 shadow-sm font-body-md text-body-md font-bold transition-transform active:scale-[0.99]" onclick="handleClearHistory()">
+<span class="material-symbols-outlined text-[24px]">warning</span>
+<span>⚠️ Tüm Fişleri ve Geçmişi Temizle</span>
+</button>
+<span class="font-label-sm text-label-sm text-center text-on-surface-variant">
+        Bu işlem geri alınamaz. Kırmızı renk yerine Kehribar Turuncu bariyersiz uyarı standardı uygulanmıştır.
+      </span>
+</div>
+</section>
+<!-- Footnote & Standards Compliance -->
+<footer class="pt-2 pb-4 flex flex-col items-center justify-center space-y-1 text-center">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary-container">verified_user</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">FiyatGöz v1.0.4</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+      Okabe-Ito Medikal Renk Körü Standardı • ISO 9241-171 Erişilebilirlik Onaylı
+    </p>
+</footer>
+</div>
+<script>
+  function showQuickToast(message) {
+    const toast = document.getElementById('statusToast');
+    const msgElem = document.getElementById('toastMsg');
+    if (!toast || !msgElem) return;
+    msgElem.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('flex');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+      toast.classList.remove('flex');
+    }, 2800);
+  }
+
+  function toggleSwitch(btn, label) {
+    const isChecked = btn.getAttribute('aria-checked') === 'true';
+    const newState = !isChecked;
+    btn.setAttribute('aria-checked', newState);
+    
+    if (newState) {
+      btn.className = 'toggle-btn min-w-[56px] h-8 rounded-full bg-primary-container p-1 transition-colors relative flex items-center justify-end';
+      btn.innerHTML = '<span class="w-6 h-6 rounded-full bg-on-primary-container shadow-sm flex items-center justify-center font-label-sm text-[10px] text-primary-container font-bold">✓</span>';
+      showQuickToast(label + ' AÇIK konuma getirildi [✓]');
+    } else {
+      btn.className = 'toggle-btn min-w-[56px] h-8 rounded-full bg-surface-container-highest p-1 transition-colors relative flex items-center justify-start';
+      btn.innerHTML = '<span class="w-6 h-6 rounded-full bg-surface-container-lowest shadow-sm flex items-center justify-center font-label-sm text-[10px] text-on-surface-variant font-bold">✕</span>';
+      showQuickToast(label + ' KAPALI konuma getirildi');
+    }
+  }
+
+  function selectBudget(btn, value) {
+    const chips = document.querySelectorAll('.budget-chip');
+    chips.forEach(chip => {
+      chip.className = 'budget-chip min-h-[48px] rounded-lg bg-surface-container text-on-surface-variant flex flex-col items-center justify-center p-2 transition-all';
+      const labelText = chip.querySelector('span:first-child').textContent;
+      let subText = 'Tasarruf';
+      if (labelText.includes('10.000')) subText = 'Geniş Aile';
+      if (labelText.includes('5.000')) subText = 'Standart';
+      chip.innerHTML = '<span class="font-label-md text-label-md font-bold">' + labelText + '</span><span class="font-label-sm text-[10px] opacity-75">' + subText + '</span>';
+    });
+
+    btn.className = 'budget-chip min-h-[48px] rounded-lg bg-primary-container text-on-primary-container shadow-md flex flex-col items-center justify-center p-2 transition-all';
+    btn.innerHTML = '<span class="font-label-md text-label-md font-bold">' + value + '</span><span class="font-label-sm text-[10px] font-bold">SEÇİLİ [✓]</span>';
+    showQuickToast('Aylık bütçe ' + value + ' olarak güncellendi');
+  }
+
+  function switchProfile(profileName) {
+    showQuickToast(profileName + ' palet profili uygulandı [✓]');
+  }
+
+  function handleClearHistory() {
+    if (confirm('Tüm taranan fişler ve geçmiş veriler silinecektir. Onaylıyor musunuz?')) {
+      showQuickToast('⚠️ Fiş geçmişi başarıyla temizlendi');
+    }
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/85 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary-container font-bold relative after:content-[''] after:absolute after:bottom-1 after:w-8 after:h-1 after:bg-primary-container after:rounded-full"><div class="h-20 px-space-xs flex items-stretch justify-around"><a aria-label="Ana Sayfa" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="ana-sayfa" href="#"><span class="material-symbols-outlined text-[26px]">home</span><span class="font-label-sm text-label-sm mt-0.5">Ana Sayfa</span></a><a aria-label="Kamera Fiyat Tara" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="kamera" href="#"><span class="material-symbols-outlined text-[26px]">center_focus_strong</span><span class="font-label-sm text-label-sm mt-0.5">Kamera</span></a><a aria-label="Sepetim" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="sepetim" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[26px]">shopping_cart</span><span class="absolute -top-1 -right-2 min-w-[18px] h-[18px] px-1 bg-primary text-on-primary rounded-full font-label-sm text-[10px] leading-none flex items-center justify-center font-bold">3</span></div><span class="font-label-sm text-label-sm mt-0.5">Sepetim</span></a><a aria-current="page" aria-label="Ayarlar ve Erişilebilirlik" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full transition-colors py-1 text-primary-container font-bold relative after:content-[''] after:absolute after:bottom-1 after:w-8 after:h-1 after:bg-primary-container after:rounded-full" data-path="ayarlar" href="#"><span class="material-symbols-outlined text-[26px]">tune</span><span class="font-label-sm text-label-sm mt-0.5">Ayarlar</span></a></div></nav></body></html>

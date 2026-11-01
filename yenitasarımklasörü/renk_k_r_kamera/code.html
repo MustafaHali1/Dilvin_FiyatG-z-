@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="tr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>FiyatGöz - Renk Körü Modu</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100%;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 0.5rem);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "tertiary-fixed": "#c6e7ff", "on-surface": "#131b2e", "primary-fixed": "#cee5ff", "on-tertiary": "#ffffff", "secondary": "#7f5600", "on-tertiary-fixed": "#001e2d", "surface-container-lowest": "#ffffff", "on-primary-container": "#e7f1ff", "surface-tint": "#00639b", "outline": "#707881", "on-tertiary-fixed-variant": "#004c6b", "error": "#ba1a1a", "secondary-container": "#fdb323", "on-surface-variant": "#404750", "surface-container": "#eaedff", "on-error": "#ffffff", "surface-dim": "#d2d9f4", "inverse-on-surface": "#eef0ff", "inverse-primary": "#97cbff", "surface": "#faf8ff", "inverse-surface": "#283044", "primary": "#00598c", "on-tertiary-container": "#e4f2ff", "outline-variant": "#c0c7d2", "secondary-fixed": "#ffddae", "on-background": "#131b2e", "secondary-fixed-dim": "#ffba40", "background": "#faf8ff", "error-container": "#ffdad6", "on-secondary-fixed-variant": "#614000", "surface-container-highest": "#dae2fd", "on-secondary-fixed": "#281800", "surface-variant": "#dae2fd", "on-primary-fixed": "#001d33", "surface-container-high": "#e2e7ff", "tertiary-container": "#0075a3", "on-error-container": "#93000a", "on-secondary-container": "#6b4800", "primary-fixed-dim": "#97cbff", "on-primary": "#ffffff", "surface-bright": "#faf8ff", "on-primary-fixed-variant": "#004a76", "surface-container-low": "#f2f3ff", "tertiary-fixed-dim": "#83cfff", "tertiary": "#005b80", "on-secondary": "#ffffff", "primary-container": "#0072b2" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-mobile": "1rem", "margin": "2rem", "gutter": "1.5rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "space-md": "1rem", "margin-mobile": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "label-lg": ["JetBrains Mono"], "label-sm": ["JetBrains Mono"], "headline-md": ["Atkinson Hyperlegible Next"], "body-md": ["Atkinson Hyperlegible Next"], "headline-sm": ["Atkinson Hyperlegible Next"], "headline-xl": ["Atkinson Hyperlegible Next"], "label-md": ["JetBrains Mono"], "headline-lg-mobile": ["Atkinson Hyperlegible Next"], "body-sm": ["Atkinson Hyperlegible Next"], "headline-lg": ["Atkinson Hyperlegible Next"], "headline-xl-mobile": ["Atkinson Hyperlegible Next"], "body-lg": ["Atkinson Hyperlegible Next"] }, "fontSize": { "label-lg": ["15px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "600" }], "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }], "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.03em", "fontWeight": "500" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "700" }], "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.015em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0.01em", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-gutter-mobile flex items-center justify-between"><div class="flex flex-col gap-1"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[22px] font-bold">visibility</span><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight uppercase font-bold">FiyatGöz</span></div><div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container shadow-none"><span class="material-symbols-outlined text-[13px]">visibility</span><span class="font-label-sm text-label-sm tracking-wide uppercase font-bold">👁️ RENK KÖRÜ MODU (Deuteranopi)</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Sesli Asistan" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[24px]">record_voice_over</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 w-full bg-surface pt-20 pb-28 px-gutter-mobile"><div class="flex flex-col w-full gap-space-md">
+<!-- Status Feedback Banner (Dual Affordance: Icon + Label + Contrast Tone) -->
+<section class="w-full bg-surface-container-high rounded-xl p-space-sm flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span class="font-label-md text-label-md text-on-surface font-bold tracking-tight">
+        👁️ Renk Körü Modu Aktif (Okabe-Ito Desenli)
+      </span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">
+      DEUTERANOPI / PROTANOPI
+    </span>
+</section>
+<!-- Live Optical Viewfinder Container -->
+<section class="relative w-full rounded-xl overflow-hidden bg-inverse-surface shadow-md">
+<!-- Camera Viewport Backdrop (Shelf Feed) -->
+<div class="w-full h-80 bg-cover bg-center relative flex flex-col justify-between p-space-sm" data-alt="Supermarket grocery shelf filled with rows of dairy milk cartons and dairy bottles in clear ambient retail lighting. Sharp depth of field focusing on shelf price tags with high contrast barcode labels, clean perspective, natural retail grocery ambiance." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBAAZ3EA-o6G0C3QB6A6YjZ2oxpETKjzHyaMrk6NOlyuM7wK1Va-rQH-hcGzm_DvMnFdIj4my3v5TtkMRYMMkN8BRFTvRsdjrOaTF6ktmH99vWp9aoPJKBbqCKLHOdFYNJNrdQm0Mxs7cCCG9X829e23jH1JdCiX6o_TZC65Dn5Rfnt6Lnyk0fNKG3YYtYsUIbzivvJhM7qd3dz0r9Sadmup2yp_d-qoYiJFVEl7H0')">
+<!-- Dark scrim for crisp text contrast -->
+<div class="absolute inset-0 bg-gradient-to-b from-inverse-surface/80 via-transparent to-inverse-surface/90 pointer-events-none"></div>
+<!-- Viewfinder Top Tactical Bar -->
+<div class="relative z-10 flex items-center justify-between w-full">
+<!-- Flash Light Toggle -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface/90 text-on-surface active:bg-secondary-container transition-colors shadow-sm" id="flashBtn" type="button">
+<span class="material-symbols-outlined text-[18px]">flash_on</span>
+<span class="font-label-md text-label-md font-bold">⚡ Flaş Açık</span>
+</button>
+<!-- Active Scanning Profile Indicator -->
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary-container text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+<span class="font-label-md text-label-md font-bold uppercase tracking-wider">✦ Fiyat &amp; Barkod</span>
+</div>
+</div>
+<!-- Precise Targeting Crosshairs HUD (Cobalt #0072B2 Anchor Frame) -->
+<div class="relative z-10 self-center my-auto w-64 h-36 flex items-center justify-center pointer-events-none">
+<!-- Corner Crosshairs Notches -->
+<div class="absolute -top-1.5 -left-1.5 w-6 h-6 flex items-center justify-center">
+<span class="font-label-lg text-label-lg font-bold text-primary-fixed leading-none">+</span>
+</div>
+<div class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center">
+<span class="font-label-lg text-label-lg font-bold text-primary-fixed leading-none">+</span>
+</div>
+<div class="absolute -bottom-1.5 -left-1.5 w-6 h-6 flex items-center justify-center">
+<span class="font-label-lg text-label-lg font-bold text-primary-fixed leading-none">+</span>
+</div>
+<div class="absolute -bottom-1.5 -right-1.5 w-6 h-6 flex items-center justify-center">
+<span class="font-label-lg text-label-lg font-bold text-primary-fixed leading-none">+</span>
+</div>
+<!-- Center Crosshair reticle -->
+<div class="w-8 h-8 rounded-full bg-primary-fixed/20 flex items-center justify-center">
+<span class="text-primary-fixed font-label-lg text-label-lg font-bold">+</span>
+</div>
+<!-- Detected HUD Overlay Tag Box -->
+<div class="absolute -bottom-7 w-full flex flex-col items-center gap-1">
+<div class="bg-primary-container text-on-primary-container px-2.5 py-1 rounded shadow-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase font-bold">[✓ RAF ETİKETİ TESPİT EDİLDİ]</span>
+</div>
+</div>
+</div>
+<!-- Real-Time Floating Value Pill -->
+<div class="relative z-10 self-center bg-surface/95 text-on-surface px-3 py-1 rounded shadow flex items-center gap-3">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">24,90 ₺</span>
+<span class="w-px h-4 bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Birim: 24,90 ₺ / L</span>
+</div>
+</div>
+<!-- Acoustic / Screen Reader Feedback Indicator Bar -->
+<div class="w-full bg-inverse-surface p-space-sm flex items-center justify-between text-inverse-on-surface">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px] shrink-0">volume_up</span>
+<p class="font-label-sm text-label-sm truncate text-inverse-on-surface">
+          “Sütaş Süt 1L — 24,90 TL (Bütçeye Uygun ✓)”
+        </p>
+</div>
+<!-- Soundwave Visualizer Graphic -->
+<svg aria-hidden="true" class="w-16 h-4 shrink-0 text-primary-fixed" fill="currentColor" viewbox="0 0 64 16">
+<rect height="6" rx="1.5" width="3" x="2" y="5"></rect>
+<rect height="12" rx="1.5" width="3" x="8" y="2"></rect>
+<rect height="4" rx="1.5" width="3" x="14" y="6"></rect>
+<rect height="14" rx="1.5" width="3" x="20" y="1"></rect>
+<rect height="8" rx="1.5" width="3" x="26" y="4"></rect>
+<rect height="2" rx="1" width="3" x="32" y="7"></rect>
+<rect height="12" rx="1.5" width="3" x="38" y="2"></rect>
+<rect height="6" rx="1.5" width="3" x="44" y="5"></rect>
+<rect height="10" rx="1.5" width="3" x="50" y="3"></rect>
+<rect height="4" rx="1.5" width="3" x="56" y="6"></rect>
+</svg>
+</div>
+</section>
+<!-- Shutter & Quick Snap Action Trigger -->
+<section class="flex flex-col items-center justify-center py-space-xs">
+<div class="relative flex items-center justify-center">
+<!-- Crosshair guides around shutter button -->
+<span class="absolute -top-3 text-primary-container font-label-md text-label-md font-bold">+</span>
+<span class="absolute -bottom-3 text-primary-container font-label-md text-label-md font-bold">+</span>
+<span class="absolute -left-3 text-primary-container font-label-md text-label-md font-bold">+</span>
+<span class="absolute -right-3 text-primary-container font-label-md text-label-md font-bold">+</span>
+<button aria-label="Fiyat ve Barkod Fotoğrafı Çek" class="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg active:scale-95 transition-transform" id="shutterBtn" type="button">
+<span class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary-container shadow-sm">
+<span class="material-symbols-outlined text-[26px]">photo_camera</span>
+</span>
+</button>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2 font-medium">
+      Fiyatı Sabitlemek İçin Dokunun
+    </span>
+</section>
+<!-- Last Scanned Item Detail Card (Son Algılanan Ürün) -->
+<section class="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">inventory_2</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase font-bold tracking-wider">
+          Son Algılanan Ürün
+        </span>
+</div>
+<!-- Barcode Identification Tag -->
+<div class="bg-surface-container px-2 py-0.5 rounded font-label-sm text-label-sm text-on-surface font-mono font-bold">
+        ||| 8690123456789
+      </div>
+</div>
+<!-- Title and Packaging Spec -->
+<div class="flex items-start justify-between gap-2">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+          Sütaş Tam Yağlı Süt
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium">
+          Net Miktar: 1 Litre Tetra Brik Paket
+        </p>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[24px]">local_drink</span>
+</div>
+</div>
+<!-- Comparative Valuation Matrix (Dual-Affordance & Okabe-Ito Compliant) -->
+<div class="w-full bg-surface-container-low rounded-lg p-space-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">KADRAJDAKİ FİYAT</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">PİYASA ORTALAMASI</span>
+</div>
+<div class="flex items-baseline justify-between">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-primary font-bold">24,90</span>
+<span class="font-label-lg text-label-lg text-primary font-bold">₺</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-body-lg text-body-lg line-through text-outline font-semibold">28,50 ₺</span>
+</div>
+</div>
+<!-- High Contrast Difference Badge (Amber-Orange Barrier-Free #E69F00 Token) -->
+<div class="flex items-center justify-between pt-1">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-container text-on-secondary-container font-bold shadow-sm">
+<span class="font-label-md text-label-md leading-none">▲</span>
+<span class="font-label-md text-label-md uppercase tracking-tight font-bold">[▲ %12,6 DAHA UCUZ]</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">
+          Kazanç: +3,60 ₺
+        </span>
+</div>
+</div>
+<!-- Guidance Pill -->
+<div class="w-full bg-primary-fixed/30 rounded p-space-xs flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0">lightbulb</span>
+<p class="font-body-sm text-body-sm text-on-surface">
+        Barkodu kadraj içindeki mavi artıya hizalayın.
+      </p>
+</div>
+</section>
+<!-- Interactive Scripts for Micro-feedback -->
+<script>
+    (function() {
+      const flashBtn = document.getElementById('flashBtn');
+      const shutterBtn = document.getElementById('shutterBtn');
+      let isFlashOn = true;
+
+      if (flashBtn) {
+        flashBtn.addEventListener('click', function() {
+          isFlashOn = !isFlashOn;
+          if (isFlashOn) {
+            flashBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">flash_on</span><span class="font-label-md text-label-md font-bold">⚡ Flaş Açık</span>';
+            flashBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface/90 text-on-surface active:bg-secondary-container transition-colors shadow-sm';
+          } else {
+            flashBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">flash_off</span><span class="font-label-md text-label-md font-bold">⚡ Flaş Kapalı</span>';
+            flashBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container-highest text-on-surface-variant active:bg-secondary-container transition-colors shadow-sm';
+          }
+        });
+      }
+
+      if (shutterBtn) {
+        shutterBtn.addEventListener('click', function() {
+          shutterBtn.classList.add('scale-90');
+          setTimeout(() => {
+            shutterBtn.classList.remove('scale-90');
+          }, 150);
+        });
+      }
+    })();
+  </script>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/85 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary-container font-bold relative after:content-[''] after:absolute after:bottom-1 after:w-8 after:h-1 after:bg-primary-container after:rounded-full"><div class="h-20 px-space-xs flex items-stretch justify-around"><a aria-label="Ana Sayfa" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="ana-sayfa" href="#"><span class="material-symbols-outlined text-[26px]">home</span><span class="font-label-sm text-label-sm mt-0.5">Ana Sayfa</span></a><a aria-current="page" aria-label="Kamera Fiyat Tara" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full transition-colors py-1 text-primary-container font-bold relative after:content-[''] after:absolute after:bottom-1 after:w-8 after:h-1 after:bg-primary-container after:rounded-full" data-path="kamera" href="#"><span class="material-symbols-outlined text-[26px]">center_focus_strong</span><span class="font-label-sm text-label-sm mt-0.5">Kamera</span></a><a aria-label="Sepetim" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="sepetim" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[26px]">shopping_cart</span><span class="absolute -top-1 -right-2 min-w-[18px] h-[18px] px-1 bg-primary text-on-primary rounded-full font-label-sm text-[10px] leading-none flex items-center justify-center font-bold">3</span></div><span class="font-label-sm text-label-sm mt-0.5">Sepetim</span></a><a aria-label="Ayarlar ve Erişilebilirlik" class="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-full text-on-surface-variant hover:text-on-surface transition-colors py-1" data-path="ayarlar" href="#"><span class="material-symbols-outlined text-[26px]">tune</span><span class="font-label-sm text-label-sm mt-0.5">Ayarlar</span></a></div></nav></body></html>

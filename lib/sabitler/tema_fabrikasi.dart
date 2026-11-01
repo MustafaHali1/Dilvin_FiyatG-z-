@@ -10,6 +10,8 @@ class TemaFabrikasi {
         return _kolayModTemasi();
       case ProfilTuru.renkKoruModu:
         return _renkKoruTemasi(profil.renkKorluguTuru);
+      case ProfilTuru.gormeEngelliModu:
+        return _kolayModTemasi(); // Yüksek kontrast ve büyük odak
       case ProfilTuru.standart:
         return _standartTema();
     }

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="tr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><title>FiyatGöz - Renk Körü Modu</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400..700;1,400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100%;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 1rem);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "tertiary-fixed": "#c6e7ff", "on-surface": "#131b2e", "primary-fixed": "#cee5ff", "on-tertiary": "#ffffff", "secondary": "#7f5600", "on-tertiary-fixed": "#001e2d", "surface-container-lowest": "#ffffff", "on-primary-container": "#e7f1ff", "surface-tint": "#00639b", "outline": "#707881", "on-tertiary-fixed-variant": "#004c6b", "error": "#ba1a1a", "secondary-container": "#fdb323", "on-surface-variant": "#404750", "surface-container": "#eaedff", "on-error": "#ffffff", "surface-dim": "#d2d9f4", "inverse-on-surface": "#eef0ff", "inverse-primary": "#97cbff", "surface": "#faf8ff", "inverse-surface": "#283044", "primary": "#00598c", "on-tertiary-container": "#e4f2ff", "outline-variant": "#c0c7d2", "secondary-fixed": "#ffddae", "on-background": "#131b2e", "secondary-fixed-dim": "#ffba40", "background": "#faf8ff", "error-container": "#ffdad6", "on-secondary-fixed-variant": "#614000", "surface-container-highest": "#dae2fd", "on-secondary-fixed": "#281800", "surface-variant": "#dae2fd", "on-primary-fixed": "#001d33", "surface-container-high": "#e2e7ff", "tertiary-container": "#0075a3", "on-error-container": "#93000a", "on-secondary-container": "#6b4800", "primary-fixed-dim": "#97cbff", "on-primary": "#ffffff", "surface-bright": "#faf8ff", "on-primary-fixed-variant": "#004a76", "surface-container-low": "#f2f3ff", "tertiary-fixed-dim": "#83cfff", "tertiary": "#005b80", "on-secondary": "#ffffff", "primary-container": "#0072b2" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-mobile": "1rem", "margin": "2rem", "gutter": "1.5rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "space-md": "1rem", "margin-mobile": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "label-lg": ["JetBrains Mono"], "label-sm": ["JetBrains Mono"], "headline-md": ["Atkinson Hyperlegible Next"], "body-md": ["Atkinson Hyperlegible Next"], "headline-sm": ["Atkinson Hyperlegible Next"], "headline-xl": ["Atkinson Hyperlegible Next"], "label-md": ["JetBrains Mono"], "headline-lg-mobile": ["Atkinson Hyperlegible Next"], "body-sm": ["Atkinson Hyperlegible Next"], "headline-lg": ["Atkinson Hyperlegible Next"], "headline-xl-mobile": ["Atkinson Hyperlegible Next"], "body-lg": ["Atkinson Hyperlegible Next"] }, "fontSize": { "label-lg": ["15px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "600" }], "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }], "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.03em", "fontWeight": "500" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "700" }], "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.015em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0.01em", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between"><div class="flex items-center gap-space-xs"><button aria-label="Geri Dön" class="w-11 h-11 min-w-[44px] min-h-[44px] -ml-2 rounded-xl flex items-center justify-center text-on-surface hover:text-primary active:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-bold line-clamp-1">Fiş Görünümü</h1></div><div class="flex items-center gap-space-xs"><button aria-label="Sesli Okuma" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary active:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[22px]">volume_up</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 w-full bg-surface pt-16 pb-safe px-gutter-mobile"><div class="flex flex-col w-full pb-8 space-y-4">
+<!-- Durum Bildirim Rozeti (Okabe-Ito Erişilebilirliği) -->
+<section class="w-full">
+<div class="w-full bg-primary-container text-on-primary-container px-3 py-2.5 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] font-bold" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-md text-label-md font-bold tracking-wide">[✓ E-FİŞ AKTİF &amp; ONAYLI]</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/20 px-2 py-0.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-sm text-label-sm font-semibold">DEUTERANOPIA/PROTANOPIA GÜVENLİ</span>
+</div>
+</div>
+</section>
+<!-- Hızlı İşlem Araç Çubuğu -->
+<section class="flex items-center justify-between gap-2 px-1">
+<button class="flex-1 py-2.5 px-3 rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm" id="readReceiptBtn" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">volume_up</span>
+<span class="font-label-md text-label-md font-bold">🔊 Fişi Oku</span>
+</button>
+<button class="flex-1 py-2.5 px-3 rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm" id="shareReceiptBtn" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">share</span>
+<span class="font-label-md text-label-md font-bold">➦ Paylaş</span>
+</button>
+</section>
+<!-- Termal Kasa Fişi (Zigzag/Tırtıklı Kenarlıklar & Okabe-Ito Renk Skalası) -->
+<article class="relative w-full mx-auto shadow-xl bg-surface-container-lowest rounded-sm overflow-hidden select-none">
+<!-- Üst Yırtık Kenar (CSS Mask / SVG Jagged Top) -->
+<div aria-hidden="true" class="w-full h-3 bg-surface-container-high flex overflow-hidden opacity-80">
+<svg class="w-full h-full text-surface fill-current" preserveaspectratio="none" viewbox="0 0 400 12">
+<polygon points="0,0 10,12 20,0 30,12 40,0 50,12 60,0 70,12 80,0 90,12 100,0 110,12 120,0 130,12 140,0 150,12 160,0 170,12 180,0 190,12 200,0 210,12 220,0 230,12 240,0 250,12 260,0 270,12 280,0 290,12 300,0 310,12 320,0 330,12 340,0 350,12 360,0 370,12 380,0 390,12 400,0"></polygon>
+</svg>
+</div>
+<!-- Fiş Gövdesi -->
+<div class="p-4 space-y-3 font-label-md text-on-surface bg-surface-container-lowest">
+<!-- Mağaza Başlığı -->
+<div class="text-center space-y-1">
+<div class="inline-block p-1 bg-surface-container rounded-lg mb-1">
+<span class="material-symbols-outlined text-primary text-[28px]">storefront</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">MİGROS TİCARET A.Ş.</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant font-medium">Kadıköy Rıhtım Şubesi • No: 18/A</p>
+<div class="flex items-center justify-center gap-2 pt-1 font-label-sm text-label-sm text-on-surface-variant">
+<span>📅 18.10.2024</span>
+<span>•</span>
+<span>⏰ 15:42</span>
+<span>•</span>
+<span class="bg-surface-container-high px-1.5 py-0.5 rounded font-bold">FİŞ: 0142</span>
+</div>
+</div>
+<!-- Çift Çizgili Geometrik Ayraç -->
+<div aria-hidden="true" class="w-full flex items-center justify-center py-1 overflow-hidden">
+<div class="w-full h-1 bg-[repeating-linear-gradient(90deg,#131b2e_0px,#131b2e_6px,transparent_6px,transparent_10px)] opacity-60"></div>
+</div>
+<!-- Kalem Kalem Alışveriş Listesi -->
+<div class="space-y-2 pt-1">
+<div class="flex justify-between items-baseline text-on-surface">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">SÜTAŞ SÜT 1L</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">2 ADET x 24,90 ₺</span>
+</div>
+<span class="font-label-lg text-label-lg font-bold">49,80 ₺</span>
+</div>
+<div class="w-full h-px bg-surface-container-high"></div>
+<div class="flex justify-between items-baseline text-on-surface">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">ÇAYKUR RİZE ÇAY</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">1 ADET x 89,50 ₺</span>
+</div>
+<span class="font-label-lg text-label-lg font-bold">89,50 ₺</span>
+</div>
+<div class="w-full h-px bg-surface-container-high"></div>
+<div class="flex justify-between items-baseline text-on-surface">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">BARİLLA MAKARNA</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">3 ADET x 28,20 ₺</span>
+</div>
+<span class="font-label-lg text-label-lg font-bold">84,60 ₺</span>
+</div>
+<div class="w-full h-px bg-surface-container-high"></div>
+<div class="flex justify-between items-baseline text-on-surface">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">PINAR SÜZME PEYNİR</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">1 ADET x 63,50 ₺</span>
+</div>
+<span class="font-label-lg text-label-lg font-bold">63,50 ₺</span>
+</div>
+</div>
+<!-- Çift Çizgili Geometrik Ayraç -->
+<div aria-hidden="true" class="w-full flex items-center justify-center py-1 overflow-hidden">
+<div class="w-full h-1 bg-[repeating-linear-gradient(90deg,#131b2e_0px,#131b2e_6px,transparent_6px,transparent_10px)] opacity-60"></div>
+</div>
+<!-- Ara Toplam & KDV -->
+<div class="space-y-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex justify-between items-center">
+<span>ARA TOPLAM TUTAR</span>
+<span class="font-bold text-on-surface">287,40 ₺</span>
+</div>
+<div class="flex justify-between items-center">
+<span>HESAPLANAN KDV (%1 &amp; %10)</span>
+<span class="font-bold text-on-surface">26,12 ₺</span>
+</div>
+</div>
+<!-- Toplam Tutarı Vurgulayan Kutu (Çapraz Çizgili Doku + Okabe Ito Mavi) -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-highest p-3.5 mt-2">
+<!-- Arka Plan Diagonal Hatching -->
+<div class="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(45deg,#00598c_0px,#00598c_8px,transparent_8px,transparent_16px)] pointer-events-none"></div>
+<div class="relative flex justify-between items-center">
+<div>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span class="font-label-md text-label-md font-bold tracking-wider">TOPLAM TUTAR</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Kredi Kartı ile Ödendi</p>
+</div>
+<div class="text-right">
+<span class="font-headline-md text-headline-md font-black text-primary tracking-tight">287,40 ₺</span>
+</div>
+</div>
+</div>
+<!-- Doğrulama Mührü (FiyatGöz Sertifikalı Güven Rozeti) -->
+<div class="flex items-center justify-center py-3">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container text-primary shadow-sm transform -rotate-1 hover:rotate-0 transition-transform">
+<span class="material-symbols-outlined text-[20px] font-bold" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-md text-label-md font-bold tracking-tight uppercase">[✓ FİYATGÖZ İLE DOĞRULANDI]</span>
+</div>
+</div>
+<!-- Barkod Bloğu -->
+<div class="flex flex-col items-center justify-center pt-2 pb-1 space-y-1">
+<div class="w-64 h-12 flex justify-between items-stretch px-2 bg-surface-container-lowest">
+<div class="w-1.5 bg-on-surface"></div>
+<div class="w-0.5 bg-on-surface"></div>
+<div class="w-2 bg-on-surface"></div>
+<div class="w-1 bg-on-surface"></div>
+<div class="w-3 bg-on-surface"></div>
+<div class="w-0.5 bg-on-surface"></div>
+<div class="w-1.5 bg-on-surface"></div>
+<div class="w-2.5 bg-on-surface"></div>
+<div class="w-1 bg-on-surface"></div>
+<div class="w-0.5 bg-on-surface"></div>
+<div class="w-3.5 bg-on-surface"></div>
+<div class="w-1 bg-on-surface"></div>
+<div class="w-1.5 bg-on-surface"></div>
+<div class="w-2 bg-on-surface"></div>
+<div class="w-0.5 bg-on-surface"></div>
+<div class="w-1 bg-on-surface"></div>
+<div class="w-2.5 bg-on-surface"></div>
+<div class="w-1.5 bg-on-surface"></div>
+<div class="w-0.5 bg-on-surface"></div>
+<div class="w-2 bg-on-surface"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold tracking-widest">281024-0142-9938-MGRS</span>
+</div>
+</div>
+<!-- Alt Yırtık Kenar (CSS Mask / SVG Jagged Bottom) -->
+<div aria-hidden="true" class="w-full h-3 bg-surface-container-high flex overflow-hidden opacity-80">
+<svg class="w-full h-full text-surface fill-current rotate-180" preserveaspectratio="none" viewbox="0 0 400 12">
+<polygon points="0,0 10,12 20,0 30,12 40,0 50,12 60,0 70,12 80,0 90,12 100,0 110,12 120,0 130,12 140,0 150,12 160,0 170,12 180,0 190,12 200,0 210,12 220,0 230,12 240,0 250,12 260,0 270,12 280,0 290,12 300,0 310,12 320,0 330,12 340,0 350,12 360,0 370,12 380,0 390,12 400,0"></polygon>
+</svg>
+</div>
+</article>
+<!-- Fişi Bütçene Kaydet Bölümü (Form & Aksiyon Paneli) -->
+<section class="w-full bg-surface-container-low p-4 rounded-xl shadow-md space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Fişi Bütçene Kaydet</h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-1 rounded-full font-semibold">ADIM 2/2</span>
+</div>
+<!-- Açıklama Alanı -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="receiptTitleInput">Harcama Açıklaması</label>
+<span class="font-label-sm text-label-sm text-primary font-bold">[Zorunlu]</span>
+</div>
+<div class="relative">
+<input class="w-full px-3.5 py-3 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest focus:ring-0 shadow-sm" id="receiptTitleInput" placeholder="Örn. Haftalık Mutfak Alışverişi" type="text" value="Haftalık Mutfak Alışverişi"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</div>
+</div>
+</div>
+<!-- Kategori Seçim Çipleri (Çift Belirteçli - İkon + Metin + Tik) -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface">Kategori Seçimi</label>
+<div class="flex flex-wrap gap-2" id="categoryChips">
+<!-- Seçili Kategori (Süpermarket) -->
+<button class="category-btn px-3 py-2 rounded-xl bg-primary text-on-primary flex items-center gap-1.5 shadow-sm active:scale-95 transition-all" data-category="supermarket" type="button">
+<span class="font-body-md text-body-md">🛒</span>
+<span class="font-label-md text-label-md font-bold">Süpermarket</span>
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</button>
+<!-- Diğer Kategoriler (Seçili Olmayan) -->
+<button class="category-btn px-3 py-2 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 shadow-sm active:scale-95 transition-all" data-category="pazar" type="button">
+<span class="font-body-md text-body-md">🥕</span>
+<span class="font-label-md text-label-md font-bold">Pazar</span>
+</button>
+<button class="category-btn px-3 py-2 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 shadow-sm active:scale-95 transition-all" data-category="eczane" type="button">
+<span class="font-body-md text-body-md">💊</span>
+<span class="font-label-md text-label-md font-bold">Eczane</span>
+</button>
+</div>
+</div>
+<!-- Tarih Seçici -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface">Harcama Tarihi</label>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">Bugün, 18 Ekim 2024</span>
+</div>
+<button class="font-label-sm text-label-sm font-bold text-primary px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high transition-colors" type="button">
+          DEĞİŞTİR
+        </button>
+</div>
+</div>
+<!-- Aksiyon Butonları (Kaydet ve Dışa Aktar) -->
+<div class="pt-2 space-y-2.5">
+<!-- Birincil Buton: Cobalt Blue (#0072B2) -->
+<button class="w-full min-h-[50px] px-4 py-3 rounded-xl bg-primary text-on-primary font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 shadow-md hover:bg-primary-container active:scale-[0.98] transition-all" id="saveReceiptSubmit" type="button">
+<span class="material-symbols-outlined text-[24px]">save</span>
+<span>Fişi Kaydet &amp; Bütçeye İşle</span>
+</button>
+<!-- İkincil Buton: Yüksek Kontrastlı İndir/Paylaş -->
+<button class="w-full min-h-[46px] px-4 py-2.5 rounded-xl bg-surface-container text-on-surface font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-surface-container-high active:scale-[0.98] transition-all" id="downloadPdfBtn" type="button">
+<span class="material-symbols-outlined text-[22px] text-primary">download</span>
+<span>Fiş Görselini İndir / Paylaş (PDF)</span>
+</button>
+</div>
+</section>
+<!-- Bildirim Toast (Etkileşim Geri Bildirimi) -->
+<div class="fixed bottom-6 left-4 right-4 bg-inverse-surface text-inverse-on-surface p-3.5 rounded-xl shadow-xl flex items-center justify-between opacity-0 pointer-events-none transition-opacity duration-300 z-50" id="feedbackToast">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary-fixed text-[24px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md font-bold" id="toastMessage">İşlem başarıyla tamamlandı!</span>
+</div>
+<button class="text-inverse-on-surface p-1" onclick="document.getElementById('feedbackToast').classList.add('opacity-0','pointer-events-none')" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<script>
+  (function() {
+    const toast = document.getElementById('feedbackToast');
+    const toastMsg = document.getElementById('toastMessage');
+
+    function showToast(message) {
+      if (!toast) return;
+      toastMsg.textContent = message;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3200);
+    }
+
+    // Sesli Okuma Tetikleyicisi
+    const readBtn = document.getElementById('readReceiptBtn');
+    if (readBtn) {
+      readBtn.addEventListener('click', () => {
+        showToast('🔊 Fiş detayları seslendiriliyor: Migros Kadıköy, 287,40 TL...');
+      });
+    }
+
+    // Paylaşım Tetikleyicisi
+    const shareBtn = document.getElementById('shareReceiptBtn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: 'FiyatGöz - Migros Fişi',
+            text: '18.10.2024 Migros Alışveriş Fişi (287,40 ₺)',
+            url: window.location.href,
+          }).catch(() => {});
+        } else {
+          showToast('➦ Fiş paylaşım bağlantısı panoya kopyalandı.');
+        }
+      });
+    }
+
+    // Kategori Seçim Etkileşimi
+    const catButtons = document.querySelectorAll('.category-btn');
+    catButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        catButtons.forEach(b => {
+          b.className = 'category-btn px-3 py-2 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 shadow-sm active:scale-95 transition-all';
+          const checkIcon = b.querySelector('.material-symbols-outlined');
+          if (checkIcon) checkIcon.remove();
+        });
+
+        btn.className = 'category-btn px-3 py-2 rounded-xl bg-primary text-on-primary flex items-center gap-1.5 shadow-sm active:scale-95 transition-all';
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'material-symbols-outlined text-[16px] font-bold';
+        iconSpan.textContent = 'check';
+        btn.appendChild(iconSpan);
+      });
+    });
+
+    // Kaydetme Aksiyonu
+    const saveBtn = document.getElementById('saveReceiptSubmit');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        const title = document.getElementById('receiptTitleInput').value || 'Alışveriş';
+        saveBtn.disabled = true;
+        saveBtn.classList.add('opacity-75');
+        setTimeout(() => {
+          showToast(`💾 "${title}" başarıyla bütçenize kaydedildi!`);
+          saveBtn.disabled = false;
+          saveBtn.classList.remove('opacity-75');
+        }, 500);
+      });
+    }
+
+    // PDF İndir Aksiyonu
+    const pdfBtn = document.getElementById('downloadPdfBtn');
+    if (pdfBtn) {
+      pdfBtn.addEventListener('click', () => {
+        showToast('📥 Yüksek kontrastlı E-Fiş PDF olarak hazırlanıyor...');
+      });
+    }
+  })();
+</script></main></body></html>

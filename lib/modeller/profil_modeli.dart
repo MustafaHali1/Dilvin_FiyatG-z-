@@ -1,22 +1,24 @@
-/// Kullanıcı profil türleri
+/// Uygulama Genelinde 4 Ana Erişilebilirlik Modu
 enum ProfilTuru {
   standart,
   kolayMod,
   renkKoruModu,
+  gormeEngelliModu,
 }
 
-/// Renk körlüğü türleri
+/// Renk Körlüğü Tıbbi Alt Türleri
 enum RenkKorluguTuru {
-  deuteranopi, // Yeşil (en yaygın)
+  deuteranopi, // Yeşil (En yaygın)
   protanopi,   // Kırmızı
   tritanopi,   // Mavi-Sarı
 }
 
-/// Kullanıcının erişilebilirlik ve arayüz ayarları
+/// Kullanıcının Seçtiği Profil ve İnce Ayarları
 class ProfilModeli {
   final ProfilTuru profilTuru;
   final RenkKorluguTuru renkKorluguTuru;
-  final double yaziBoyutuCarpani;
+  final double yaziBoyutu;
+  final String kontrastTuru; // 'normal', 'siyah_sari', 'beyaz_siyah'
   final bool sesliAsistanAcik;
   final bool titresimAcik;
   final double aylikButce;
@@ -24,7 +26,8 @@ class ProfilModeli {
   const ProfilModeli({
     this.profilTuru = ProfilTuru.standart,
     this.renkKorluguTuru = RenkKorluguTuru.deuteranopi,
-    this.yaziBoyutuCarpani = 1.0,
+    this.yaziBoyutu = 16.0,
+    this.kontrastTuru = 'siyah_sari',
     this.sesliAsistanAcik = true,
     this.titresimAcik = true,
     this.aylikButce = 5000.0,
@@ -33,7 +36,8 @@ class ProfilModeli {
   ProfilModeli kopyala({
     ProfilTuru? profilTuru,
     RenkKorluguTuru? renkKorluguTuru,
-    double? yaziBoyutuCarpani,
+    double? yaziBoyutu,
+    String? kontrastTuru,
     bool? sesliAsistanAcik,
     bool? titresimAcik,
     double? aylikButce,
@@ -41,7 +45,8 @@ class ProfilModeli {
     return ProfilModeli(
       profilTuru: profilTuru ?? this.profilTuru,
       renkKorluguTuru: renkKorluguTuru ?? this.renkKorluguTuru,
-      yaziBoyutuCarpani: yaziBoyutuCarpani ?? this.yaziBoyutuCarpani,
+      yaziBoyutu: yaziBoyutu ?? this.yaziBoyutu,
+      kontrastTuru: kontrastTuru ?? this.kontrastTuru,
       sesliAsistanAcik: sesliAsistanAcik ?? this.sesliAsistanAcik,
       titresimAcik: titresimAcik ?? this.titresimAcik,
       aylikButce: aylikButce ?? this.aylikButce,

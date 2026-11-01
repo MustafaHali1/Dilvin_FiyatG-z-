@@ -245,6 +245,8 @@ class AyarlarEkrani extends StatelessWidget {
         return 'Kolay Mod (Yüksek Kontrast)';
       case ProfilTuru.renkKoruModu:
         return 'Renk Körü Modu';
+      case ProfilTuru.gormeEngelliModu:
+        return 'Sesli Radar & Haptik Mod';
     }
   }
 }
