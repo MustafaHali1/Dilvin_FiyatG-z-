@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:fiyatgoz/sabitler/uygulama_renkleri.dart';
+import 'package:fiyatgoz/sabitler/olculer.dart';
+import 'package:fiyatgoz/sabitler/metin_stilleri.dart';
+import 'package:fiyatgoz/bilesenler/fiyat_etiketi.dart';
+import 'package:fiyatgoz/modeller/fis_modeli.dart';
+
+/// Ana sayfadaki fis ogesi karti
+class FisKarti extends StatelessWidget {
+  final FisModeli fis;
+  final VoidCallback? onDokunuldu;
+
+  const FisKarti({
+    super.key,
+    required this.fis,
+    this.onDokunuldu,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onDokunuldu,
+      borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
+        padding: const EdgeInsets.all(Olculer.boslukOrta),
+        decoration: BoxDecoration(
+          color: UygulamaRenkleri.kartBeyaz,
+          borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+          border: Border.all(color: UygulamaRenkleri.cizgi),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: UygulamaRenkleri.anaAcik,
+                borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+              ),
+              child: const Icon(
+                Icons.shopping_cart_outlined,
+                color: UygulamaRenkleri.anaKoyu,
+              ),
+            ),
+            const SizedBox(width: Olculer.boslukOrta),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    fis.aciklama,
+                    style: MetinStilleri.govdeKalin(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          fis.marketAdi,
+                          style: MetinStilleri.aciklama(renk: const Color(0xFF475569)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${fis.toplamUrunAdedi} ürün',
+                        style: MetinStilleri.aciklama(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            FiyatEtiketi(tutar: fis.toplamTutar, boyut: 17),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: UygulamaRenkleri.griYazi,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
