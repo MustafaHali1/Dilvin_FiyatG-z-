@@ -1,17 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:fiyatgoz/sabitler/uygulama_renkleri.dart';
-import 'package:fiyatgoz/sabitler/olculer.dart';
-import 'package:fiyatgoz/sabitler/metin_stilleri.dart';
-import 'package:fiyatgoz/bilesenler/ozel_buton.dart';
-import 'package:fiyatgoz/bilesenler/durum_rozeti.dart';
+import '../../sabitler/uygulama_renkleri.dart';
+import '../../sabitler/olculer.dart';
+import '../../sabitler/metin_stilleri.dart';
+import '../../bilesenler/ozel_buton.dart';
+import '../../bilesenler/durum_rozeti.dart';
 
 /// Yapay zeka veya OCR ile okunan fiyatin onaylandigi ara yuz
 class FiyatOnayEkrani extends StatefulWidget {
-  final VoidCallback onOnaylandi;
+  final String? resimYolu;
+  final ValueChanged<Map<String, dynamic>> onOnaylandi;
   final VoidCallback onTekrarCek;
 
   const FiyatOnayEkrani({
     super.key,
+    this.resimYolu,
     required this.onOnaylandi,
     required this.onTekrarCek,
   });
@@ -22,13 +25,16 @@ class FiyatOnayEkrani extends StatefulWidget {
 
 class _FiyatOnayEkraniState extends State<FiyatOnayEkrani> {
   int _adet = 1;
-  final double _seciliFiyat = 24.90;
+  double _seciliFiyat = 24.90;
   final TextEditingController _urunAdiDenetleyici =
       TextEditingController(text: 'Sütaş Tam Yağlı Süt 1L');
+  final TextEditingController _fiyatDenetleyici =
+      TextEditingController(text: '24.90');
 
   @override
   void dispose() {
     _urunAdiDenetleyici.dispose();
+    _fiyatDenetleyici.dispose();
     super.dispose();
   }
 
@@ -50,6 +56,21 @@ class _FiyatOnayEkraniState extends State<FiyatOnayEkrani> {
       body: ListView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),
         children: [
+          // Çekilen Resim Önizlemesi (Varsa)
+          if (widget.resimYolu != null && File(widget.resimYolu!).existsSync())
+            ClipRRect(
+              borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              child: SizedBox(
+                height: 140,
+                width: double.infinity,
+                child: Image.file(
+                  File(widget.resimYolu!),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          if (widget.resimYolu != null) const SizedBox(height: Olculer.boslukOrta),
+
           // AI Tanima Sonuc Karti
           Container(
             padding: const EdgeInsets.all(Olculer.boslukBuyuk),
@@ -99,6 +120,37 @@ class _FiyatOnayEkraniState extends State<FiyatOnayEkrani> {
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
 
+          // Ürün Adı ve Fiyat Düzenleme Alanı
+          TextField(
+            controller: _urunAdiDenetleyici,
+            decoration: InputDecoration(
+              labelText: 'Ürün Adı',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              ),
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukOrta),
+          TextField(
+            controller: _fiyatDenetleyici,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (val) {
+              final d = double.tryParse(val.replaceAll(',', '.'));
+              if (d != null) setState(() => _seciliFiyat = d);
+            },
+            decoration: InputDecoration(
+              labelText: 'Birim Fiyat (₺)',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              ),
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukBuyuk),
+
           // Adet Secimi
           Container(
             padding: const EdgeInsets.all(Olculer.boslukOrta),
@@ -143,7 +195,14 @@ class _FiyatOnayEkraniState extends State<FiyatOnayEkrani> {
               Expanded(
                 child: OzelButon(
                   metin: 'Sepete Ekle',
-                  onPressed: widget.onOnaylandi,
+                  onPressed: () {
+                    widget.onOnaylandi({
+                      'ad': _urunAdiDenetleyici.text,
+                      'birimFiyat': _seciliFiyat,
+                      'adet': _adet,
+                      'resimYolu': widget.resimYolu,
+                    });
+                  },
                 ),
               ),
             ],

@@ -1,41 +1,144 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/durum_rozeti.dart';
+import '../../servisler/kamera_servisi.dart';
+import 'kamera_izni_gerekli_ekrani.dart';
 
-/// Kamera Arayüzü (Yeşil tarama çerçevesi, uyarılar ve deklanşör)
-class KameraTarayiciEkrani extends StatelessWidget {
-  final VoidCallback onFotoCekildi;
-  final VoidCallback onGaleridenSec;
+/// Gerçek kamera görüntüsünü canlı veren ve çekim yapan arayüz
+class KameraTarayiciEkrani extends StatefulWidget {
+  final ValueChanged<String> onFotoCekildi; // Çekilen resmin yerel dosya yolu
   final VoidCallback onKapat;
 
   const KameraTarayiciEkrani({
     super.key,
     required this.onFotoCekildi,
-    required this.onGaleridenSec,
     required this.onKapat,
   });
 
   @override
+  State<KameraTarayiciEkrani> createState() => _KameraTarayiciEkraniState();
+}
+
+class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
+  CameraController? _kameraDenetleyici;
+  bool _izinVerildi = false;
+  bool _yukleniyor = true;
+  bool _flasAcik = false;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _kamerayiHazirla();
+  }
+
+  Future<void> _kamerayiHazirla() async {
+    final izinDurumu = await Permission.camera.request();
+    if (!izinDurumu.isGranted) {
+      if (mounted) {
+        setState(() {
+          _izinVerildi = false;
+          _yukleniyor = false;
+        });
+      }
+      return;
+    }
+
+    _izinVerildi = true;
+    final kamera = KameraServisi.varsayilanArkaKamera;
+    if (kamera != null) {
+      _kameraDenetleyici = CameraController(
+        kamera,
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
+      try {
+        await _kameraDenetleyici!.initialize();
+      } catch (e) {
+        debugPrint('Kamera hatası: $e');
+      }
+    }
+
+    if (mounted) {
+      setState(() => _yukleniyor = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _kameraDenetleyici?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fotoCek() async {
+    if (_kameraDenetleyici == null || !_kameraDenetleyici!.value.isInitialized) return;
+    if (_kameraDenetleyici!.value.isTakingPicture) return;
+
+    try {
+      final XFile dosya = await _kameraDenetleyici!.takePicture();
+      widget.onFotoCekildi(dosya.path);
+    } catch (e) {
+      debugPrint('Fotoğraf çekme hatası: $e');
+    }
+  }
+
+  Future<void> _galeridenSec() async {
+    final XFile? secilen = await _picker.pickImage(source: ImageSource.gallery);
+    if (secilen != null) {
+      widget.onFotoCekildi(secilen.path);
+    }
+  }
+
+  Future<void> _flasDegistir() async {
+    if (_kameraDenetleyici == null || !_kameraDenetleyici!.value.isInitialized) return;
+    setState(() => _flasAcik = !_flasAcik);
+    await _kameraDenetleyici!.setFlashMode(
+      _flasAcik ? FlashMode.torch : FlashMode.off,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_yukleniyor) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: CircularProgressIndicator(color: UygulamaRenkleri.anaZumrut),
+        ),
+      );
+    }
+
+    if (!_izinVerildi) {
+      return KameraIzniGerekliEkrani(
+        onAyarlaraGit: () => openAppSettings(),
+        onGaleridenSec: _galeridenSec,
+        onElleGir: widget.onKapat,
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Arka Plan Kamera Simülasyonu (Karanlık zemin)
-          Container(
-            color: const Color(0xFF0F172A),
-            child: Center(
-              child: Icon(
-                Icons.camera_alt_outlined,
-                size: 96,
-                color: Colors.white.withValues(alpha: 0.1),
+          // 1. Canlı Kamera Önizlemesi
+          if (_kameraDenetleyici != null && _kameraDenetleyici!.value.isInitialized)
+            CameraPreview(_kameraDenetleyici!)
+          else
+            const Center(
+              child: Text(
+                'Kamera başlatılamadı',
+                style: TextStyle(color: Colors.white),
               ),
             ),
-          ),
 
-          // Üst Kontroller ve Rozetler
+          // 2. Üst Kontroller
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -48,77 +151,49 @@ class KameraTarayiciEkrani extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: onKapat,
+                        onPressed: widget.onKapat,
                         icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black38,
-                        ),
+                        style: IconButton.styleFrom(backgroundColor: Colors.black45),
                       ),
                       DurumRozeti.cevrimdisi(),
                       IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.flash_off_rounded, color: Colors.white, size: 24),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black38,
+                        onPressed: _flasDegistir,
+                        icon: Icon(
+                          _flasAcik ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+                          color: _flasAcik ? UygulamaRenkleri.kolayModSari : Colors.white,
+                          size: 24,
                         ),
+                        style: IconButton.styleFrom(backgroundColor: Colors.black45),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: Olculer.boslukOrta),
-
-                  // Düşük Işık / Bulanıklık Uyarısı Bandı
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.65),
-                      borderRadius: BorderRadius.circular(Olculer.yariCapTam),
-                      border: Border.all(color: Colors.white24),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.lightbulb_outline_rounded, color: UygulamaRenkleri.uyariTuruncu, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Ortam karanlık, flaşı açmayı dene',
-                          style: MetinStilleri.aciklama(renk: Colors.white),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          // Ortadaki Tarama Çerçevesi (Yeşil Hedef Alanı)
+          // 3. Ortadaki Yeşil Tarama Çerçevesi
           Center(
             child: Container(
-              width: 280,
-              height: 160,
+              width: 300,
+              height: 180,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: UygulamaRenkleri.anaZumrut,
-                  width: 2.5,
+                  width: 3,
                 ),
                 borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
               ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Tarama Çizgisi
-                  Container(
-                    height: 2,
-                    width: 260,
-                    color: UygulamaRenkleri.anaZumrut.withValues(alpha: 0.8),
-                  ),
                   Positioned(
                     bottom: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+                        color: Colors.black.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(Olculer.yariCapTam),
                       ),
                       child: Text(
                         'Fiyat etiketini çerçeveye hizala',
@@ -131,28 +206,25 @@ class KameraTarayiciEkrani extends StatelessWidget {
             ),
           ),
 
-          // Alt Deklanşör ve Galeri Alanı
+          // 4. Alt Deklanşör ve Galeri Alanı
           Align(
             alignment: Alignment.bottomCenter,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(Olculer.boslukCokBuyuk),
+                padding: const EdgeInsets.all(Olculer.boslukBuyuk),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Galeri Butonu
                     IconButton(
-                      onPressed: onGaleridenSec,
-                      icon: const Icon(Icons.photo_library_outlined, color: Colors.white, size: 30),
+                      onPressed: _galeridenSec,
+                      icon: const Icon(Icons.photo_library_outlined, color: Colors.white, size: 28),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white12,
+                        backgroundColor: Colors.black45,
                         padding: const EdgeInsets.all(14),
                       ),
                     ),
-
-                    // Büyük Deklanşör Butonu
                     GestureDetector(
-                      onTap: onFotoCekildi,
+                      onTap: _fotoCek,
                       child: Container(
                         width: 76,
                         height: 76,
@@ -173,9 +245,7 @@ class KameraTarayiciEkrani extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    // Boşluk dengeleyici
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 48), // Simetri dengeleyici
                   ],
                 ),
               ),

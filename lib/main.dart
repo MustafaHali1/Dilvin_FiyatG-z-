@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fiyatgoz/sabitler/tema_fabrikasi.dart';
-import 'package:fiyatgoz/yoneticiler/sepet_yoneticisi.dart';
-import 'package:fiyatgoz/yoneticiler/profil_yoneticisi.dart';
-import 'package:fiyatgoz/ekranlar/onboarding/onboarding_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/onboarding/okuma_testi_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/onboarding/renk_korlugu_secim_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/onboarding/renk_testi_sorusu_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/ana_sayfa/ana_sayfa_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/sepet/sepet_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/kamera/kamera_tarayici_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/fis_detay/fis_detay_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/ayarlar/ayarlar_ekrani.dart';
-import 'package:fiyatgoz/bilesenler/sesli_asistan_sayfasi.dart';
-import 'package:fiyatgoz/modeller/fis_modeli.dart';
-import 'package:fiyatgoz/modeller/profil_modeli.dart';
+import 'sabitler/tema_fabrikasi.dart';
+import 'servisler/kamera_servisi.dart';
+import 'yoneticiler/sepet_yoneticisi.dart';
+import 'yoneticiler/profil_yoneticisi.dart';
+import 'ekranlar/onboarding/onboarding_ekrani.dart';
+import 'ekranlar/onboarding/okuma_testi_ekrani.dart';
+import 'ekranlar/onboarding/renk_korlugu_secim_ekrani.dart';
+import 'ekranlar/onboarding/renk_testi_sorusu_ekrani.dart';
+import 'ekranlar/ana_sayfa/ana_sayfa_ekrani.dart';
+import 'ekranlar/sepet/sepet_ekrani.dart';
+import 'ekranlar/kamera/kamera_tarayici_ekrani.dart';
+import 'ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
+import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
+import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
+import 'bilesenler/sesli_asistan_sayfasi.dart';
+import 'modeller/fis_modeli.dart';
+import 'modeller/urun_modeli.dart';
+import 'modeller/profil_modeli.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await KameraServisi.baslat();
+
   runApp(
     MultiProvider(
       providers: [
@@ -34,7 +39,6 @@ class FiyatGozUygulamasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Canli Profil Dinleyicisi: Mod degistigi an tum tema aninda guncellenir!
     final profil = context.watch<ProfilYoneticisi>().profil;
 
     return MaterialApp(
@@ -177,24 +181,36 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
       MaterialPageRoute(
         builder: (context) => KameraTarayiciEkrani(
           onKapat: () => Navigator.of(context).pop(),
-          onGaleridenSec: () {},
-          onFotoCekildi: () {
+          onFotoCekildi: (resimYolu) {
             Navigator.of(context).pop();
-            _fiyatOnaySayfasiniAc(context);
+            _fiyatOnaySayfasiniAc(context, resimYolu);
           },
         ),
       ),
     );
   }
 
-  void _fiyatOnaySayfasiniAc(BuildContext context) {
+  void _fiyatOnaySayfasiniAc(BuildContext context, String resimYolu) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => FiyatOnayEkrani(
-          onTekrarCek: () => Navigator.of(context).pop(),
-          onOnaylandi: () {
+          resimYolu: resimYolu,
+          onTekrarCek: () {
             Navigator.of(context).pop();
-            setState(() => _seciliSayfa = 1);
+            _kameraSayfasiniAc(context);
+          },
+          onOnaylandi: (veri) {
+            final yeniUrun = UrunModeli(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              ad: veri['ad'] as String,
+              birimFiyat: veri['birimFiyat'] as double,
+              adet: veri['adet'] as int,
+              gorselYolu: veri['resimYolu'] as String?,
+              yapayZekaIleTanindi: true,
+            );
+            context.read<SepetYoneticisi>().urunEkle(yeniUrun);
+            Navigator.of(context).pop();
+            setState(() => _seciliSayfa = 1); // Sepete gec
           },
         ),
       ),
