@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../sabitler/uygulama_renkleri.dart';
 import '../sabitler/olculer.dart';
 import '../sabitler/metin_stilleri.dart';
+import '../yoneticiler/profil_yoneticisi.dart';
+import '../modeller/profil_modeli.dart';
 
 enum ButonTipi { dolu, cizgili, acik, tehlike }
 
-/// Tum uygulamada kullanilan tek ve moduler buton class'i
+/// Modlara ve temaya duyarlı akıllı atomik buton class'ı
 class OzelButon extends StatelessWidget {
   final String metin;
   final VoidCallback? onPressed;
   final IconData? ikon;
   final ButonTipi tip;
-  final bool kolayMod;
+  final bool? kolayMod;
   final bool yukleniyor;
 
   const OzelButon({
@@ -20,40 +23,49 @@ class OzelButon extends StatelessWidget {
     this.onPressed,
     this.ikon,
     this.tip = ButonTipi.dolu,
-    this.kolayMod = false,
+    this.kolayMod,
     this.yukleniyor = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final double yukseklik = kolayMod
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final bool isKolayMod = kolayMod ?? (profil.profilTuru == ProfilTuru.kolayMod);
+    final bool isRenkKoru = profil.profilTuru == ProfilTuru.renkKoruModu;
+
+    final double yukseklik = isKolayMod
         ? Olculer.kolayModButonYukseklik
         : Olculer.standartButonYukseklik;
+
+    Color anaRenk = isRenkKoru ? UygulamaRenkleri.renkKoruMavi : UygulamaRenkleri.anaZumrut;
+    Color acikRenk = isRenkKoru ? const Color(0xFFE0F2FE) : UygulamaRenkleri.anaAcik;
+    Color koyuRenk = isRenkKoru ? const Color(0xFF0369A1) : UygulamaRenkleri.anaKoyu;
 
     Color arkaPlan;
     Color yaziRengi;
     BorderSide cerceve = BorderSide.none;
 
-    if (kolayMod) {
+    if (isKolayMod) {
       arkaPlan = UygulamaRenkleri.kolayModSari;
       yaziRengi = UygulamaRenkleri.kolayModSiyah;
+      cerceve = const BorderSide(color: Colors.white, width: 2);
     } else {
       switch (tip) {
         case ButonTipi.dolu:
-          arkaPlan = UygulamaRenkleri.anaZumrut;
+          arkaPlan = anaRenk;
           yaziRengi = Colors.white;
           break;
         case ButonTipi.cizgili:
           arkaPlan = Colors.transparent;
-          yaziRengi = UygulamaRenkleri.anaZumrut;
-          cerceve = const BorderSide(color: UygulamaRenkleri.anaZumrut, width: 1.5);
+          yaziRengi = anaRenk;
+          cerceve = BorderSide(color: anaRenk, width: 2);
           break;
         case ButonTipi.acik:
-          arkaPlan = UygulamaRenkleri.anaAcik;
-          yaziRengi = UygulamaRenkleri.anaKoyu;
+          arkaPlan = acikRenk;
+          yaziRengi = koyuRenk;
           break;
         case ButonTipi.tehlike:
-          arkaPlan = UygulamaRenkleri.tehlikeKirmizi;
+          arkaPlan = isRenkKoru ? UygulamaRenkleri.renkKoruTuruncu : UygulamaRenkleri.tehlikeKirmizi;
           yaziRengi = Colors.white;
           break;
       }
@@ -66,11 +78,11 @@ class OzelButon extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: arkaPlan,
           foregroundColor: yaziRengi,
-          elevation: tip == ButonTipi.dolu && !kolayMod ? 2 : 0,
+          elevation: isKolayMod ? 0 : 2,
           side: cerceve,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              kolayMod ? Olculer.yariCapBuyuk : Olculer.yariCapOrta,
+              isKolayMod ? Olculer.yariCapBuyuk : Olculer.yariCapOrta,
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: Olculer.boslukOrta),
@@ -91,14 +103,14 @@ class OzelButon extends StatelessWidget {
                   if (ikon != null) ...[
                     Icon(
                       ikon,
-                      size: kolayMod ? 28 : 20,
+                      size: isKolayMod ? 28 : 22,
                       color: yaziRengi,
                     ),
                     const SizedBox(width: Olculer.boslukKucuk),
                   ],
                   Text(
                     metin,
-                    style: kolayMod
+                    style: isKolayMod
                         ? MetinStilleri.kolayModGovde(renk: yaziRengi)
                         : MetinStilleri.govdeKalin(renk: yaziRengi),
                   ),
