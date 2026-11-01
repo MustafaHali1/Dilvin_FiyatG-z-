@@ -19,6 +19,7 @@ class UrunModeli {
   });
 
   double get toplamTutar => birimFiyat * adet;
+  double get fiyat => birimFiyat;
   bool get indirimliMi => eskiFiyat != null && eskiFiyat! > birimFiyat;
 
   UrunModeli kopyala({

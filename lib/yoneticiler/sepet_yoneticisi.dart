@@ -39,6 +39,7 @@ class SepetYoneticisi extends ChangeNotifier {
       _urunler.fold(0.0, (toplam, urun) => toplam + urun.toplamTutar);
 
   double get genelToplam => araToplam;
+  double get toplamTutar => genelToplam;
 
   int get urunCesitSayisi => _urunler.length;
   int get toplamUrunAdedi =>
@@ -80,4 +81,6 @@ class SepetYoneticisi extends ChangeNotifier {
     _urunler.clear();
     notifyListeners();
   }
+
+  void sepetiTemizle() => sepetiBosalt();
 }

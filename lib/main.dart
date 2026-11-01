@@ -14,6 +14,9 @@ import 'ekranlar/kamera/kamera_tarayici_ekrani.dart';
 import 'ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
 import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
 import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
+import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
+import 'ekranlar/sepet/gorme_engelli_sepet_view.dart';
+import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import 'bilesenler/sesli_asistan_sayfasi.dart';
 import 'modeller/fis_modeli.dart';
 import 'modeller/urun_modeli.dart';
@@ -127,6 +130,22 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
   @override
   Widget build(BuildContext context) {
     final sepet = context.watch<SepetYoneticisi>();
+    final profil = context.watch<ProfilYoneticisi>().profil;
+
+    // Görme Engelli Modu: Kendi dev taktil 3 butonlu alt navigasyonuna sahiptir
+    if (profil.profilTuru == ProfilTuru.gormeEngelliModu) {
+      if (_seciliSayfa == 0) {
+        return GormeEngelliRadarKameraView(
+          cameraController: null,
+          onFotoCek: () => _kameraSayfasiniAc(context),
+          onKapat: () => setState(() => _seciliSayfa = 2),
+        );
+      } else if (_seciliSayfa == 1) {
+        return const GormeEngelliSepetView();
+      } else {
+        return const AyarlarEkrani();
+      }
+    }
 
     final sayfalar = [
       AnaSayfaEkrani(
@@ -237,6 +256,16 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
   }
 
   void _sesliAsistaniAc(BuildContext context) {
+    final profil = context.read<ProfilYoneticisi>().profil;
+    if (profil.profilTuru == ProfilTuru.gormeEngelliModu) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const SesliAsistanDiyalogEkrani(),
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

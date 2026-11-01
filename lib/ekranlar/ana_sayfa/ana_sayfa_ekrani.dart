@@ -5,6 +5,7 @@ import '../../yoneticiler/profil_yoneticisi.dart';
 import 'standart_ana_sayfa_view.dart';
 import 'kolay_mod_ana_sayfa_view.dart';
 import 'renk_koru_ana_sayfa_view.dart';
+import '../kamera/gorme_engelli_radar_kamera_view.dart';
 
 /// Kullanıcının seçtiği profile göre birebir Stitch tasarımını ekrana getiren dinamik bağlayıcı
 class AnaSayfaEkrani extends StatelessWidget {
@@ -41,6 +42,11 @@ class AnaSayfaEkrani extends StatelessWidget {
           onAyarlaraGit: onAyarlaraGit,
         );
       case ProfilTuru.gormeEngelliModu:
+        return GormeEngelliRadarKameraView(
+          cameraController: null,
+          onFotoCek: onKameraAc,
+          onKapat: onAyarlaraGit,
+        );
       case ProfilTuru.standart:
         return StandartAnaSayfaView(
           onKameraAc: onKameraAc,

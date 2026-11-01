@@ -25,6 +25,7 @@ class FiyatOnayEkrani extends StatelessWidget {
 
     switch (profil.profilTuru) {
       case ProfilTuru.kolayMod:
+      case ProfilTuru.gormeEngelliModu:
         return KolayModFiyatOnayView(
           resimYolu: resimYolu,
           onOnaylandi: onOnaylandi,
@@ -36,7 +37,6 @@ class FiyatOnayEkrani extends StatelessWidget {
           onOnaylandi: onOnaylandi,
           onTekrarCek: onTekrarCek,
         );
-      case ProfilTuru.gormeEngelliModu:
       case ProfilTuru.standart:
         return StandartFiyatOnayView(
           resimYolu: resimYolu,

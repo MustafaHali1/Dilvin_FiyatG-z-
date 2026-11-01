@@ -16,6 +16,8 @@ class FisModeli {
     required this.urunler,
   });
 
+  String get magazaAdi => marketAdi;
+
   double get toplamTutar =>
       urunler.fold(0.0, (toplam, urun) => toplam + urun.toplamTutar);
 

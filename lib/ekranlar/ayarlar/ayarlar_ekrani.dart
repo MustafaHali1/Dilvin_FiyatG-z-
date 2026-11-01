@@ -170,6 +170,18 @@ class AyarlarEkrani extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.radar, color: Color(0xFFFFD600)),
+                  title: Text('Görme Engelli (Sesli Radar Modu)', style: MetinStilleri.govdeKalin()),
+                  subtitle: const Text('Tam sesli okuma, haptik radar ve konuşan asistan'),
+                  trailing: yonetici.profil.profilTuru == ProfilTuru.gormeEngelliModu
+                      ? const Icon(Icons.check_circle, color: UygulamaRenkleri.anaZumrut)
+                      : null,
+                  onTap: () {
+                    yonetici.profilAyarla(ProfilTuru.gormeEngelliModu);
+                    Navigator.of(context).pop();
+                  },
+                ),
               ],
             ),
           ),
