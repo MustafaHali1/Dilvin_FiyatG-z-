@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fiyatgoz/sabitler/uygulama_renkleri.dart';
-import 'package:fiyatgoz/yoneticiler/sepet_yoneticisi.dart';
-import 'package:fiyatgoz/yoneticiler/profil_yoneticisi.dart';
-import 'package:fiyatgoz/ekranlar/ana_sayfa/ana_sayfa_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/sepet/sepet_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
-import 'package:fiyatgoz/ekranlar/fis_detay/fis_detay_ekrani.dart';
-import 'package:fiyatgoz/modeller/fis_modeli.dart';
+import 'sabitler/uygulama_renkleri.dart';
+import 'yoneticiler/sepet_yoneticisi.dart';
+import 'yoneticiler/profil_yoneticisi.dart';
+import 'ekranlar/onboarding/onboarding_ekrani.dart';
+import 'ekranlar/onboarding/okuma_testi_ekrani.dart';
+import 'ekranlar/onboarding/renk_korlugu_secim_ekrani.dart';
+import 'ekranlar/onboarding/renk_testi_sorusu_ekrani.dart';
+import 'ekranlar/ana_sayfa/ana_sayfa_ekrani.dart';
+import 'ekranlar/sepet/sepet_ekrani.dart';
+import 'ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
+import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
+import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
+import 'modeller/fis_modeli.dart';
+import 'modeller/profil_modeli.dart';
 
 void main() {
   runApp(
@@ -34,8 +40,71 @@ class FiyatGozUygulamasi extends StatelessWidget {
         colorSchemeSeed: UygulamaRenkleri.anaZumrut,
         scaffoldBackgroundColor: UygulamaRenkleri.arkaPlan,
       ),
-      home: const AnaGezintiIskeleti(),
+      home: const UygulamaGirisKontrolcusu(),
     );
+  }
+}
+
+/// Ilk acilista Onboarding ve Test akislarini yoneten ara katman
+class UygulamaGirisKontrolcusu extends StatefulWidget {
+  const UygulamaGirisKontrolcusu({super.key});
+
+  @override
+  State<UygulamaGirisKontrolcusu> createState() => _UygulamaGirisKontrolcusuState();
+}
+
+class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
+  bool _kurulumTamamlandi = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_kurulumTamamlandi) {
+      return OnboardingEkrani(
+        onTamamlandi: () {
+          final profil = context.read<ProfilYoneticisi>().profil;
+          if (profil.profilTuru == ProfilTuru.kolayMod) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => OkumaTestiEkrani(
+                  onSecildi: (boyut) {
+                    Navigator.of(context).pop();
+                    setState(() => _kurulumTamamlandi = true);
+                  },
+                ),
+              ),
+            );
+          } else if (profil.profilTuru == ProfilTuru.renkKoruModu) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => RenkKorluguSecimEkrani(
+                  onSecildi: (tur) {
+                    Navigator.of(context).pop();
+                    setState(() => _kurulumTamamlandi = true);
+                  },
+                  onTestBaslat: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => RenkTestiSorusuEkrani(
+                          onTestTamamlandi: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                            setState(() => _kurulumTamamlandi = true);
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          } else {
+            setState(() => _kurulumTamamlandi = true);
+          }
+        },
+      );
+    }
+
+    return const AnaGezintiIskeleti();
   }
 }
 
@@ -63,6 +132,7 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
         onUrunEkle: () => _fiyatOnaySayfasiniAc(context),
         onAlisverisiBitir: () => _fisDetaySayfasiniAc(context, sepet),
       ),
+      const AyarlarEkrani(),
     ];
 
     return Scaffold(
@@ -88,6 +158,11 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
               child: const Icon(Icons.shopping_cart_rounded),
             ),
             label: 'Sepet',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings_rounded),
+            label: 'Ayarlar',
           ),
         ],
       ),
