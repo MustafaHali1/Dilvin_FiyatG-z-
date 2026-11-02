@@ -11,12 +11,14 @@ class StandartFisView extends StatelessWidget {
   final FisModeli fis;
   final VoidCallback onPaylas;
   final VoidCallback onSesliOku;
+  final VoidCallback onSesliAsistan;
 
   const StandartFisView({
     super.key,
     required this.fis,
     required this.onPaylas,
     required this.onSesliOku,
+    required this.onSesliAsistan,
   });
 
   @override
@@ -28,8 +30,21 @@ class StandartFisView extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(onPressed: onPaylas, icon: const Icon(Icons.share_rounded)),
-          IconButton(onPressed: onSesliOku, icon: const Icon(Icons.volume_up_rounded)),
+          IconButton(
+            tooltip: 'Sesli Asistan',
+            onPressed: onSesliAsistan,
+            icon: const Icon(Icons.mic_rounded, color: UygulamaRenkleri.anaZumrut, size: 26),
+          ),
+          IconButton(
+            tooltip: 'PDF Paylaş',
+            onPressed: onPaylas,
+            icon: const Icon(Icons.share_rounded),
+          ),
+          IconButton(
+            tooltip: 'Fişi Sesli Oku',
+            onPressed: onSesliOku,
+            icon: const Icon(Icons.volume_up_rounded),
+          ),
         ],
       ),
       body: SingleChildScrollView(

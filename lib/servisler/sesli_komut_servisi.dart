@@ -1,13 +1,17 @@
 import '../sabitler/sesli_komut_lugati.dart';
 
-/// Sesli asistan tarafından çözülen niyet (komut) türleri
+/// Sesli asistan tarafından çözülen niyet (Intent) türleri
 enum KomutTuru {
-  sepeteEkle,
-  adetBelirle,
+  selamlama,
+  tesekkurVeda,
+  yardim,
+  sepetiSifirla,
   iptal,
+  sepeteEkle,
   butceSorgula,
   sepetOzeti,
   urunAra,
+  adetBelirle,
   belirsiz,
 }
 
@@ -30,56 +34,95 @@ class SesliKomutSonucu {
       'SesliKomutSonucu(tur: $tur, adet: $adet, hedefUrun: $hedefUrun, hamMetin: "$hamMetin")';
 }
 
-/// Kullanıcının Türkçe serbest konuşma cümlelerini kurallı komutlara ve niyetlere (NLU) dönüştüren zeki servis
+/// Kullanıcının Türkçe serbest konuşma cümlelerini kurallı komutlara ve niyetlere (NLU) dönüştüren zeki motor
 class SesliKomutServisi {
   /// Gelen serbest Türkçe konuşma metnini analiz eder ve asıl niyeti (Intent) çözer
   SesliKomutSonucu niyetCoz(String hamMetin) {
-    final kucukMetin = _turkceKucult(hamMetin).trim();
-    if (kucukMetin.isEmpty) {
+    // 1. Temizlik ve normalizasyon
+    final metin = _turkceKucult(hamMetin)
+        .replaceAll(RegExp(r'[.,!?\-]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    if (metin.isEmpty) {
       return SesliKomutSonucu(
         tur: KomutTuru.belirsiz,
         hamMetin: hamMetin,
       );
     }
 
-    // 1. İptal / Vazgeç Komutları (SesliKomutLugati.iptalKelimeleri)
-    if (_iciriyorMu(kucukMetin, SesliKomutLugati.iptalKelimeleri)) {
+    // 2. Öncelik Sırasına Göre Niyet Kontrolü
+
+    // A) Tehlikeli / Sıfırlama İşlemleri ("Sepeti boşalt", "Sıfırla")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.sepetSifirlamaKelimeleri)) {
+      return SesliKomutSonucu(
+        tur: KomutTuru.sepetiSifirla,
+        hamMetin: hamMetin,
+      );
+    }
+
+    // B) İptal / Vazgeçme ("Ekleme iptal et" durumunda eklemeyi tetiklememek için iptal önce gelir)
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.iptalKelimeleri)) {
       return SesliKomutSonucu(
         tur: KomutTuru.iptal,
         hamMetin: hamMetin,
       );
     }
 
-    // 2. Bütçe ve Harcama Sorguları (SesliKomutLugati.butceSorgulari)
-    if (_iciriyorMu(kucukMetin, SesliKomutLugati.butceSorgulari)) {
+    // C) Bütçe ve Harcama Sorguları ("Bütçem ne kadar", "Patladık mı")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.butceSorgulari)) {
       return SesliKomutSonucu(
         tur: KomutTuru.butceSorgula,
         hamMetin: hamMetin,
       );
     }
 
-    // 3. Sepet Özeti ve Hesap Sorguları (SesliKomutLugati.sepetOzetiSorgulari)
-    if (_iciriyorMu(kucukMetin, SesliKomutLugati.sepetOzetiSorgulari)) {
+    // D) Sepet Özeti ve Hesap Sorguları ("Sepette ne var", "Kaça patladı")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.sepetOzetiSorgulari)) {
       return SesliKomutSonucu(
         tur: KomutTuru.sepetOzeti,
         hamMetin: hamMetin,
       );
     }
 
-    // 4. Hedef Ürün Arama (Radar için: "Bana süt bul", "Zeytin ara", "Peynir nerede", "Çay lazım")
-    final aramaKomutu = _urunAramaNiyetiCoz(kucukMetin, hamMetin);
+    // E) Yardım ve Kapasite Sorguları ("Yardım et", "Sen kimsin", "Komutlar")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.yardimKelimeleri)) {
+      return SesliKomutSonucu(
+        tur: KomutTuru.yardim,
+        hamMetin: hamMetin,
+      );
+    }
+
+    // F) Teşekkür ve Veda ("Sağ ol", "Eyvallah", "Görüşürüz")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.tesekkurVedaKelimeleri)) {
+      return SesliKomutSonucu(
+        tur: KomutTuru.tesekkurVeda,
+        hamMetin: hamMetin,
+      );
+    }
+
+    // G) Selamlaşma ve Hal-Hatır ("Merhaba", "Naber", "Günaydın", "sa")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.selamlamaKelimeleri)) {
+      return SesliKomutSonucu(
+        tur: KomutTuru.selamlama,
+        hamMetin: hamMetin,
+      );
+    }
+
+    // H) Hedef Ürün Arama (Radar için: "Bana süt bul", "Zeytin nerede", "Peynir ara")
+    final aramaKomutu = _urunAramaNiyetiCoz(metin, hamMetin);
     if (aramaKomutu != null) {
       return aramaKomutu;
     }
 
-    // 5. Adet Belirleme ("2 adet", "3 tane", "dört adet ekle", "5 tane yap", "çift al")
-    final adetSonucu = _adetCoz(kucukMetin, hamMetin);
+    // I) Adet Belirleme ("2 adet", "3 tane", "dört adet ekle", "çift al")
+    final adetSonucu = _adetCoz(metin, hamMetin);
     if (adetSonucu != null) {
       return adetSonucu;
     }
 
-    // 6. Sepete Ekleme / Onaylama (SesliKomutLugati.sepeteEkleKelimeleri)
-    if (_iciriyorMu(kucukMetin, SesliKomutLugati.sepeteEkleKelimeleri)) {
+    // J) Sepete Ekleme / Onaylama ("Sepete fırlat", "Yapıştır", "Aldım", "Koy sepete")
+    if (_kumeIcindeGeciyorMu(metin, AsistanVeriSeti.sepeteEkleKelimeleri)) {
       return SesliKomutSonucu(
         tur: KomutTuru.sepeteEkle,
         hamMetin: hamMetin,
@@ -94,7 +137,6 @@ class SesliKomutServisi {
 
   /// Metinden ürün arama niyetini ayıklar
   SesliKomutSonucu? _urunAramaNiyetiCoz(String kucukMetin, String hamMetin) {
-    // 1. "bana süt bul", "zeytin nerede", "peynir ara", "çay getir", "ekmek lazım"
     final kalip = RegExp(
       r'(?:bana\s+)?([a-zA-ZçğıöşüÇĞİÖŞÜ0-9\s]+?)\s+(?:bul|ara|nerede|arıyorum|ariyorum|göster|goster|lazım|lazim|var mı|var mi)$',
     );
@@ -110,7 +152,6 @@ class SesliKomutServisi {
       }
     }
 
-    // 2. "süt bulur musun", "zeytine bak"
     final kalip2 = RegExp(r'^(?:bana\s+)?([a-zA-ZçğıöşüÇĞİÖŞÜ0-9\s]+?)\s+(?:bulur musun|bakar mısın|bakar misin)$');
     final match2 = kalip2.firstMatch(kucukMetin);
     if (match2 != null) {
@@ -127,7 +168,7 @@ class SesliKomutServisi {
     return null;
   }
 
-  /// Metinden adet bilgisini ayıklar ("2 adet", "üç tane", "5 paket", "çift al")
+  /// Metinden adet bilgisini ayıklar
   SesliKomutSonucu? _adetCoz(String kucukMetin, String hamMetin) {
     // 1. Rakam ile adet: "2 adet", "3 tane", "5 paket ekle"
     final rakamReg = RegExp(r'(\d+)\s*(?:adet|tane|paket|kutu|şişe|tanesini)?');
@@ -144,8 +185,8 @@ class SesliKomutServisi {
       }
     }
 
-    // 2. Yazı ile sayı: "iki adet", "üç tane", "bir adet", "çift al"
-    for (final entry in SesliKomutLugati.sayiKarsiliklari.entries) {
+    // 2. Yazı ile sayı: "iki adet", "üç tane", "bir adet", "çift al", "düzine"
+    for (final entry in AsistanVeriSeti.sayiKarsiliklari.entries) {
       if (kucukMetin.contains('${entry.key} adet') ||
           kucukMetin.contains('${entry.key} tane') ||
           kucukMetin.contains('${entry.key} paket') ||
@@ -162,9 +203,16 @@ class SesliKomutServisi {
     return null;
   }
 
-  bool _iciriyorMu(String metin, Iterable<String> anahtarlar) {
-    for (final anahtar in anahtarlar) {
-      if (metin.contains(anahtar)) return true;
+  static bool _kumeIcindeGeciyorMu(String metin, Set<String> kume) {
+    final sozcukler = metin.split(' ');
+    for (final kalip in kume) {
+      if (kalip.contains(' ')) {
+        // Çok sözcüklü kalıp ise ("sepete ekle", "sağ ol", "bütçem ne kadar") doğrudan substring kontrolü
+        if (metin.contains(kalip)) return true;
+      } else {
+        // Tek sözcük ise ("sa", "as", "al", "iptal") başka sözcüklerin içine yapışmamalı, bağımsız olmalı
+        if (sozcukler.contains(kalip)) return true;
+      }
     }
     return false;
   }
@@ -176,3 +224,6 @@ class SesliKomutServisi {
         .toLowerCase();
   }
 }
+
+/// Geriye dönük uyumluluk için alias
+typedef AsistanMotoru = SesliKomutServisi;

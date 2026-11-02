@@ -12,12 +12,14 @@ class RenkKoruFisView extends StatelessWidget {
   final FisModeli fis;
   final VoidCallback onPaylas;
   final VoidCallback onSesliOku;
+  final VoidCallback onSesliAsistan;
 
   const RenkKoruFisView({
     super.key,
     required this.fis,
     required this.onPaylas,
     required this.onSesliOku,
+    required this.onSesliAsistan,
   });
 
   @override
@@ -32,6 +34,24 @@ class RenkKoruFisView extends StatelessWidget {
         title: Text('Fiş Detayı [${palet.turAdi}]', style: MetinStilleri.baslik2(renk: anaRenk)),
         backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: IconThemeData(color: anaRenk),
+        actions: [
+          IconButton(
+            tooltip: 'Sesli Asistan',
+            onPressed: onSesliAsistan,
+            icon: Icon(Icons.mic_rounded, color: anaRenk),
+          ),
+          IconButton(
+            tooltip: 'Paylaş',
+            onPressed: onPaylas,
+            icon: Icon(Icons.share_rounded, color: anaRenk),
+          ),
+          IconButton(
+            tooltip: 'Sesli Oku',
+            onPressed: onSesliOku,
+            icon: Icon(Icons.volume_up_rounded, color: anaRenk),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),

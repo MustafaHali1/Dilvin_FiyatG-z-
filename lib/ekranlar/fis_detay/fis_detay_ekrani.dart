@@ -8,6 +8,7 @@ import '../../servisler/fis_pdf_servisi.dart';
 import '../../servisler/sesli_asistan_servisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import 'standart_fis_view.dart';
 import 'kolay_mod_fis_view.dart';
 import 'renk_koru_fis_view.dart';
@@ -17,12 +18,14 @@ class FisDetayEkrani extends StatelessWidget {
   final FisModeli? fis;
   final VoidCallback? onPaylas;
   final VoidCallback? onSesliOku;
+  final VoidCallback? onSesliAsistan;
 
   const FisDetayEkrani({
     super.key,
     this.fis,
     this.onPaylas,
     this.onSesliOku,
+    this.onSesliAsistan,
   });
 
   @override
@@ -66,6 +69,15 @@ class FisDetayEkrani extends StatelessWidget {
           await asistan.konus(metin);
         };
 
+    final etkinSesliAsistan = onSesliAsistan ??
+        () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const SesliAsistanDiyalogEkrani(),
+            ),
+          );
+        };
+
     switch (profil.profilTuru) {
       case ProfilTuru.kolayMod:
       case ProfilTuru.gormeEngelliModu:
@@ -73,18 +85,21 @@ class FisDetayEkrani extends StatelessWidget {
           fis: etkinFis,
           onPaylas: etkinPaylas,
           onSesliOku: etkinSesliOku,
+          onSesliAsistan: etkinSesliAsistan,
         );
       case ProfilTuru.renkKoruModu:
         return RenkKoruFisView(
           fis: etkinFis,
           onPaylas: etkinPaylas,
           onSesliOku: etkinSesliOku,
+          onSesliAsistan: etkinSesliAsistan,
         );
       case ProfilTuru.standart:
         return StandartFisView(
           fis: etkinFis,
           onPaylas: etkinPaylas,
           onSesliOku: etkinSesliOku,
+          onSesliAsistan: etkinSesliAsistan,
         );
     }
   }

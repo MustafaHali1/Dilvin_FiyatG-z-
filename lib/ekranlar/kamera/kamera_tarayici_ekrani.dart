@@ -15,6 +15,7 @@ import '../../bilesenler/kamera_hedef_maskesi.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../bilesenler/durum_rozeti.dart';
+import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 
 /// Kullanıcının seçtiği profile göre birebir Kamera tasarımını ekrana getiren dinamik bağlayıcı
 class KameraTarayiciEkrani extends StatefulWidget {
@@ -206,7 +207,18 @@ class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 48),
+                    IconButton(
+                      tooltip: 'Sesli Asistan',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SesliAsistanDiyalogEkrani(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 28),
+                      style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(14)),
+                    ),
                   ],
                 ),
               ),

@@ -92,6 +92,23 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
           String yanit = '';
 
           switch (komut.tur) {
+            case KomutTuru.selamlama:
+              yanit = 'Merhabalar! Alışverişinizde size yardımcı olmak için buradayım. Fiyat sorabilir, sepetinizi veya bütçenizi kontrol edebilirsiniz.';
+              break;
+
+            case KomutTuru.tesekkurVeda:
+              yanit = 'Rica ederim, her zaman buradayım! İyi alışverişler dilerim.';
+              break;
+
+            case KomutTuru.yardim:
+              yanit = 'Ben FiyatGöz Asistanı. Ürün etiketlerini okuyabilir, sepetinizi hesaplayabilir, bütçenizi takip edebilir ve aradığınız ürünleri bulabilirim.';
+              break;
+
+            case KomutTuru.sepetiSifirla:
+              sepet.sepetiBosalt();
+              yanit = 'Sepetiniz tamamen temizlendi, baştan başlıyoruz.';
+              break;
+
             case KomutTuru.butceSorgula:
               final harcanan = sepet.toplamTutar;
               final kalan = profil.aylikButce - harcanan;

@@ -9,12 +9,14 @@ class KolayModFisView extends StatelessWidget {
   final FisModeli fis;
   final VoidCallback onPaylas;
   final VoidCallback onSesliOku;
+  final VoidCallback onSesliAsistan;
 
   const KolayModFisView({
     super.key,
     required this.fis,
     required this.onPaylas,
     required this.onSesliOku,
+    required this.onSesliAsistan,
   });
 
   @override
@@ -25,6 +27,23 @@ class KolayModFisView extends StatelessWidget {
         title: Text('DİJİTAL FİŞ', style: MetinStilleri.kolayModBaslik()),
         backgroundColor: Colors.black,
         elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: 'Sesli Asistan',
+            onPressed: onSesliAsistan,
+            icon: const Icon(Icons.mic_rounded, color: UygulamaRenkleri.kolayModSari, size: 30),
+          ),
+          IconButton(
+            tooltip: 'Sesli Oku',
+            onPressed: onSesliOku,
+            icon: const Icon(Icons.volume_up_rounded, color: UygulamaRenkleri.kolayModSari, size: 30),
+          ),
+          IconButton(
+            tooltip: 'Paylaş',
+            onPressed: onPaylas,
+            icon: const Icon(Icons.share_rounded, color: UygulamaRenkleri.kolayModSari, size: 28),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),

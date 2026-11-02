@@ -72,6 +72,36 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     debugPrint('Algılanan sesli komut: $sonuc');
 
     switch (sonuc.tur) {
+      case KomutTuru.selamlama:
+        _asistanMesaji = 'Merhabalar! Kamerayı etiketlere doğru gezdirin, ürün ve fiyatları okuyayım.';
+        notifyListeners();
+        _asistan.titret(TitresimTuru.secim);
+        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        break;
+
+      case KomutTuru.tesekkurVeda:
+        _asistanMesaji = 'Rica ederim, iyi alışverişler!';
+        notifyListeners();
+        _asistan.titret(TitresimTuru.secim);
+        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        break;
+
+      case KomutTuru.yardim:
+        _asistanMesaji = 'Kamerayı etiketlere tutun. Çift dokunarak ürünü sepete ekleyebilirsiniz veya basılı tutup bütçenizi sorabilirsiniz.';
+        notifyListeners();
+        _asistan.titret(TitresimTuru.secim);
+        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        break;
+
+      case KomutTuru.sepetiSifirla:
+        sepet.sepetiBosalt();
+        _sonBulunanUrun = null;
+        _asistanMesaji = 'Sepet tamamen sıfırlandı.';
+        notifyListeners();
+        _asistan.titret(TitresimTuru.hafif);
+        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        break;
+
       case KomutTuru.sepeteEkle:
         if (_sonBulunanUrun != null) {
           await ekranaCiftDokunuldu(sepet: sepet, profil: profil);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
+import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 
 /// Kolay Mod - Kamera Ekranı (Stitch: kolay_mod_kamera birebir)
 class KolayModKameraView extends StatelessWidget {
@@ -34,6 +35,17 @@ class KolayModKameraView extends StatelessWidget {
                     onPressed: onKapat,
                     icon: const Icon(Icons.arrow_back, color: UygulamaRenkleri.kolayModSari, size: 28),
                     label: Text('GERİ DÖN', style: MetinStilleri.kolayModBaslik()),
+                  ),
+                  IconButton(
+                    tooltip: 'Sesli Asistan',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SesliAsistanDiyalogEkrani(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.mic_rounded, color: UygulamaRenkleri.kolayModSari, size: 34),
                   ),
                 ],
               ),
