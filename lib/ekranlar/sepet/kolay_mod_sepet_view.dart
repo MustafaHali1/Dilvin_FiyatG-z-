@@ -200,29 +200,35 @@ class KolayModSepetView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '${urun.adet} Adet (${urun.birimFiyat.toStringAsFixed(2)} ₺ / adet)',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Text(
+                              'Birim: ${urun.birimFiyat.toStringAsFixed(2)} ₺',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white70,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               // Eksi Butonu
                               IconButton(
                                 onPressed: () => sepet.adetAzalt(urun.id),
-                                icon: const Icon(Icons.remove_rounded, size: 26),
+                                icon: const Icon(Icons.remove_rounded, size: 24),
                                 style: IconButton.styleFrom(
                                   backgroundColor: const Color(0xFF2E2E2E),
                                   foregroundColor: Colors.white,
-                                  minimumSize: const Size(44, 44),
+                                  minimumSize: const Size(40, 40),
                                   padding: EdgeInsets.zero,
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
                                 child: Text(
                                   '${urun.adet}',
                                   style: const TextStyle(
@@ -235,11 +241,11 @@ class KolayModSepetView extends StatelessWidget {
                               // Artı Butonu
                               IconButton(
                                 onPressed: () => sepet.adetArtir(urun.id),
-                                icon: const Icon(Icons.add_rounded, size: 26),
+                                icon: const Icon(Icons.add_rounded, size: 24),
                                 style: IconButton.styleFrom(
                                   backgroundColor: UygulamaRenkleri.kolayModSari,
                                   foregroundColor: Colors.black,
-                                  minimumSize: const Size(44, 44),
+                                  minimumSize: const Size(40, 40),
                                   padding: EdgeInsets.zero,
                                 ),
                               ),
