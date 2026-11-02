@@ -38,13 +38,13 @@ class FiyatOnayYoneticisi extends ChangeNotifier {
   List<double> get adayFiyatlar => _sonuc?.adayFiyatlar ?? [];
 
   /// Görseli ML Kit OCR ile tarar ve alanları otomatik doldurur
-  Future<void> resimdenTani(String path) async {
+  Future<void> resimdenTani(String path, {bool merkezOdakli = true}) async {
     _yukleniyor = true;
     _resimYolu = path;
     notifyListeners();
 
     try {
-      final res = await _ocrServisi.resmiTara(path);
+      final res = await _ocrServisi.resmiTara(path, merkezOdakli: merkezOdakli);
       _sonuc = res;
 
       if (res.basarili && res.tespitEdilenFiyat != null) {
