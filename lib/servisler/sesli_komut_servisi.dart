@@ -1,3 +1,5 @@
+import '../sabitler/sesli_komut_lugati.dart';
+
 /// Sesli asistan tarafından çözülen niyet (komut) türleri
 enum KomutTuru {
   sepeteEkle,
@@ -30,24 +32,6 @@ class SesliKomutSonucu {
 
 /// Kullanıcının Türkçe serbest konuşma cümlelerini kurallı komutlara ve niyetlere (NLU) dönüştüren zeki servis
 class SesliKomutServisi {
-  static const Map<String, int> _turkceSayilar = {
-    'bir': 1,
-    'iki': 2,
-    'çift': 2,
-    'üç': 3,
-    'uc': 3,
-    'dört': 4,
-    'dort': 4,
-    'beş': 5,
-    'bes': 5,
-    'altı': 6,
-    'alti': 6,
-    'yedi': 7,
-    'sekiz': 8,
-    'dokuz': 9,
-    'on': 10,
-  };
-
   /// Gelen serbest Türkçe konuşma metnini analiz eder ve asıl niyeti (Intent) çözer
   SesliKomutSonucu niyetCoz(String hamMetin) {
     final kucukMetin = _turkceKucult(hamMetin).trim();
@@ -58,93 +42,24 @@ class SesliKomutServisi {
       );
     }
 
-    // 1. İptal / Vazgeç Komutları (Genişletilmiş)
-    if (_iciriyorMu(kucukMetin, [
-      'iptal',
-      'vazgeç',
-      'vazgec',
-      'sil',
-      'bırak',
-      'birak',
-      'kapat',
-      'alma',
-      'istemiyorum',
-      'bunu alma',
-      'çıkart',
-      'cikart',
-      'vazgectim',
-      'vazgeçtim',
-      'hayır',
-      'hayir',
-      'yok',
-      'bosver',
-      'boşver',
-      'kalsın',
-      'kalsin',
-    ])) {
+    // 1. İptal / Vazgeç Komutları (SesliKomutLugati.iptalKelimeleri)
+    if (_iciriyorMu(kucukMetin, SesliKomutLugati.iptalKelimeleri)) {
       return SesliKomutSonucu(
         tur: KomutTuru.iptal,
         hamMetin: hamMetin,
       );
     }
 
-    // 2. Bütçe ve Harcama Sorguları (Genişletilmiş)
-    if (_iciriyorMu(kucukMetin, [
-      'bütçem',
-      'butcem',
-      'kalan bütçe',
-      'param kaldı mı',
-      'param kaldi mi',
-      'ne kadar param kaldı',
-      'ne kadar harcadım',
-      'ne kadar harcadim',
-      'harcamam',
-      'harcama durumu',
-      'bütçeyi aştım mı',
-      'butceyi astim mi',
-      'para bitti mi',
-      'cebimde ne kaldı',
-      'limiti aştık mı',
-      'bütçe ne kadar',
-      'para yetiyor mu',
-      'kaç param var',
-      'kac param var',
-      'kalan para',
-    ])) {
+    // 2. Bütçe ve Harcama Sorguları (SesliKomutLugati.butceSorgulari)
+    if (_iciriyorMu(kucukMetin, SesliKomutLugati.butceSorgulari)) {
       return SesliKomutSonucu(
         tur: KomutTuru.butceSorgula,
         hamMetin: hamMetin,
       );
     }
 
-    // 3. Sepet Özeti ve Hesap Sorguları (Genişletilmiş)
-    if (_iciriyorMu(kucukMetin, [
-      'sepette ne var',
-      'sepette neler var',
-      'sepeti oku',
-      'sepeti söyle',
-      'sepeti soyle',
-      'toplam ne kadar',
-      'toplam tutar',
-      'toplam ne tuttu',
-      'ne kadar tuttu',
-      'hesap ne kadar',
-      'kaça patladı',
-      'kaca patladi',
-      'kaç ürün var',
-      'kac urun var',
-      'sepet durumu',
-      'neler aldım',
-      'neler aldim',
-      'aldıklarım',
-      'aldiklarim',
-      'sepeti göster',
-      'sepeti goster',
-      'listeyi oku',
-      'sepet özeti',
-      'kaç para tuttu',
-      'kac para tuttu',
-    ])) {
+    // 3. Sepet Özeti ve Hesap Sorguları (SesliKomutLugati.sepetOzetiSorgulari)
+    if (_iciriyorMu(kucukMetin, SesliKomutLugati.sepetOzetiSorgulari)) {
       return SesliKomutSonucu(
         tur: KomutTuru.sepetOzeti,
         hamMetin: hamMetin,
@@ -163,38 +78,8 @@ class SesliKomutServisi {
       return adetSonucu;
     }
 
-    // 6. Sepete Ekleme / Onaylama (Genişletilmiş Halk Ağzı)
-    if (_iciriyorMu(kucukMetin, [
-      'sepete ekle',
-      'sepete at',
-      'sepete koy',
-      'sepete atıver',
-      'sepete ativer',
-      'onayla',
-      'onaylıyorum',
-      'onayliyorum',
-      'ekle',
-      'tamam',
-      'aldım',
-      'aldim',
-      'kabul et',
-      'satın al',
-      'satin al',
-      'bunu al',
-      'bunu alalım',
-      'bunu alalim',
-      'bunu ekle',
-      'bunu yaz',
-      'alıyorum',
-      'aliyorum',
-      'koy bunu',
-      'ekle gitsin',
-      'olur',
-      'tamamdır',
-      'tamamdir',
-      'ekle bakalım',
-      'yaz sepete',
-    ])) {
+    // 6. Sepete Ekleme / Onaylama (SesliKomutLugati.sepeteEkleKelimeleri)
+    if (_iciriyorMu(kucukMetin, SesliKomutLugati.sepeteEkleKelimeleri)) {
       return SesliKomutSonucu(
         tur: KomutTuru.sepeteEkle,
         hamMetin: hamMetin,
@@ -260,7 +145,7 @@ class SesliKomutServisi {
     }
 
     // 2. Yazı ile sayı: "iki adet", "üç tane", "bir adet", "çift al"
-    for (final entry in _turkceSayilar.entries) {
+    for (final entry in SesliKomutLugati.sayiKarsiliklari.entries) {
       if (kucukMetin.contains('${entry.key} adet') ||
           kucukMetin.contains('${entry.key} tane') ||
           kucukMetin.contains('${entry.key} paket') ||
@@ -277,7 +162,7 @@ class SesliKomutServisi {
     return null;
   }
 
-  bool _iciriyorMu(String metin, List<String> anahtarlar) {
+  bool _iciriyorMu(String metin, Iterable<String> anahtarlar) {
     for (final anahtar in anahtarlar) {
       if (metin.contains(anahtar)) return true;
     }
