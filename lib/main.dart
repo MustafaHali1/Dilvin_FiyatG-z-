@@ -171,45 +171,157 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     return Scaffold(
       body: sayfalar[_seciliSayfa],
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _sesliAsistaniAc(context),
-        backgroundColor: profil.profilTuru == ProfilTuru.kolayMod
-            ? UygulamaRenkleri.kolayModSari
-            : UygulamaRenkleri.anaZumrut,
-        foregroundColor: profil.profilTuru == ProfilTuru.kolayMod
-            ? Colors.black
-            : Colors.white,
-        icon: const Icon(Icons.mic_rounded, size: 28),
-        label: const Text('Sesli Asistan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      floatingActionButton: SizedBox(
+        width: 64,
+        height: 64,
+        child: FloatingActionButton(
+          onPressed: () => _sesliAsistaniAc(context),
+          elevation: 6,
+          shape: const CircleBorder(),
+          backgroundColor: profil.profilTuru == ProfilTuru.kolayMod
+              ? UygulamaRenkleri.kolayModSari
+              : UygulamaRenkleri.anaZumrut,
+          foregroundColor: profil.profilTuru == ProfilTuru.kolayMod
+              ? Colors.black
+              : Colors.white,
+          tooltip: 'Sesli Asistan',
+          child: const Icon(Icons.mic_rounded, size: 34),
+        ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _seciliSayfa,
-        onDestinationSelected: (index) => setState(() => _seciliSayfa = index),
-        destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Ana Sayfa',
-          ),
-          NavigationDestination(
-            icon: Badge(
-              label: Text('${sepet.toplamUrunAdedi}'),
-              isLabelVisible: sepet.toplamUrunAdedi > 0,
-              child: const Icon(Icons.shopping_cart_outlined),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        elevation: 8,
+        color: profil.profilTuru == ProfilTuru.kolayMod ? Colors.black : Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Sol Buton: Ana Sayfa
+            InkWell(
+              onTap: () => setState(() => _seciliSayfa = 0),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _seciliSayfa == 0 ? Icons.home_rounded : Icons.home_outlined,
+                      color: _seciliSayfa == 0
+                          ? (profil.profilTuru == ProfilTuru.kolayMod
+                              ? UygulamaRenkleri.kolayModSari
+                              : UygulamaRenkleri.anaZumrut)
+                          : (profil.profilTuru == ProfilTuru.kolayMod
+                              ? Colors.white70
+                              : Colors.grey),
+                      size: 26,
+                    ),
+                    Text(
+                      'Ana Sayfa',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _seciliSayfa == 0 ? FontWeight.bold : FontWeight.normal,
+                        color: _seciliSayfa == 0
+                            ? (profil.profilTuru == ProfilTuru.kolayMod
+                                ? UygulamaRenkleri.kolayModSari
+                                : UygulamaRenkleri.anaZumrut)
+                            : (profil.profilTuru == ProfilTuru.kolayMod
+                                ? Colors.white70
+                                : Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            selectedIcon: Badge(
-              label: Text('${sepet.toplamUrunAdedi}'),
-              isLabelVisible: sepet.toplamUrunAdedi > 0,
-              child: const Icon(Icons.shopping_cart_rounded),
+
+            // Ortadaki Sesli Asistan Butonu Boşluğu
+            const SizedBox(width: 48),
+
+            // Sağ Buton 1: Sepet
+            InkWell(
+              onTap: () => setState(() => _seciliSayfa = 1),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Badge(
+                      label: Text('${sepet.toplamUrunAdedi}'),
+                      isLabelVisible: sepet.toplamUrunAdedi > 0,
+                      child: Icon(
+                        _seciliSayfa == 1 ? Icons.shopping_cart_rounded : Icons.shopping_cart_outlined,
+                        color: _seciliSayfa == 1
+                            ? (profil.profilTuru == ProfilTuru.kolayMod
+                                ? UygulamaRenkleri.kolayModSari
+                                : UygulamaRenkleri.anaZumrut)
+                            : (profil.profilTuru == ProfilTuru.kolayMod
+                                ? Colors.white70
+                                : Colors.grey),
+                        size: 26,
+                      ),
+                    ),
+                    Text(
+                      'Sepet',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _seciliSayfa == 1 ? FontWeight.bold : FontWeight.normal,
+                        color: _seciliSayfa == 1
+                            ? (profil.profilTuru == ProfilTuru.kolayMod
+                                ? UygulamaRenkleri.kolayModSari
+                                : UygulamaRenkleri.anaZumrut)
+                            : (profil.profilTuru == ProfilTuru.kolayMod
+                                ? Colors.white70
+                                : Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            label: 'Sepet',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings_rounded),
-            label: 'Ayarlar',
-          ),
-        ],
+
+            // Sağ Buton 2: Ayarlar
+            InkWell(
+              onTap: () => setState(() => _seciliSayfa = 2),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _seciliSayfa == 2 ? Icons.settings_rounded : Icons.settings_outlined,
+                      color: _seciliSayfa == 2
+                          ? (profil.profilTuru == ProfilTuru.kolayMod
+                              ? UygulamaRenkleri.kolayModSari
+                              : UygulamaRenkleri.anaZumrut)
+                          : (profil.profilTuru == ProfilTuru.kolayMod
+                              ? Colors.white70
+                              : Colors.grey),
+                      size: 26,
+                    ),
+                    Text(
+                      'Ayarlar',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _seciliSayfa == 2 ? FontWeight.bold : FontWeight.normal,
+                        color: _seciliSayfa == 2
+                            ? (profil.profilTuru == ProfilTuru.kolayMod
+                                ? UygulamaRenkleri.kolayModSari
+                                : UygulamaRenkleri.anaZumrut)
+                            : (profil.profilTuru == ProfilTuru.kolayMod
+                                ? Colors.white70
+                                : Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
