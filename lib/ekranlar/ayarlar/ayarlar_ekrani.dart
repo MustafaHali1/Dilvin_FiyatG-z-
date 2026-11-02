@@ -136,11 +136,27 @@ class AyarlarEkrani extends StatelessWidget {
               borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
               border: Border.all(color: UygulamaRenkleri.cizgi),
             ),
-            child: ListTile(
-              leading: const Icon(Icons.delete_outline_rounded, color: UygulamaRenkleri.tehlikeKirmizi),
-              title: Text('Tüm Fişleri Sil', style: MetinStilleri.govdeKalin(renk: UygulamaRenkleri.tehlikeKirmizi)),
-              subtitle: const Text('Cihazdaki SQLite veritabanını temizler'),
-              onTap: () => _tumFisleriSilOnay(context),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.restart_alt_rounded, color: UygulamaRenkleri.anaZumrut),
+                  title: Text('Kurulum Testlerini Yeniden Yap', style: MetinStilleri.govdeKalin()),
+                  subtitle: const Text('Renk körlüğü ve okuma testini baştan başlatır'),
+                  onTap: () {
+                    profilYoneticisi.kurulumTamamlandiAyarla(false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Kurulum modu yeniden başlatıldı.')),
+                    );
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline_rounded, color: UygulamaRenkleri.tehlikeKirmizi),
+                  title: Text('Tüm Fişleri Sil', style: MetinStilleri.govdeKalin(renk: UygulamaRenkleri.tehlikeKirmizi)),
+                  subtitle: const Text('Cihazdaki SQLite veritabanını temizler'),
+                  onTap: () => _tumFisleriSilOnay(context),
+                ),
+              ],
             ),
           ),
         ],

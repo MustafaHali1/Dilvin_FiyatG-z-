@@ -54,29 +54,31 @@ class FiyatGozUygulamasi extends StatelessWidget {
 }
 
 /// Ilk acilista Onboarding ve Test akislarini yoneten ara katman
-class UygulamaGirisKontrolcusu extends StatefulWidget {
+class UygulamaGirisKontrolcusu extends StatelessWidget {
   const UygulamaGirisKontrolcusu({super.key});
 
   @override
-  State<UygulamaGirisKontrolcusu> createState() => _UygulamaGirisKontrolcusuState();
-}
-
-class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
-  bool _kurulumTamamlandi = false;
-
-  @override
   Widget build(BuildContext context) {
-    if (!_kurulumTamamlandi) {
+    final yonetici = context.watch<ProfilYoneticisi>();
+
+    if (!yonetici.yuklendi) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!yonetici.kurulumTamamlandi) {
       return OnboardingEkrani(
         onTamamlandi: () {
-          final profil = context.read<ProfilYoneticisi>().profil;
+          final profil = yonetici.profil;
           if (profil.profilTuru == ProfilTuru.kolayMod) {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => OkumaTestiEkrani(
                   onSecildi: (boyut) {
                     Navigator.of(context).pop();
-                    setState(() => _kurulumTamamlandi = true);
+                    yonetici.kurulumTamamlandiAyarla(true);
                   },
                 ),
               ),
@@ -86,9 +88,9 @@ class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
               MaterialPageRoute(
                 builder: (context) => RenkKorluguSecimEkrani(
                   onSecildi: (tur) {
-                    context.read<ProfilYoneticisi>().renkKorluguTuruAyarla(tur);
+                    yonetici.renkKorluguTuruAyarla(tur);
                     Navigator.of(context).pop();
-                    setState(() => _kurulumTamamlandi = true);
+                    yonetici.kurulumTamamlandiAyarla(true);
                   },
                   onTestBaslat: () {
                     Navigator.of(context).push(
@@ -97,7 +99,7 @@ class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
                           onTestTamamlandi: () {
                             Navigator.of(context).pop();
                             Navigator.of(context).pop();
-                            setState(() => _kurulumTamamlandi = true);
+                            yonetici.kurulumTamamlandiAyarla(true);
                           },
                         ),
                       ),
@@ -107,7 +109,7 @@ class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
               ),
             );
           } else {
-            setState(() => _kurulumTamamlandi = true);
+            yonetici.kurulumTamamlandiAyarla(true);
           }
         },
       );
