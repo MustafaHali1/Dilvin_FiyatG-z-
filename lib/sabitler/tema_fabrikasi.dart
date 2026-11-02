@@ -54,18 +54,27 @@ class TemaFabrikasi {
     );
   }
 
-  // 3. RENK KORU TEMASI (Guvenli Mavi/Turuncu Palet)
+  // 3. RENK KORU TEMASI (Dinamik Bilimsel Palet: Deuteranopia, Protanopia, Tritanopia)
   static ThemeData _renkKoruTemasi(RenkKorluguTuru tur) {
-    const primary = UygulamaRenkleri.renkKoruMavi; // #0072B2
+    final palet = RenkKorluguPaleti.getir(tur);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorSchemeSeed: primary,
+      colorScheme: ColorScheme.light(
+        primary: palet.primary,
+        secondary: palet.secondary,
+        error: palet.error,
+        surface: Colors.white,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onError: Colors.white,
+        onSurface: UygulamaRenkleri.koyuYazi,
+      ),
       scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       cardColor: Colors.white,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
-        foregroundColor: UygulamaRenkleri.koyuYazi,
+        foregroundColor: palet.primary,
         elevation: 0,
       ),
     );

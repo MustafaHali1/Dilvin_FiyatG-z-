@@ -16,6 +16,7 @@ class OzelButon extends StatelessWidget {
   final ButonTipi tip;
   final bool? kolayMod;
   final bool yukleniyor;
+  final Color? renk;
 
   const OzelButon({
     super.key,
@@ -25,6 +26,7 @@ class OzelButon extends StatelessWidget {
     this.tip = ButonTipi.dolu,
     this.kolayMod,
     this.yukleniyor = false,
+    this.renk,
   });
 
   @override
@@ -32,14 +34,15 @@ class OzelButon extends StatelessWidget {
     final profil = context.watch<ProfilYoneticisi>().profil;
     final bool isKolayMod = kolayMod ?? (profil.profilTuru == ProfilTuru.kolayMod);
     final bool isRenkKoru = profil.profilTuru == ProfilTuru.renkKoruModu;
+    final renkPaleti = isRenkKoru ? RenkKorluguPaleti.getir(profil.renkKorluguTuru) : null;
 
     final double yukseklik = isKolayMod
         ? Olculer.kolayModButonYukseklik
         : Olculer.standartButonYukseklik;
 
-    Color anaRenk = isRenkKoru ? UygulamaRenkleri.renkKoruMavi : UygulamaRenkleri.anaZumrut;
-    Color acikRenk = isRenkKoru ? const Color(0xFFE0F2FE) : UygulamaRenkleri.anaAcik;
-    Color koyuRenk = isRenkKoru ? const Color(0xFF0369A1) : UygulamaRenkleri.anaKoyu;
+    Color anaRenk = renk ?? (isRenkKoru ? renkPaleti!.primary : UygulamaRenkleri.anaZumrut);
+    Color acikRenk = isRenkKoru ? anaRenk.withValues(alpha: 0.15) : UygulamaRenkleri.anaAcik;
+    Color koyuRenk = isRenkKoru ? anaRenk : UygulamaRenkleri.anaKoyu;
 
     Color arkaPlan;
     Color yaziRengi;

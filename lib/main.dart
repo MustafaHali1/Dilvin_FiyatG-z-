@@ -86,6 +86,7 @@ class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
               MaterialPageRoute(
                 builder: (context) => RenkKorluguSecimEkrani(
                   onSecildi: (tur) {
+                    context.read<ProfilYoneticisi>().renkKorluguTuruAyarla(tur);
                     Navigator.of(context).pop();
                     setState(() => _kurulumTamamlandi = true);
                   },

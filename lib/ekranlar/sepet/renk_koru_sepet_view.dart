@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 
 /// Renk Körü Modu - Sepet Ekranı (Stitch: renk_k_r_sepetim birebir)
 class RenkKoruSepetView extends StatelessWidget {
@@ -20,19 +22,22 @@ class RenkKoruSepetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const anaMavi = UygulamaRenkleri.renkKoruMavi; // #0072B2
-    const uyariTuruncu = UygulamaRenkleri.renkKoruTuruncu; // #E69F00
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
+
+    final anaRenk = palet.primary;
+    final uyariRenk = palet.warning;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('Sepetim [Renk Güvenli]', style: MetinStilleri.baslik2(renk: anaMavi)),
+        title: Text('Sepetim [${palet.turAdi}]', style: MetinStilleri.baslik2(renk: anaRenk)),
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.volume_up_rounded, color: anaMavi),
+            icon: Icon(Icons.volume_up_rounded, color: anaRenk),
           ),
         ],
       ),
@@ -43,23 +48,23 @@ class RenkKoruSepetView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(Olculer.boslukOrta),
             decoration: BoxDecoration(
-              color: uyariTuruncu.withValues(alpha: 0.15),
+              color: uyariRenk.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-              border: Border.all(color: uyariTuruncu, width: 2),
+              border: Border.all(color: uyariRenk, width: 2),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: uyariTuruncu, size: 32),
-                SizedBox(width: Olculer.boslukOrta),
+                Icon(Icons.warning_amber_rounded, color: uyariRenk, size: 32),
+                const SizedBox(width: Olculer.boslukOrta),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'DİKKAT: BÜTÇE LİMİTİ YAKLAŞTI',
-                        style: TextStyle(fontWeight: FontWeight.w900, color: uyariTuruncu),
+                        style: TextStyle(fontWeight: FontWeight.w900, color: uyariRenk),
                       ),
-                      Text(
+                      const Text(
                         'Aylık sepet hedefinin %70\'ine ulaştın.',
                         style: TextStyle(fontSize: 13, color: Colors.black87),
                       ),
@@ -71,7 +76,7 @@ class RenkKoruSepetView extends StatelessWidget {
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
 
-          // Ürün Listesi (Kalın Mavi Çerçeveli)
+          // Ürün Listesi (Kalın Çerçeveli)
           for (final urun in sepet.urunler)
             Container(
               margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
@@ -79,7 +84,7 @@ class RenkKoruSepetView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                border: Border.all(color: anaMavi, width: 1.5),
+                border: Border.all(color: anaRenk, width: 1.5),
               ),
               child: Row(
                 children: [
@@ -97,19 +102,19 @@ class RenkKoruSepetView extends StatelessWidget {
                   ),
                   Text(
                     '${urun.toplamTutar.toStringAsFixed(2)} ₺',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: anaMavi),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: anaRenk),
                   ),
                   const SizedBox(width: 12),
                   Row(
                     children: [
                       IconButton(
                         onPressed: () => sepet.adetAzalt(urun.id),
-                        icon: const Icon(Icons.remove_circle_outline, color: anaMavi),
+                        icon: Icon(Icons.remove_circle_outline, color: anaRenk),
                       ),
                       Text('${urun.adet}', style: MetinStilleri.govdeKalin()),
                       IconButton(
                         onPressed: () => sepet.adetArtir(urun.id),
-                        icon: const Icon(Icons.add_circle, color: anaMavi),
+                        icon: Icon(Icons.add_circle, color: anaRenk),
                       ),
                     ],
                   ),
@@ -122,7 +127,7 @@ class RenkKoruSepetView extends StatelessWidget {
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(top: BorderSide(color: anaMavi.withValues(alpha: 0.3), width: 2)),
+          border: Border(top: BorderSide(color: anaRenk.withValues(alpha: 0.3), width: 2)),
         ),
         child: SafeArea(
           child: Column(
@@ -134,7 +139,7 @@ class RenkKoruSepetView extends StatelessWidget {
                   const Text('Ödenecek Tutar:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   Text(
                     '${sepet.genelToplam.toStringAsFixed(2)} ₺',
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: anaMavi),
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: anaRenk),
                   ),
                 ],
               ),
@@ -142,6 +147,7 @@ class RenkKoruSepetView extends StatelessWidget {
               OzelButon(
                 metin: 'Alışverişi Bitir ve Fiş Al',
                 ikon: Icons.check_circle_outline,
+                renk: anaRenk,
                 onPressed: sepet.urunler.isEmpty ? null : onAlisverisiBitir,
               ),
             ],

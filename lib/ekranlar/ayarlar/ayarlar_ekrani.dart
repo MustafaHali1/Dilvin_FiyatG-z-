@@ -74,6 +74,36 @@ class AyarlarEkrani extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _modSecimDiyalogu(context, profilYoneticisi),
                 ),
+                if (profil.profilTuru == ProfilTuru.renkKoruModu) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: RenkKorluguPaleti.getir(profil.renkKorluguTuru).primary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    title: Text('Renk Körlüğü Türü', style: MetinStilleri.govdeKalin()),
+                    subtitle: Text(
+                      '${RenkKorluguPaleti.getir(profil.renkKorluguTuru).turAdi} (${RenkKorluguPaleti.getir(profil.renkKorluguTuru).turAciklamasi})',
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _renkNoktasi(RenkKorluguPaleti.getir(profil.renkKorluguTuru).primary),
+                        const SizedBox(width: 4),
+                        _renkNoktasi(RenkKorluguPaleti.getir(profil.renkKorluguTuru).secondary),
+                        const SizedBox(width: 4),
+                        _renkNoktasi(RenkKorluguPaleti.getir(profil.renkKorluguTuru).warning),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
+                    onTap: () => _renkKoruTuruSecimDiyalogu(context, profilYoneticisi),
+                  ),
+                ],
                 const Divider(height: 1),
                 SwitchListTile(
                   secondary: const Icon(Icons.volume_up_outlined, color: UygulamaRenkleri.anaKoyu),
@@ -115,6 +145,142 @@ class AyarlarEkrani extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _renkNoktasi(Color renk) {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(color: renk, shape: BoxShape.circle),
+    );
+  }
+
+  void _renkKoruTuruSecimDiyalogu(BuildContext context, ProfilYoneticisi yonetici) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Olculer.yariCapBuyuk)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Renk Körlüğü Türünü Seç', style: MetinStilleri.baslik2()),
+                const SizedBox(height: 6),
+                Text(
+                  'Uygulama renkleri seçtiğin tıbbi palete göre anında güncellenir.',
+                  style: MetinStilleri.aciklama(),
+                ),
+                const SizedBox(height: Olculer.boslukOrta),
+
+                // 1. Deuteranopia
+                _renkKoruTurSatiri(
+                  context: context,
+                  yonetici: yonetici,
+                  tur: RenkKorluguTuru.deuteranopi,
+                  palet: RenkKorluguPaleti.deuteranopia,
+                ),
+                // 2. Protanopia
+                _renkKoruTurSatiri(
+                  context: context,
+                  yonetici: yonetici,
+                  tur: RenkKorluguTuru.protanopi,
+                  palet: RenkKorluguPaleti.protanopia,
+                ),
+                // 3. Tritanopia
+                _renkKoruTurSatiri(
+                  context: context,
+                  yonetici: yonetici,
+                  tur: RenkKorluguTuru.tritanopi,
+                  palet: RenkKorluguPaleti.tritanopia,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _renkKoruTurSatiri({
+    required BuildContext context,
+    required ProfilYoneticisi yonetici,
+    required RenkKorluguTuru tur,
+    required RenkKorluguPaleti palet,
+  }) {
+    final bool seciliMi = yonetici.profil.renkKorluguTuru == tur;
+
+    return ListTile(
+      leading: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: palet.primary,
+          shape: BoxShape.circle,
+        ),
+        child: seciliMi ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
+      ),
+      title: Text('${palet.turAdi} (${palet.turAciklamasi})', style: MetinStilleri.govdeKalin()),
+      subtitle: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: palet.primary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'Primary',
+              style: TextStyle(color: palet.primary, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: palet.secondary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'Secondary',
+              style: TextStyle(color: palet.secondary, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: palet.warning.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'Warning',
+              style: TextStyle(color: palet.warning, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      trailing: seciliMi
+          ? Icon(Icons.check_circle, color: palet.primary)
+          : null,
+      onTap: () {
+        yonetici.renkKorluguTuruAyarla(tur);
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: palet.primary,
+            content: Text(
+              'Palet güncellendi: ${palet.turAdi} (${palet.turAciklamasi})',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+      },
     );
   }
 

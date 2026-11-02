@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 
 /// Renk Körü Modu - Kamera Ekranı (Stitch: renk_k_r_kamera birebir)
 class RenkKoruKameraView extends StatelessWidget {
@@ -18,7 +20,9 @@ class RenkKoruKameraView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const anaMavi = UygulamaRenkleri.renkKoruMavi;
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
+    final anaRenk = palet.primary;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -44,8 +48,8 @@ class RenkKoruKameraView extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: anaMavi, borderRadius: BorderRadius.circular(Olculer.yariCapTam)),
-                    child: const Text('Renk Güvenli Kamera', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    decoration: BoxDecoration(color: anaRenk, borderRadius: BorderRadius.circular(Olculer.yariCapTam)),
+                    child: Text('Kamera [${palet.turAdi}]', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 48),
                 ],
@@ -53,13 +57,13 @@ class RenkKoruKameraView extends StatelessWidget {
             ),
           ),
 
-          // Mavi Artı İbreli Hedef Çerçevesi
+          // Artı İbreli Hedef Çerçevesi
           Center(
             child: Container(
               width: 290,
               height: 170,
               decoration: BoxDecoration(
-                border: Border.all(color: anaMavi, width: 3),
+                border: Border.all(color: anaRenk, width: 3),
                 borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
               ),
               child: const Stack(
@@ -74,7 +78,7 @@ class RenkKoruKameraView extends StatelessWidget {
             ),
           ),
 
-          // Mavi Deklanşör Butonu
+          // Deklanşör Butonu
           Align(
             alignment: Alignment.bottomCenter,
             child: SafeArea(
@@ -93,7 +97,7 @@ class RenkKoruKameraView extends StatelessWidget {
                       child: Container(
                         width: 60,
                         height: 60,
-                        decoration: const BoxDecoration(color: anaMavi, shape: BoxShape.circle),
+                        decoration: BoxDecoration(color: anaRenk, shape: BoxShape.circle),
                         child: const Icon(Icons.camera_alt, color: Colors.white, size: 30),
                       ),
                     ),

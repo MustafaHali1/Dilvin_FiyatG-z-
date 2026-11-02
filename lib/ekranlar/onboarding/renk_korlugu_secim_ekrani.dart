@@ -46,21 +46,33 @@ class _RenkKorluguSecimEkraniState extends State<RenkKorluguSecimEkrani> {
               _TurKarti(
                 baslik: 'Yeşili ayırt edemiyorum',
                 turAdi: 'Deuteranopi (En Yaygın)',
-                ornekRenkler: const [Color(0xFF0072B2), Color(0xFFE69F00)],
+                ornekRenkler: const [
+                  Color(0xFF0072B2), // Primary
+                  Color(0xFFE69F00), // Secondary
+                  Color(0xFF56B4E9), // Info
+                ],
                 seciliMi: _seciliTur == RenkKorluguTuru.deuteranopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.deuteranopi),
               ),
               _TurKarti(
                 baslik: 'Kırmızıyı ayırt edemiyorum',
                 turAdi: 'Protanopi',
-                ornekRenkler: const [Color(0xFF0072B2), Color(0xFF56B4E9)],
+                ornekRenkler: const [
+                  Color(0xFF009E73), // Primary
+                  Color(0xFF56B4E9), // Secondary
+                  Color(0xFFD55E00), // Error
+                ],
                 seciliMi: _seciliTur == RenkKorluguTuru.protanopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.protanopi),
               ),
               _TurKarti(
                 baslik: 'Mavi ve sarıyı ayırt edemiyorum',
                 turAdi: 'Tritanopi',
-                ornekRenkler: const [Color(0xFF009E73), Color(0xFFD55E00)],
+                ornekRenkler: const [
+                  Color(0xFFD55E00), // Primary
+                  Color(0xFF009E73), // Secondary
+                  Color(0xFFCC79A7), // Warning
+                ],
                 seciliMi: _seciliTur == RenkKorluguTuru.tritanopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.tritanopi),
               ),
@@ -75,6 +87,7 @@ class _RenkKorluguSecimEkraniState extends State<RenkKorluguSecimEkrani> {
               OzelButon(
                 metin: 'Bu Paletle Devam Et',
                 ikon: Icons.check_rounded,
+                renk: RenkKorluguPaleti.getir(_seciliTur).primary,
                 onPressed: () => widget.onSecildi(_seciliTur),
               ),
             ],

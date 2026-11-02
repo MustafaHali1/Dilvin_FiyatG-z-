@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../modeller/profil_modeli.dart';
 
 /// FiyatGoz Tasarim Sistemi Renk Sabitleri
 class UygulamaRenkleri {
@@ -25,8 +26,79 @@ class UygulamaRenkleri {
   static const Color kolayModSari = Color(0xFFFFD600);
   static const Color kolayModBeyaz = Color(0xFFFFFFFF);
 
-  // Renk Koru Guvenli Palet (Deuteranopia / Protanopia)
+  // Renk Koru Guvenli Palet (Deuteranopia / Protanopia / Tritanopia)
   static const Color renkKoruMavi = Color(0xFF0072B2);
   static const Color renkKoruTuruncu = Color(0xFFE69F00);
   static const Color renkKoruSari = Color(0xFFF0E442);
+}
+
+/// Bilimsel Okabe-Ito Renk Körlüğü Palet Sistemi
+/// Kullanıcının seçtiği renk körlüğü türüne göre dinamik renkler sunar.
+class RenkKorluguPaleti {
+  final Color primary;
+  final Color secondary;
+  final Color success;
+  final Color error;
+  final Color warning;
+  final Color info;
+  final String turAdi;
+  final String turAciklamasi;
+
+  const RenkKorluguPaleti({
+    required this.primary,
+    required this.secondary,
+    required this.success,
+    required this.error,
+    required this.warning,
+    required this.info,
+    required this.turAdi,
+    required this.turAciklamasi,
+  });
+
+  // 1. Deuteranopia (Yeşil Körlüğü)
+  static const deuteranopia = RenkKorluguPaleti(
+    primary: Color(0xFF0072B2),   // Kobalt Mavi
+    secondary: Color(0xFFE69F00), // Kehribar Turuncu
+    success: Color(0xFF0072B2),
+    error: Color(0xFFCC79A7),     // Kırmızımsı Mor
+    warning: Color(0xFFE69F00),
+    info: Color(0xFF56B4E9),      // Gökyüzü Mavisi
+    turAdi: 'Deuteranopi',
+    turAciklamasi: 'Yeşil Körlüğü',
+  );
+
+  // 2. Protanopia (Kırmızı Körlüğü)
+  static const protanopia = RenkKorluguPaleti(
+    primary: Color(0xFF009E73),   // Mavimsi Yeşil
+    secondary: Color(0xFF56B4E9), // Gökyüzü Mavisi
+    success: Color(0xFF009E73),
+    error: Color(0xFFD55E00),     // Parlak Turuncu / Vermillion
+    warning: Color(0xFFE69F00),
+    info: Color(0xFF0072B2),      // Kobalt Mavi
+    turAdi: 'Protanopi',
+    turAciklamasi: 'Kırmızı Körlüğü',
+  );
+
+  // 3. Tritanopia (Mavi-Sarı Körlüğü)
+  static const tritanopia = RenkKorluguPaleti(
+    primary: Color(0xFFD55E00),   // Parlak Turuncu / Vermillion
+    secondary: Color(0xFF009E73), // Mavimsi Yeşil
+    success: Color(0xFF009E73),
+    error: Color(0xFFD55E00),
+    warning: Color(0xFFCC79A7),   // Kırmızımsı Mor
+    info: Color(0xFF009E73),
+    turAdi: 'Tritanopi',
+    turAciklamasi: 'Mavi-Sarı Körlüğü',
+  );
+
+  static RenkKorluguPaleti getir(RenkKorluguTuru tur) {
+    switch (tur) {
+      case RenkKorluguTuru.deuteranopi:
+        return deuteranopia;
+      case RenkKorluguTuru.protanopi:
+        return protanopia;
+      case RenkKorluguTuru.tritanopi:
+        return tritanopia;
+    }
+  }
 }

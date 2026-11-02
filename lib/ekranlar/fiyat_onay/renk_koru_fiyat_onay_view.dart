@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 
 /// Renk Körü Modu - Fiyat Onay Ekranı (Stitch: renk_k_r_fiyat_onay birebir)
 class RenkKoruFiyatOnayView extends StatefulWidget {
@@ -39,12 +41,14 @@ class _RenkKoruFiyatOnayViewState extends State<RenkKoruFiyatOnayView> {
 
   @override
   Widget build(BuildContext context) {
-    const anaMavi = UygulamaRenkleri.renkKoruMavi;
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
+    final anaRenk = palet.primary;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('Fiyat Onayı [Renk Güvenli]', style: MetinStilleri.baslik2(renk: anaMavi)),
+        title: Text('Fiyat Onayı [${palet.turAdi}]', style: MetinStilleri.baslik2(renk: anaRenk)),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -58,28 +62,28 @@ class _RenkKoruFiyatOnayViewState extends State<RenkKoruFiyatOnayView> {
             ),
           const SizedBox(height: Olculer.boslukOrta),
 
-          // Mavi Çerçeveli Onay Kartı
+          // Çerçeveli Onay Kartı
           Container(
             padding: const EdgeInsets.all(Olculer.boslukBuyuk),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-              border: Border.all(color: anaMavi, width: 2.5),
+              border: Border.all(color: anaRenk, width: 2.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.check_circle_rounded, color: anaMavi, size: 24),
-                    SizedBox(width: 8),
-                    Text('TESPİT EDİLEN ÜRÜN VE FİYAT', style: TextStyle(color: anaMavi, fontWeight: FontWeight.w900)),
+                    Icon(Icons.check_circle_rounded, color: anaRenk, size: 24),
+                    const SizedBox(width: 8),
+                    Text('TESPİT EDİLEN ÜRÜN VE FİYAT', style: TextStyle(color: anaRenk, fontWeight: FontWeight.w900)),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(_urunAdiDenetleyici.text, style: MetinStilleri.baslik1()),
                 const SizedBox(height: 8),
-                Text('${_seciliFiyat.toStringAsFixed(2)} ₺', style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: anaMavi)),
+                Text('${_seciliFiyat.toStringAsFixed(2)} ₺', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: anaRenk)),
               ],
             ),
           ),
@@ -91,6 +95,10 @@ class _RenkKoruFiyatOnayViewState extends State<RenkKoruFiyatOnayView> {
               labelText: 'Ürün Adı',
               filled: true,
               fillColor: Colors.white,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                borderSide: BorderSide(color: anaRenk, width: 2),
+              ),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
             ),
           ),
@@ -106,6 +114,10 @@ class _RenkKoruFiyatOnayViewState extends State<RenkKoruFiyatOnayView> {
               labelText: 'Birim Fiyat (₺)',
               filled: true,
               fillColor: Colors.white,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                borderSide: BorderSide(color: anaRenk, width: 2),
+              ),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
             ),
           ),
@@ -117,6 +129,7 @@ class _RenkKoruFiyatOnayViewState extends State<RenkKoruFiyatOnayView> {
                 child: OzelButon(
                   metin: 'Tekrar Çek',
                   tip: ButonTipi.cizgili,
+                  renk: anaRenk,
                   onPressed: widget.onTekrarCek,
                 ),
               ),
@@ -124,6 +137,7 @@ class _RenkKoruFiyatOnayViewState extends State<RenkKoruFiyatOnayView> {
               Expanded(
                 child: OzelButon(
                   metin: 'Sepete Ekle',
+                  renk: anaRenk,
                   onPressed: () {
                     widget.onOnaylandi({
                       'ad': _urunAdiDenetleyici.text,
