@@ -20,7 +20,7 @@ class FiyatTanimaServisi {
   /// Verilen görsel dosyasını ML Kit ile okuyup mekânsal analizden geçirir
   Future<FiyatTanimaSonucu> resmiTara(
     String resimYolu, {
-    bool merkezOdakli = false,
+    bool merkezOdakli = true,
     String? hedefUrun,
   }) async {
     try {
@@ -63,7 +63,6 @@ class FiyatTanimaServisi {
   }
 
   /// Saf koordinat ve metin kutularını analiz eden kural ve mekan tabanlı motor
-  /// (Birim testlerde donanımsız çalıştırılabilir)
   FiyatTanimaSonucu satirlardanFiyatVeUrunCikar(
     List<MetinSatirKutusu> satirlar, {
     double? goruntuGenisligi,
@@ -82,14 +81,13 @@ class FiyatTanimaServisi {
     final maxX = goruntuGenisligi ?? satirlar.map((s) => s.kutu.right).reduce((a, b) => a > b ? a : b);
     final genislik = maxX - minX;
 
-    // 2. Kenar Alanları Filtresi (Örn: Sol %15'teki kitap veya sağ %15'teki yabancı nesneler)
+    // 2. Kenar Alanları Filtresi (Örn: Sol %15 veya sağ %15'teki yabancı nesneler)
     final gecerliSatirlar = <MetinSatirKutusu>[];
     for (final satir in satirlar) {
       if (genislik > 200 && merkezOdakli) {
-        final solKenarPayi = minX + (genislik * 0.15);
-        final sagKenarPayi = maxX - (genislik * 0.15);
+        final solKenarPayi = minX + (genislik * 0.12);
+        final sagKenarPayi = maxX - (genislik * 0.12);
         if (satir.merkezX < solKenarPayi || satir.merkezX > sagKenarPayi) {
-          // Kenarda kalan alakasız nesneleri merkez odak modunda atla
           continue;
         }
       }
@@ -98,21 +96,26 @@ class FiyatTanimaServisi {
 
     final islenecekSatirlar = gecerliSatirlar.isNotEmpty ? gecerliSatirlar : satirlar;
 
-    // 3. Etiketteki en büyük yazı yüksekliğini bul (Punto dominansı)
-    double maxYukseklik = 1.0;
+    // 3. Etiketteki en büyük YATAY yazı yüksekliğini bul (Dikey sütunlar elenir!)
+    double maxYatayYukseklik = 1.0;
     for (final s in islenecekSatirlar) {
-      if (s.yukseklik > maxYukseklik) maxYukseklik = s.yukseklik;
+      // Dikey / döndürülmüş metinleri (height > width * 1.5) font hesabı için baz alma
+      if (s.genislik >= s.yukseklik * 0.8) {
+        if (s.yukseklik > maxYatayYukseklik) {
+          maxYatayYukseklik = s.yukseklik;
+        }
+      }
     }
 
     // 4. Fiyat Adaylarını Ayıkla ve Puanla
     final adaylar = <_AkilliFiyatAdayi>[];
 
-    // Önce yatayda birbirine bitişik [Büyük Tamsayı] + [Küçük Kuruş (örn: 299 ve 00 TL)] kutularını birleştir
-    _bitisikKuruslariBirlestirVeEkle(islenecekSatirlar, maxYukseklik, adaylar);
+    // Önce yatayda birbirine bitişik [Büyük Tamsayı: 299] + [Küçük Kuruş: ,00 TL] kutularını birleştir
+    _bitisikKuruslariBirlestirVeEkle(islenecekSatirlar, maxYatayYukseklik, adaylar);
 
     // Ardından tek satırda geçen fiyatları analiz et
     for (final satir in islenecekSatirlar) {
-      _satirdanAkilliFiyatCikar(satir, maxYukseklik, adaylar);
+      _satirdanAkilliFiyatCikar(satir, islenecekSatirlar, maxYatayYukseklik, adaylar);
     }
 
     if (adaylar.isEmpty) {
@@ -163,17 +166,17 @@ class FiyatTanimaServisi {
   /// Satır içerisindeki sayıları ölçü birimleri (M, KG, vb.) ve tarihlerden arındırarak fiyat olarak puanlar
   void _satirdanAkilliFiyatCikar(
     MetinSatirKutusu satirKutusu,
-    double maxYukseklik,
+    List<MetinSatirKutusu> tumSatirlar,
+    double maxYatayYukseklik,
     List<_AkilliFiyatAdayi> adaylar,
   ) {
     final satir = satirKutusu.metin;
     final kucukSatir = satir.toLowerCase();
 
-    // 1. Tarih ve Saat Kalıplarını Tamamen Ele
+    // 1. Tarih ve Saat Kalıplarını Tamamen Ele (Örn: 01-05-2024)
     if (RegExp(r'\b\d{2}[./-]\d{2}[./-]\d{2,4}\b').hasMatch(satir)) return;
 
     // 2. Ölçü Birimlerine Yapışık Sayıları Tespit Et (KARA LİSTE)
-    // Örnek: "20 M", "20M", "1.5 KG", "500 GR", "1 LT", "2 ADET", "3 PARÇA", "%20", "20 KAT"
     final olcuRegex = RegExp(
       r'\b(\d+(?:[.,]\d+)?)\s*(?:m|mt|metre|cm|mm|kg|kilo|gr|gram|g|lt|l|litre|ml|ad|adet|pk|paket|koli|parca|parça|kat|x|%)\b',
       caseSensitive: false,
@@ -206,7 +209,7 @@ class FiyatTanimaServisi {
       final fiyat = _fiyatNormalizeEt(temizHam);
       if (fiyat == null || fiyat <= 0.0 || fiyat > 50000.0) continue;
 
-      // Barkod veya çok uzun tamsayıları ele (Örn: 00077038)
+      // Barkod veya çok uzun tamsayıları ele (Örn: 00077038, 869037130518)
       if (!temizHam.contains(',') && !temizHam.contains('.') && temizHam.length > 4) {
         continue;
       }
@@ -216,16 +219,25 @@ class FiyatTanimaServisi {
         continue;
       }
 
-      // Skor Hesaplama (Maksimum 100 üzerinden)
-      double skor = 40.0;
+      // Skor Hesaplama (Maksimum 150 üzerinden)
+      double skor = 20.0;
 
-      // A) Punto / Yazı Büyüklüğü (Satış fiyatı etiketteki en devasa yazıdır!)
-      final puntoOrani = (satirKutusu.yukseklik / maxYukseklik).clamp(0.1, 1.0);
-      skor += puntoOrani * 45.0; // En büyük yazıysa +45 puan
+      // A) Punto / Yazı Büyüklüğü (Satış fiyatı etiketteki en devasa yazıdır - MUTLAK ÜSTÜNLÜK)
+      final puntoOrani = (satirKutusu.yukseklik / maxYatayYukseklik).clamp(0.05, 1.0);
+      skor += puntoOrani * 70.0; // En büyük yazıysa doğrudan +70 puan!
 
-      // B) Para Birimi Vurgusu (₺ veya TL)
-      if (satir.contains('₺') || kucukSatir.contains('tl')) {
-        skor += 25.0;
+      if (satirKutusu.yukseklik >= 40) {
+        skor += 30.0; // 40 pikselden büyükse devasa fiyattır: +30 ekstra puan!
+      }
+
+      // B) Para Birimi Vurgusu (Satırda veya komşu kutularda ₺ veya TL var mı?)
+      bool paraBirimiVar = satir.contains('₺') || kucukSatir.contains('tl');
+      if (!paraBirimiVar) {
+        // Altında veya sağında TL kutusu var mı kontrol et
+        paraBirimiVar = _komsuKutudaParaBirimiVarMi(satirKutusu.kutu, tumSatirlar);
+      }
+      if (paraBirimiVar) {
+        skor += 35.0; // Para birimi eşleşmesine +35 puan
       }
 
       // C) Satış Fiyatı İpuçları
@@ -238,18 +250,47 @@ class FiyatTanimaServisi {
           kucukSatir.contains('tl/kg') ||
           kucukSatir.contains('tl/lt') ||
           kucukSatir.contains('birim fiyat') ||
-          kucukSatir.contains('kdv')) {
-        skor -= 35.0;
+          kucukSatir.contains('kdv') ||
+          kucukSatir.contains('f. değ') ||
+          kucukSatir.contains('fiyat değ')) {
+        skor -= 50.0;
+      }
+
+      // Küçük rastgele tamsayıları (4, 6, 7 gibi) cezalandır
+      if (!temizHam.contains(',') && !temizHam.contains('.') && fiyat < 10 && !paraBirimiVar) {
+        skor -= 30.0;
       }
 
       adaylar.add(_AkilliFiyatAdayi(fiyat: fiyat, skor: skor, kutu: satirKutusu.kutu));
     }
   }
 
+  /// Kutunun hemen altında veya sağında 'TL' veya '₺' simgesi olup olmadığını denetler
+  bool _komsuKutudaParaBirimiVarMi(Rect anaKutu, List<MetinSatirKutusu> satirlar) {
+    for (final s in satirlar) {
+      final k = s.metin.toLowerCase().trim();
+      if (k == 'tl' || k == '₺' || k.startsWith(',00 tl') || k.startsWith('00 tl')) {
+        // Yatay mesafe veya dikey mesafe yakın mı?
+        final yatayFark = (s.merkezX - (anaKutu.left + anaKutu.width / 2)).abs();
+        final dikeyFark = s.kutu.top - anaKutu.bottom;
+
+        if (dikeyFark >= -20 && dikeyFark <= anaKutu.height * 1.5 && yatayFark < anaKutu.width * 1.2) {
+          return true;
+        }
+
+        final yatayUzaklik = s.kutu.left - anaKutu.right;
+        if (yatayUzaklik >= -10 && yatayUzaklik <= anaKutu.width * 0.8) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   /// Türkiye etiketlerindeki yaygın [Büyük Tamsayı: 299] ve [Bitişik Küçük Kuruş: ,00 TL] bloklarını birleştirir
   void _bitisikKuruslariBirlestirVeEkle(
     List<MetinSatirKutusu> satirlar,
-    double maxYukseklik,
+    double maxYatayYukseklik,
     List<_AkilliFiyatAdayi> adaylar,
   ) {
     for (int i = 0; i < satirlar.length; i++) {
@@ -275,7 +316,6 @@ class FiyatTanimaServisi {
         if (kurusStr == null) continue;
 
         // Geometrik Mesafe Kontrolü:
-        // s2, s1'in sağında olmalı ve yatay boşluk makul bir seviyede olmalı
         final yatayBosluk = s2.kutu.left - s1.kutu.right;
         final dikeyFark = (s1.merkezY - s2.merkezY).abs();
 
@@ -286,7 +326,6 @@ class FiyatTanimaServisi {
           final birlestirilmisFiyatStr = '$tamKisim.$kurusStr';
           final birlesmisFiyat = double.tryParse(birlestirilmisFiyatStr);
           if (birlesmisFiyat != null) {
-            // Birleşik kutu oluştur
             final birlesikKutu = Rect.fromLTRB(
               s1.kutu.left,
               s1.kutu.top < s2.kutu.top ? s1.kutu.top : s2.kutu.top,
@@ -295,12 +334,12 @@ class FiyatTanimaServisi {
             );
 
             double skor = 50.0;
-            // Punto oranı en büyük sayıdan hesaplanır
-            final puntoOrani = (s1.yukseklik / maxYukseklik).clamp(0.1, 1.0);
-            skor += puntoOrani * 45.0; // Devasa punto
+            final puntoOrani = (s1.yukseklik / maxYatayYukseklik).clamp(0.1, 1.0);
+            skor += puntoOrani * 70.0; // Büyük puntoya devasa puan!
+            if (s1.yukseklik >= 40) skor += 30.0;
 
             if (metin2.toLowerCase().contains('tl') || metin2.contains('₺')) {
-              skor += 25.0;
+              skor += 35.0;
             }
 
             adaylar.add(_AkilliFiyatAdayi(fiyat: birlesmisFiyat, skor: skor, kutu: birlesikKutu));
@@ -316,7 +355,6 @@ class FiyatTanimaServisi {
     Rect? fiyatKutusu,
     String? hedefUrun,
   ) {
-    // 1. Eğer aranan belirli bir hedef ürün varsa (örn: "süt", "hortum"), onu içeren satıra öncelik ver
     if (hedefUrun != null && hedefUrun.trim().isNotEmpty) {
       final hedefKucuk = hedefUrun.toLowerCase().trim();
       for (final s in satirlar) {
@@ -326,6 +364,14 @@ class FiyatTanimaServisi {
       }
     }
 
+    // Yasaklı anahtar kelimeler listesi (Kesinlikle ürün adı olamaz!)
+    final yasakliKelimeler = {
+      'market', 'marketler', 'şok', 'a101', 'bim', 'migros', 'carrefour',
+      'etiket', 'fiyat', 'fiyatı', 'yanlışlığı', 'şikayet', 'şikayetvar',
+      'üretim', 'menşei', 'türkiye', 'kdv', 'dahildir', 'barkod',
+      'birim', 'tarih', 'kasiyer', 'yerli', 'gaza', 't'
+    };
+
     final temizAdaylar = <_UrunAdiAdayi>[];
 
     for (final s in satirlar) {
@@ -334,47 +380,62 @@ class FiyatTanimaServisi {
 
       final kucuk = metin.toLowerCase();
 
-      // Market adı, logolar ve fiş üst bilgilerini filtrele
-      if (kucuk.contains('şok market') ||
-          kucuk.contains('a101') ||
-          kucuk.contains('bim') ||
-          kucuk.contains('migros') ||
-          kucuk.contains('carrefour') ||
-          kucuk.contains('şikayetvar') ||
-          kucuk.contains('tarih') ||
-          kucuk.contains('kasiyer') ||
-          kucuk.contains('üretim') ||
+      // Kelimeleri parçala ve yasaklı kontrolü yap
+      final kelimeler = kucuk.split(RegExp(r'\s+'));
+
+      // Eğer satır sadece yasaklı kelimelerden oluşuyorsa (Örn: "Market" veya "Şok Marketler") doğrudan ele!
+      final faydaliKelimeler = kelimeler.where((k) => !yasakliKelimeler.contains(k)).toList();
+      if (faydaliKelimeler.isEmpty) {
+        continue;
+      }
+
+      // Üretim menşei, tarih ve KDV gibi yasal etiket detayları ürün adı olamaz!
+      if (kucuk.contains('üretim') ||
           kucuk.contains('menşei') ||
-          kucuk.contains('kdv') ||
+          kucuk.contains('türkiye') ||
+          kucuk.contains('yerli') ||
           kucuk.contains('barkod') ||
-          kucuk.contains('birim fiyat')) {
+          kucuk.contains('tarih')) {
+        continue;
+      }
+
+      // Birim fiyat satırları veya fiş detayları kesinlikle ürün adı olamaz!
+      if (kucuk.contains('birim fiyat') ||
+          kucuk.contains('tl/ad') ||
+          kucuk.contains('tl/kg') ||
+          kucuk.contains('tl/lt') ||
+          kucuk.contains('fiyat değ') ||
+          kucuk.contains('f. değ') ||
+          kucuk.contains('kdv')) {
+        continue;
+      }
+
+      // "Şok Marketler Şok Market..." gibi başlıkları ele
+      if (kucuk.contains('şikayet') || kucuk.contains('yanlışlığı') || kucuk.contains('etiket fiyat')) {
         continue;
       }
 
       // Sadece sayılardan veya sembollerden oluşanları ele
       if (!RegExp(r'[a-zA-ZçÇğĞıİöÖşŞüÜ]').hasMatch(metin)) continue;
 
-      // Çok kısa harf kodlarını (örn: tek başına "T") ele
-      if (metin.length <= 2) continue;
-
       // Geometrik Konum Puanlaması (Fiyat Kutusunun Hemen Üstünde mi?)
-      double konumSkoru = 50.0;
+      double konumSkoru = 50.0 + (s.yukseklik * 2.5); // Başlık fontu her zaman büyüktür!
 
       if (fiyatKutusu != null) {
         final dikeyMesafe = fiyatKutusu.top - s.kutu.bottom;
 
-        if (dikeyMesafe >= -20 && dikeyMesafe <= 300) {
+        if (dikeyMesafe >= -20 && dikeyMesafe <= 350) {
           // Fiyatın yukarısında ve yakınında: Çok yüksek puan
-          konumSkoru += (300 - dikeyMesafe) / 5.0; // +10 ile +60 puan
+          konumSkoru += (350 - dikeyMesafe) / 4.0;
 
-          // Yatayda hizalı mı?
-          final yatayOrtusme = (s.merkezX - (fiyatKutusu.left + fiyatKutusu.width / 2)).abs();
-          if (yatayOrtusme < 300) {
-            konumSkoru += 30.0;
+          // Yatayda fiyatla aynı sütunda mı?
+          final yatayFark = (s.merkezX - (fiyatKutusu.left + fiyatKutusu.width / 2)).abs();
+          if (yatayFark < 250) {
+            konumSkoru += 40.0;
           }
         } else if (s.kutu.top > fiyatKutusu.bottom) {
-          // Fiyatın altındaki satırlar genellikle barkod veya kural metinleridir
-          konumSkoru -= 30.0;
+          // Fiyatın altındaki satırlar
+          konumSkoru -= 40.0;
         }
       }
 
@@ -383,7 +444,6 @@ class FiyatTanimaServisi {
 
     if (temizAdaylar.isEmpty) return null;
 
-    // En yüksek konumsal puana sahip olan satırı seç
     temizAdaylar.sort((a, b) => b.skor.compareTo(a.skor));
     return temizAdaylar.first.metin;
   }

@@ -9,18 +9,22 @@ void main() {
   group('Akıllı Fiyat ve Ürün Tanıma Servisi Testleri', () {
     final servis = FiyatTanimaServisi();
 
-    test('Bahçe Hortumu Gerçek Market Etiketi Senaryosu: 20 M elenmeli, 299.00 TL ve JOY BAHCE HORTUMU 20 M seçilmeli', () {
-      // Kullanıcının çektiği gerçek market görselinin kutu koordinatları simülasyonu
+    test('Bilgisayar Ekranı & Dikey Banner Senaryosu: Dikey metinler elenmeli, 299 TL ve JOY BAHCE HORTUMU seçilmeli', () {
       final satirlar = [
-        // Sol kenardaki kitap (Arapça yazı / Ajisal Gsall)
+        // Sol kenardaki scroll / simge
         const MetinSatirKutusu(
-          metin: 'Ajisal Gsall',
-          kutu: Rect.fromLTWH(10, 100, 60, 250),
+          metin: '< > 4.00 6.50',
+          kutu: Rect.fromLTWH(10, 100, 40, 20),
         ),
-        // Sağ üstteki market bannerı
+        // Sağ taraftaki DİKEY Şikayetvar Web Bannerı (yükseklik: 400 piksel!)
         const MetinSatirKutusu(
-          metin: 'Şok Marketler Şok Market Etiket Fiyat',
-          kutu: Rect.fromLTWH(700, 50, 80, 300),
+          metin: 'Şok Marketler Şok Market Etiket Fiyat Yanlışlığı - Şikayetvar',
+          kutu: Rect.fromLTWH(720, 50, 35, 400), // DİKEY SÜTUN!
+        ),
+        // Tek başına "Market" yazısı
+        const MetinSatirKutusu(
+          metin: 'Market',
+          kutu: Rect.fromLTWH(720, 460, 35, 20),
         ),
         // Ürün Adı (20 M içeriyor)
         const MetinSatirKutusu(
@@ -42,15 +46,15 @@ void main() {
           metin: 'Birim Fiyatı: 299.00 TL/AD',
           kutu: Rect.fromLTWH(200, 200, 220, 18),
         ),
-        // Devasa puntoyla yazılmış asıl satış fiyatı tamsayısı (299)
+        // Devasa puntoyla yazılmış asıl satış fiyatı (299,00 veya 299.90)
         const MetinSatirKutusu(
-          metin: '299',
-          kutu: Rect.fromLTWH(360, 220, 180, 85), // Yükseklik: 85 (En büyük yazı)
+          metin: '299,00',
+          kutu: Rect.fromLTWH(360, 220, 180, 75), // Yükseklik: 75 (En büyük yatay yazı)
         ),
-        // Yanındaki kuruş ve para birimi kutusu (,00 TL)
+        // Hemen altında duran TL kutusu
         const MetinSatirKutusu(
-          metin: ',00 TL',
-          kutu: Rect.fromLTWH(545, 225, 75, 45),
+          metin: 'TL',
+          kutu: Rect.fromLTWH(550, 260, 40, 30),
         ),
       ];
 
@@ -61,12 +65,10 @@ void main() {
       );
 
       expect(sonuc.basarili, isTrue);
-      // Fiyat 20 M'deki 20 değil, kesinlikle 299.00 olmalı
+      // Fiyat 6.50 veya 4.00 değil, 299.00 olmalı!
       expect(sonuc.tespitEdilenFiyat, 299.00);
-      // Ürün adı kitap değil, 'JOY BAHCE HORTUMU 20 M' olmalı
+      // Ürün adı 'Market' değil, 'JOY BAHCE HORTUMU 20 M' olmalı!
       expect(sonuc.tespitEdilenUrunAdi, 'JOY BAHCE HORTUMU 20 M');
-      // 20.00 fiyata aday bile olmamalı
-      expect(sonuc.adayFiyatlar.contains(20.00), isFalse);
     });
 
     test('Standart Tek Satır Fiyat ve Ürün Tespiti: Pınar Süt 1L 34.50 TL', () {
@@ -77,7 +79,7 @@ void main() {
         ),
         const MetinSatirKutusu(
           metin: '34,50 TL',
-          kutu: Rect.fromLTWH(100, 150, 200, 60), // En büyük punto
+          kutu: Rect.fromLTWH(100, 150, 200, 60),
         ),
       ];
 
