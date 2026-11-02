@@ -167,6 +167,15 @@ class FiyatTanimaServisi {
       );
     }
 
+    // KURAL: Eğer aynı tamsayıya ait ondalıklı (kuruşlu) bir fiyat varsa (örn: 49.90),
+    // kuruşsuz düz tamsayıyı (49.00) doğrudan ele!
+    final ondalikliTamsayilar = <int>{};
+    for (final a in adaylar) {
+      if ((a.fiyat - a.fiyat.truncate()).abs() > 0.01) {
+        ondalikliTamsayilar.add(a.fiyat.truncate());
+      }
+    }
+
     // Adayları sezgisel skorlarına göre büyükten küçüğe sırala
     adaylar.sort((a, b) => b.skor.compareTo(a.skor));
 
@@ -177,6 +186,13 @@ class FiyatTanimaServisi {
 
     for (final aday in adaylar) {
       final yuvarlanmis = double.parse(aday.fiyat.toStringAsFixed(2));
+      final tamKisim = aday.fiyat.truncate();
+
+      // Kuruşlu versiyonu varken (örn: 49.90) düz tamsayıyı (49.00) fiyata alma!
+      if ((aday.fiyat - tamKisim).abs() < 0.01 && ondalikliTamsayilar.contains(tamKisim)) {
+        continue;
+      }
+
       if (!tekilFiyatlar.contains(yuvarlanmis)) {
         tekilFiyatlar.add(yuvarlanmis);
         siraliFiyatlar.add(yuvarlanmis);
@@ -209,6 +225,11 @@ class FiyatTanimaServisi {
     final satir = satirKutusu.metin;
     final kucukSatir = satir.toLowerCase();
 
+    // 0. Doğrudan virgül/nokta ile başlayan 2 haneli kuruşları tek başına fiyat yapma (Örn: ",90", ",00 TL")
+    if (RegExp(r'^\s*[,.]\d{2}\s*(?:₺|TL)?$', caseSensitive: false).hasMatch(satir.trim())) {
+      return;
+    }
+
     // 1. Tarih ve Saat Kalıplarını Tamamen Ele (Örn: 01-05-2024)
     if (RegExp(r'\b\d{2}[./-]\d{2}[./-]\d{2,4}\b').hasMatch(satir)) return;
 
@@ -229,6 +250,21 @@ class FiyatTanimaServisi {
       final sayiGrubu = m.group(1);
       if (sayiGrubu != null) {
         elenecekSayilar.add(sayiGrubu.trim());
+      }
+    }
+
+    // 4. Parantez İçi Sayıları ve Kalibreleri Ele (Örn: "(321-380)")
+    final parantezRegex = RegExp(r'\(\s*(\d+)\s*[-/]?\s*(\d+)?\s*\)');
+    for (final m in parantezRegex.allMatches(satir)) {
+      if (m.group(1) != null) elenecekSayilar.add(m.group(1)!);
+      if (m.group(2) != null) elenecekSayilar.add(m.group(2)!);
+    }
+
+    // 5. Ürün adı satırında TL içermeyen standart gramajları ele (Örn: 500, 1000, 250)
+    if (!satir.contains('₺') && !kucukSatir.contains('tl')) {
+      final gramajRegex = RegExp(r'\b(100|200|250|300|330|350|400|500|600|700|750|800|900|1000)\b');
+      for (final m in gramajRegex.allMatches(satir)) {
+        elenecekSayilar.add(m.group(1)!);
       }
     }
 
@@ -555,13 +591,32 @@ class FiyatTanimaServisi {
         }
       }
 
-      temizAdaylar.add(_UrunAdiAdayi(metin: metin, skor: konumSkoru));
+      temizAdaylar.add(_UrunAdiAdayi(metin: metin, skor: konumSkoru, kutu: s.kutu));
     }
 
     if (temizAdaylar.isEmpty) return null;
 
     temizAdaylar.sort((a, b) => b.skor.compareTo(a.skor));
-    return temizAdaylar.first.metin;
+    final enIyi = temizAdaylar.first;
+
+    // Çok satırlı ürün adı birleştirici (Örn: "LIO SALAMURA SIYAH" + "ZEYTIN 500")
+    for (int i = 1; i < temizAdaylar.length; i++) {
+      final diger = temizAdaylar[i];
+      final dikeyMesafe = (diger.kutu.top - enIyi.kutu.bottom).abs();
+      final dikeyMesafeTers = (enIyi.kutu.top - diger.kutu.bottom).abs();
+      final enKisaDikey = dikeyMesafe < dikeyMesafeTers ? dikeyMesafe : dikeyMesafeTers;
+
+      final yatayHiza = (diger.kutu.left - enIyi.kutu.left).abs();
+      if (enKisaDikey <= 45 && yatayHiza < 180) {
+        if (enIyi.kutu.top < diger.kutu.top) {
+          return '${enIyi.metin} ${diger.metin}'.trim();
+        } else {
+          return '${diger.metin} ${enIyi.metin}'.trim();
+        }
+      }
+    }
+
+    return enIyi.metin;
   }
 
   /// "299,00" -> 299.00, "1.249,50" -> 1249.50, "299" -> 299.0
@@ -600,5 +655,10 @@ class _AkilliFiyatAdayi {
 class _UrunAdiAdayi {
   final String metin;
   final double skor;
-  const _UrunAdiAdayi({required this.metin, required this.skor});
+  final Rect kutu;
+  const _UrunAdiAdayi({
+    required this.metin,
+    required this.skor,
+    required this.kutu,
+  });
 }

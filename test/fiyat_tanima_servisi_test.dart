@@ -157,6 +157,54 @@ void main() {
       expect(sonuc.adayFiyatlar.contains(37.0), isFalse);
     });
 
+    test('Lio Zeytin Senaryosu: 49.00 yerine 49.90 TL seçilmeli, çok satırlı ürün adı birleşmeli, 500 ve (321-380) elenmeli', () {
+      final satirlar = [
+        const MetinSatirKutusu(
+          metin: 'LIO SALAMURA SIYAH',
+          kutu: Rect.fromLTWH(100, 100, 300, 28),
+        ),
+        const MetinSatirKutusu(
+          metin: 'ZEYTIN (321-380) 500',
+          kutu: Rect.fromLTWH(100, 130, 280, 26),
+        ),
+        const MetinSatirKutusu(
+          metin: 'Birim Fiyatı: 99.80 TL/KG',
+          kutu: Rect.fromLTWH(100, 170, 220, 18),
+        ),
+        // Büyük fiyat (49) ve kuruş (,90)
+        const MetinSatirKutusu(
+          metin: '49',
+          kutu: Rect.fromLTWH(200, 200, 140, 75),
+        ),
+        const MetinSatirKutusu(
+          metin: ',90',
+          kutu: Rect.fromLTWH(345, 205, 60, 40),
+        ),
+        const MetinSatirKutusu(
+          metin: 'TL',
+          kutu: Rect.fromLTWH(350, 245, 40, 30),
+        ),
+        // Barkod
+        const MetinSatirKutusu(
+          metin: '8 690504 230427',
+          kutu: Rect.fromLTWH(100, 290, 200, 20),
+        ),
+      ];
+
+      final sonuc = servis.satirlardanFiyatVeUrunCikar(satirlar);
+
+      expect(sonuc.basarili, isTrue);
+      // Fiyat 49.00 değil, tam olarak 49.90 TL olmalı!
+      expect(sonuc.tespitEdilenFiyat, 49.90);
+      // Ürün adı hem birinci hem ikinci satırı içermeli
+      expect(sonuc.tespitEdilenUrunAdi?.contains('LIO SALAMURA SIYAH'), isTrue);
+      expect(sonuc.tespitEdilenUrunAdi?.contains('ZEYTIN'), isTrue);
+      // Gramaj 500 ve kalibre (321-380) fiyata aday olmamalı
+      expect(sonuc.adayFiyatlar.contains(500.0), isFalse);
+      expect(sonuc.adayFiyatlar.contains(321.0), isFalse);
+      expect(sonuc.adayFiyatlar.contains(380.0), isFalse);
+    });
+
     test('Standart Tek Satır Fiyat ve Ürün Tespiti: Pınar Süt 1L 34.50 TL', () {
       final satirlar = [
         const MetinSatirKutusu(
