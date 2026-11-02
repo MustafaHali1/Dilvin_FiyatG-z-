@@ -52,9 +52,10 @@ class FiyatTanimaServisi {
         }
       }
 
+      final oncedenKirpilmis = resimYolu.contains('_kirpilmis');
       return satirlardanFiyatVeUrunCikar(
         satirlar,
-        merkezOdakli: merkezOdakli,
+        merkezOdakli: oncedenKirpilmis ? false : merkezOdakli,
         hedefUrun: hedefUrun,
       );
     } catch (e) {

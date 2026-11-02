@@ -24,7 +24,7 @@ class KameraHedefMaskesi extends StatelessWidget {
         // Dışarıyı karartan delikli maske (Cutout overlay)
         ColorFiltered(
           colorFilter: ColorFilter.mode(
-            Colors.black.withValues(alpha: 0.65),
+            Colors.black.withValues(alpha: 0.85),
             BlendMode.srcOut,
           ),
           child: Stack(

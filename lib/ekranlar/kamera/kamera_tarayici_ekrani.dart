@@ -10,6 +10,7 @@ import 'kamera_izni_gerekli_ekrani.dart';
 import 'kolay_mod_kamera_view.dart';
 import 'renk_koru_kamera_view.dart';
 import 'gorme_engelli_radar_kamera_view.dart';
+import '../../servisler/resim_kirpma_servisi.dart';
 import '../../bilesenler/kamera_hedef_maskesi.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
@@ -74,7 +75,9 @@ class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
     if (_kameraDenetleyici == null || !_kameraDenetleyici!.value.isInitialized) return;
     try {
       final XFile dosya = await _kameraDenetleyici!.takePicture();
-      widget.onFotoCekildi(dosya.path);
+      // Çekilen fotoğrafı fiziksel olarak sadece hedef kutusuna kırpıyoruz!
+      final kirpilmisYol = await ResimKirpmaServisi.hedefKutusunuKirp(dosya.path);
+      widget.onFotoCekildi(kirpilmisYol);
     } catch (e) {
       debugPrint('Foto çekme hatası: $e');
     }
