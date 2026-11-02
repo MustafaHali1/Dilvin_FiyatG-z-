@@ -18,6 +18,7 @@ import 'ekranlar/kamera/kamera_tarayici_ekrani.dart';
 import 'ekranlar/fiyat_onay/fiyat_onay_ekrani.dart';
 import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
 import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
+import 'ekranlar/fisler/tum_fisler_ekrani.dart';
 import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
 import 'ekranlar/sepet/gorme_engelli_sepet_view.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
@@ -158,9 +159,18 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
     final sayfalar = [
       AnaSayfaEkrani(
         onKameraAc: () => _kameraSayfasiniAc(context),
-        onSepeteGit: () => setState(() => _seciliSayfa = 1),
+        onSepeteGit: () => setState(() => _seciliSayfa = 2),
         onSesliAsistanAc: () => _sesliAsistaniAc(context),
-        onAyarlaraGit: () => setState(() => _seciliSayfa = 2),
+        onAyarlaraGit: () => setState(() => _seciliSayfa = 3),
+      ),
+      TumFislerEkrani(
+        onFisSecildi: (fis) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => FisDetayEkrani(fis: fis),
+            ),
+          );
+        },
       ),
       SepetEkrani(
         onUrunEkle: () => _kameraSayfasiniAc(context),
@@ -169,158 +179,162 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
       const AyarlarEkrani(),
     ];
 
+    final isKolayMod = profil.profilTuru == ProfilTuru.kolayMod;
+
     return Scaffold(
-      body: sayfalar[_seciliSayfa],
-      floatingActionButton: SizedBox(
-        width: 64,
-        height: 64,
-        child: FloatingActionButton(
-          onPressed: () => _sesliAsistaniAc(context),
-          elevation: 6,
-          shape: const CircleBorder(),
-          backgroundColor: profil.profilTuru == ProfilTuru.kolayMod
-              ? UygulamaRenkleri.kolayModSari
-              : UygulamaRenkleri.anaZumrut,
-          foregroundColor: profil.profilTuru == ProfilTuru.kolayMod
-              ? Colors.black
-              : Colors.white,
-          tooltip: 'Sesli Asistan',
-          child: const Icon(Icons.mic_rounded, size: 34),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        elevation: 8,
-        color: profil.profilTuru == ProfilTuru.kolayMod ? Colors.black : Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Sol Buton: Ana Sayfa
-            InkWell(
-              onTap: () => setState(() => _seciliSayfa = 0),
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _seciliSayfa == 0 ? Icons.home_rounded : Icons.home_outlined,
-                      color: _seciliSayfa == 0
-                          ? (profil.profilTuru == ProfilTuru.kolayMod
-                              ? UygulamaRenkleri.kolayModSari
-                              : UygulamaRenkleri.anaZumrut)
-                          : (profil.profilTuru == ProfilTuru.kolayMod
-                              ? Colors.white70
-                              : Colors.grey),
-                      size: 26,
-                    ),
-                    Text(
-                      'Ana Sayfa',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: _seciliSayfa == 0 ? FontWeight.bold : FontWeight.normal,
-                        color: _seciliSayfa == 0
-                            ? (profil.profilTuru == ProfilTuru.kolayMod
-                                ? UygulamaRenkleri.kolayModSari
-                                : UygulamaRenkleri.anaZumrut)
-                            : (profil.profilTuru == ProfilTuru.kolayMod
-                                ? Colors.white70
-                                : Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Ortadaki Sesli Asistan Butonu Boşluğu
-            const SizedBox(width: 48),
-
-            // Sağ Buton 1: Sepet
-            InkWell(
-              onTap: () => setState(() => _seciliSayfa = 1),
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Badge(
-                      label: Text('${sepet.toplamUrunAdedi}'),
-                      isLabelVisible: sepet.toplamUrunAdedi > 0,
-                      child: Icon(
-                        _seciliSayfa == 1 ? Icons.shopping_cart_rounded : Icons.shopping_cart_outlined,
-                        color: _seciliSayfa == 1
-                            ? (profil.profilTuru == ProfilTuru.kolayMod
-                                ? UygulamaRenkleri.kolayModSari
-                                : UygulamaRenkleri.anaZumrut)
-                            : (profil.profilTuru == ProfilTuru.kolayMod
-                                ? Colors.white70
-                                : Colors.grey),
-                        size: 26,
-                      ),
-                    ),
-                    Text(
-                      'Sepet',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: _seciliSayfa == 1 ? FontWeight.bold : FontWeight.normal,
-                        color: _seciliSayfa == 1
-                            ? (profil.profilTuru == ProfilTuru.kolayMod
-                                ? UygulamaRenkleri.kolayModSari
-                                : UygulamaRenkleri.anaZumrut)
-                            : (profil.profilTuru == ProfilTuru.kolayMod
-                                ? Colors.white70
-                                : Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Sağ Buton 2: Ayarlar
-            InkWell(
-              onTap: () => setState(() => _seciliSayfa = 2),
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _seciliSayfa == 2 ? Icons.settings_rounded : Icons.settings_outlined,
-                      color: _seciliSayfa == 2
-                          ? (profil.profilTuru == ProfilTuru.kolayMod
-                              ? UygulamaRenkleri.kolayModSari
-                              : UygulamaRenkleri.anaZumrut)
-                          : (profil.profilTuru == ProfilTuru.kolayMod
-                              ? Colors.white70
-                              : Colors.grey),
-                      size: 26,
-                    ),
-                    Text(
-                      'Ayarlar',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: _seciliSayfa == 2 ? FontWeight.bold : FontWeight.normal,
-                        color: _seciliSayfa == 2
-                            ? (profil.profilTuru == ProfilTuru.kolayMod
-                                ? UygulamaRenkleri.kolayModSari
-                                : UygulamaRenkleri.anaZumrut)
-                            : (profil.profilTuru == ProfilTuru.kolayMod
-                                ? Colors.white70
-                                : Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      body: sayfalar[_seciliSayfa.clamp(0, sayfalar.length - 1)],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isKolayMod ? Colors.black : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isKolayMod ? 0.3 : 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, -4),
             ),
           ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // 1. Ana Sayfa
+                _buildAltNavButonu(
+                  index: 0,
+                  ikonSecili: Icons.home_rounded,
+                  ikonNormal: Icons.home_outlined,
+                  etiket: 'Ana Sayfa',
+                  profil: profil,
+                ),
+
+                // 2. Fişlerim (Yuvarlak 2 ve Genel Navigasyon)
+                _buildAltNavButonu(
+                  index: 1,
+                  ikonSecili: Icons.receipt_long_rounded,
+                  ikonNormal: Icons.receipt_long_outlined,
+                  etiket: 'Fişlerim',
+                  profil: profil,
+                ),
+
+                // 3. Ortada Göz Alıcı Sesli Asistan Mikrofon Butonu (Yuvarlak 6 Çözümü)
+                GestureDetector(
+                  onTap: () => _sesliAsistaniAc(context),
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: isKolayMod
+                            ? [UygulamaRenkleri.kolayModSari, UygulamaRenkleri.kolayModSari]
+                            : [const Color(0xFF10B981), const Color(0xFF047857)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isKolayMod
+                                  ? UygulamaRenkleri.kolayModSari
+                                  : UygulamaRenkleri.anaZumrut)
+                              .withValues(alpha: 0.38),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.mic_rounded,
+                        color: isKolayMod ? Colors.black : Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 4. Sepet (Canlı Ürün Rozetiyle)
+                _buildAltNavButonu(
+                  index: 2,
+                  ikonSecili: Icons.shopping_cart_rounded,
+                  ikonNormal: Icons.shopping_cart_outlined,
+                  etiket: 'Sepet',
+                  rozetSayisi: sepet.toplamUrunAdedi,
+                  profil: profil,
+                ),
+
+                // 5. Ayarlar
+                _buildAltNavButonu(
+                  index: 3,
+                  ikonSecili: Icons.settings_rounded,
+                  ikonNormal: Icons.settings_outlined,
+                  etiket: 'Ayarlar',
+                  profil: profil,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAltNavButonu({
+    required int index,
+    required IconData ikonSecili,
+    required IconData ikonNormal,
+    required String etiket,
+    int? rozetSayisi,
+    required ProfilModeli profil,
+  }) {
+    final secili = _seciliSayfa == index;
+    final aktifRenk = profil.profilTuru == ProfilTuru.kolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : UygulamaRenkleri.anaZumrut;
+    final pasifRenk = profil.profilTuru == ProfilTuru.kolayMod
+        ? Colors.white60
+        : const Color(0xFF94A3B8);
+
+    Widget ikon = Icon(
+      secili ? ikonSecili : ikonNormal,
+      color: secili ? aktifRenk : pasifRenk,
+      size: 25,
+    );
+
+    if (rozetSayisi != null && rozetSayisi > 0) {
+      ikon = Badge(
+        label: Text('$rozetSayisi'),
+        backgroundColor: Colors.redAccent,
+        child: ikon,
+      );
+    }
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _seciliSayfa = index),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ikon,
+              const SizedBox(height: 3),
+              Text(
+                etiket,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: secili ? FontWeight.bold : FontWeight.w500,
+                  color: secili ? aktifRenk : pasifRenk,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -360,7 +374,7 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
             );
             context.read<SepetYoneticisi>().urunEkle(yeniUrun);
             Navigator.of(context).pop();
-            setState(() => _seciliSayfa = 1); // Sepete gec
+            setState(() => _seciliSayfa = 2); // Sepete gec
           },
         ),
       ),

@@ -10,6 +10,8 @@ class ButceOzetKarti extends StatelessWidget {
   final double butce;
   final int fisSayisi;
   final double buHaftaHarcanan;
+  final VoidCallback? onKayitliFisTap;
+  final VoidCallback? onBuHaftaTap;
 
   const ButceOzetKarti({
     super.key,
@@ -17,6 +19,8 @@ class ButceOzetKarti extends StatelessWidget {
     required this.butce,
     this.fisSayisi = 14,
     this.buHaftaHarcanan = 840.20,
+    this.onKayitliFisTap,
+    this.onBuHaftaTap,
   });
 
   @override
@@ -105,6 +109,7 @@ class ButceOzetKarti extends StatelessWidget {
                   baslik: 'Kayıtlı Fiş',
                   deger: '$fisSayisi Adet',
                   ikon: Icons.receipt_long_rounded,
+                  onTap: onKayitliFisTap,
                 ),
               ),
               const SizedBox(width: Olculer.boslukOrta),
@@ -113,6 +118,7 @@ class ButceOzetKarti extends StatelessWidget {
                   baslik: 'Bu Hafta',
                   deger: '${buHaftaHarcanan.toStringAsFixed(2)} ₺',
                   ikon: Icons.calendar_today_rounded,
+                  onTap: onBuHaftaTap,
                 ),
               ),
             ],
@@ -127,33 +133,50 @@ class _KucukIstatistikKutusu extends StatelessWidget {
   final String baslik;
   final String deger;
   final IconData ikon;
+  final VoidCallback? onTap;
 
   const _KucukIstatistikKutusu({
     required this.baslik,
     required this.deger,
     required this.ikon,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(Olculer.boslukOrta),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-      ),
-      child: Row(
-        children: [
-          Icon(ikon, size: 20, color: Colors.white70),
-          const SizedBox(width: Olculer.boslukKucuk),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Olculer.boslukOrta,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Row(
             children: [
-              Text(baslik, style: MetinStilleri.aciklama(renk: Colors.white54)),
-              Text(deger, style: MetinStilleri.govdeKalin(renk: Colors.white)),
+              Icon(ikon, size: 20, color: Colors.white70),
+              const SizedBox(width: Olculer.boslukKucuk),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(baslik, style: MetinStilleri.aciklama(renk: Colors.white54), maxLines: 1),
+                    Text(deger, style: MetinStilleri.govdeKalin(renk: Colors.white), maxLines: 1),
+                  ],
+                ),
+              ),
+              if (onTap != null)
+                const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.white38),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

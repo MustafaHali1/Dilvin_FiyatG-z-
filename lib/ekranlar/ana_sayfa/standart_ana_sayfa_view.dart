@@ -9,6 +9,7 @@ import '../../yoneticiler/kullanici_yoneticisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../profil/kullanici_profili_ekrani.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
+import '../fisler/tum_fisler_ekrani.dart';
 import 'bilesenler/butce_ozet_karti.dart';
 import 'bilesenler/fis_karti.dart';
 
@@ -32,10 +33,8 @@ class StandartAnaSayfaView extends StatefulWidget {
 }
 
 class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
-  String _seciliFiltre = 'Tümü';
   String _arama = '';
-
-  final filtreler = ['Tümü', 'Kasım 2026', 'Ekim 2026', 'Eylül 2026'];
+  bool _gecmisFislerAcik = true;
 
   @override
   Widget build(BuildContext context) {
@@ -58,75 +57,80 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
         child: ListView(
           padding: const EdgeInsets.all(Olculer.boslukBuyuk),
           children: [
-            // Üst Header
+            // Üst Header (Taşmasız, yalın ve modern profil başlığı)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Merhaba $kullaniciAdi 👋', style: MetinStilleri.baslik1()),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Alışveriş harcamalarını kolayca takip et',
-                      style: MetinStilleri.aciklama(),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Merhaba $kullaniciAdi 👋', style: MetinStilleri.baslik1()),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Alışveriş harcamalarını kolayca takip et',
+                        style: MetinStilleri.aciklama(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                Row(
-                  children: [
-                    // Profil Butonu
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const KullaniciProfiliEkrani(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.person_rounded, color: UygulamaRenkleri.anaKoyu, size: 24),
-                      style: IconButton.styleFrom(
-                        backgroundColor: UygulamaRenkleri.anaAcik,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
+                const SizedBox(width: 12),
+                // Profil Butonu
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const KullaniciProfiliEkrani(),
                       ),
-                      tooltip: 'Kullanıcı Profili',
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: widget.onSesliAsistanAc,
-                      icon: const Icon(Icons.mic_rounded, color: UygulamaRenkleri.anaZumrut, size: 24),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: widget.onAyarlaraGit,
-                      icon: const Icon(Icons.tune_rounded),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
-                      ),
-                    ),
-                  ],
+                    );
+                  },
+                  icon: const Icon(Icons.person_rounded, color: UygulamaRenkleri.anaKoyu, size: 24),
+                  style: IconButton.styleFrom(
+                    backgroundColor: UygulamaRenkleri.anaAcik,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
+                  ),
+                  tooltip: 'Kullanıcı Profili',
                 ),
               ],
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
-            // Canlı SQLite Bütçe Özet Kartı
+            // Canlı SQLite Bütçe Özet Kartı (Kayıtlı Fiş ve Bu Hafta Tıklanabilir)
             ButceOzetKarti(
               harcanan: fisYoneticisi.buAyHarcama,
               butce: profilYoneticisi.profil.aylikButce,
+              fisSayisi: fisYoneticisi.fisSayisi,
+              buHaftaHarcanan: fisYoneticisi.buHaftaHarcama,
+              onKayitliFisTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TumFislerEkrani(
+                      baslik: 'Tüm Kayıtlı Fişler',
+                      sadeceHaftalik: false,
+                    ),
+                  ),
+                );
+              },
+              onBuHaftaTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TumFislerEkrani(
+                      baslik: 'Bu Haftanın Fişleri',
+                      sadeceHaftalik: true,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
             // Arama Çubuğu
             TextField(
-              onChanged: (val) => setState(() => _arama = val),
+              onChanged: (val) => setState(() => _arama = val.trim()),
               decoration: InputDecoration(
-                hintText: 'Fiş ara (market, ürün)...',
+                hintText: 'Fiş veya market ara...',
                 prefixIcon: const Icon(Icons.search_rounded, color: UygulamaRenkleri.griYazi),
                 filled: true,
                 fillColor: Colors.white,
@@ -141,30 +145,6 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                 ),
               ),
             ),
-            const SizedBox(height: Olculer.boslukOrta),
-
-            // Ay Filtreleme Çipleri
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: filtreler.map((filtre) {
-                  final secili = _seciliFiltre == filtre;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(filtre),
-                      selected: secili,
-                      selectedColor: UygulamaRenkleri.anaAcik,
-                      labelStyle: TextStyle(
-                        color: secili ? UygulamaRenkleri.anaKoyu : UygulamaRenkleri.koyuYazi,
-                        fontWeight: secili ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      onSelected: (_) => setState(() => _seciliFiltre = filtre),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
             // Büyük Yeni Alışveriş Başlat Butonu
@@ -175,51 +155,98 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
-            // Geçmiş Fişler Başlığı
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Geçmiş Fişler', style: MetinStilleri.baslik2()),
-                Text('${filtrelenmis.length} Fiş', style: MetinStilleri.aciklama(renk: UygulamaRenkleri.anaKoyu)),
-              ],
-            ),
-            const SizedBox(height: Olculer.boslukOrta),
-
-            // Fiş Listesi veya Boş Durum
-            if (filtrelenmis.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(Olculer.boslukBuyuk),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                  border: Border.all(color: UygulamaRenkleri.cizgi),
-                ),
-                child: Column(
+            // Geçmiş Fişler Başlığı (Açılır-Kapanır Tırnaklı Accordion)
+            InkWell(
+              onTap: () => setState(() => _gecmisFislerAcik = !_gecmisFislerAcik),
+              borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                child: Row(
                   children: [
-                    const Icon(Icons.receipt_long_outlined, size: 48, color: UygulamaRenkleri.griYazi),
-                    const SizedBox(height: 8),
-                    Text('Henüz Kayıtlı Fiş Yok', style: MetinStilleri.govdeKalin()),
-                    const SizedBox(height: 4),
+                    Text('Geçmiş Fişler', style: MetinStilleri.baslik2()),
+                    const SizedBox(width: 6),
+                    AnimatedRotation(
+                      turns: _gecmisFislerAcik ? 0.0 : -0.25,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: UygulamaRenkleri.anaZumrut,
+                        size: 28,
+                      ),
+                    ),
+                    const Spacer(),
                     Text(
-                      'Sepeti tamamlayıp ilk alışveriş fişinizi kaydedin.',
-                      style: MetinStilleri.aciklama(),
-                      textAlign: TextAlign.center,
+                      '${filtrelenmis.length} Fiş',
+                      style: MetinStilleri.aciklama(renk: UygulamaRenkleri.anaKoyu),
                     ),
                   ],
                 ),
-              )
-            else
-              for (final fis in filtrelenmis)
-                FisKarti(
-                  fis: fis,
-                  onDokunuldu: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => FisDetayEkrani(fis: fis),
+              ),
+            ),
+
+            // Fiş Listesi (Sadece Son 3 Fiş veya Boş Durum)
+            if (_gecmisFislerAcik) ...[
+              const SizedBox(height: Olculer.boslukOrta),
+              if (filtrelenmis.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                    border: Border.all(color: UygulamaRenkleri.cizgi),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.receipt_long_outlined, size: 48, color: UygulamaRenkleri.griYazi),
+                      const SizedBox(height: 8),
+                      Text('Henüz Kayıtlı Fiş Yok', style: MetinStilleri.govdeKalin()),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Sepeti tamamlayıp ilk alışveriş fişinizi kaydedin.',
+                        style: MetinStilleri.aciklama(),
+                        textAlign: TextAlign.center,
                       ),
-                    );
-                  },
-                ),
+                    ],
+                  ),
+                )
+              else ...[
+                // Sadece son 3 fişi göster
+                for (final fis in filtrelenmis.take(3))
+                  FisKarti(
+                    fis: fis,
+                    onDokunuldu: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FisDetayEkrani(fis: fis),
+                        ),
+                      );
+                    },
+                  ),
+                if (filtrelenmis.length > 3)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 8),
+                    child: Center(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const TumFislerEkrani(
+                                baslik: 'Tüm Kayıtlı Fişler',
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                        label: Text('Tüm Fişleri Gör (${filtrelenmis.length})'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: UygulamaRenkleri.anaZumrut,
+                          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ],
           ],
         ),
       ),

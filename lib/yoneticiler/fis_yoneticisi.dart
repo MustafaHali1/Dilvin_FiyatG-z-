@@ -22,6 +22,20 @@ class FisYoneticisi extends ChangeNotifier {
   double get toplamTasarruf => _toplamTasarruf;
   int get fisSayisi => _fisler.length;
 
+  /// Son 7 günde yapılan toplam harcama tutarı
+  double get buHaftaHarcama {
+    final yediGunOnce = DateTime.now().subtract(const Duration(days: 7));
+    return _fisler
+        .where((f) => f.tarih.isAfter(yediGunOnce))
+        .fold(0.0, (toplam, f) => toplam + f.toplamTutar);
+  }
+
+  /// Son 7 günün fişleri
+  List<FisModeli> get buHaftaninFisleri {
+    final yediGunOnce = DateTime.now().subtract(const Duration(days: 7));
+    return _fisler.where((f) => f.tarih.isAfter(yediGunOnce)).toList();
+  }
+
   /// Veritabanındaki tüm fişleri ve aylık/tasarruf istatistiklerini yükler
   Future<void> verileriYukle() async {
     _yukleniyor = true;
