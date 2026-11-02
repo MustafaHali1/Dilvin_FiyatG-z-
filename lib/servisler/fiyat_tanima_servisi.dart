@@ -76,19 +76,33 @@ class FiyatTanimaServisi {
 
     final tumSatirlarMetin = satirlar.map((s) => s.metin).toList();
 
-    // 1. Ekran / Görsel sınırlarının hesaplanması
+    // 1. Ekran / Görsel sınırlarının hesaplanması (X ve Y eksenleri)
     final minX = goruntuGenisligi != null ? 0.0 : satirlar.map((s) => s.kutu.left).reduce((a, b) => a < b ? a : b);
     final maxX = goruntuGenisligi ?? satirlar.map((s) => s.kutu.right).reduce((a, b) => a > b ? a : b);
     final genislik = maxX - minX;
 
-    // 2. Kenar Alanları Filtresi (Örn: Sol %15 veya sağ %15'teki yabancı nesneler)
+    final minY = goruntuYuksekligi != null ? 0.0 : satirlar.map((s) => s.kutu.top).reduce((a, b) => a < b ? a : b);
+    final maxY = goruntuYuksekligi ?? satirlar.map((s) => s.kutu.bottom).reduce((a, b) => a > b ? a : b);
+    final toplamYukseklik = maxY - minY;
+
+    // 2. Kenar Alanları Filtresi (Merkez Odaklı Kırpma: Sol, Sağ, Üst ve Alt marjinler)
     final gecerliSatirlar = <MetinSatirKutusu>[];
     for (final satir in satirlar) {
-      if (genislik > 200 && merkezOdakli) {
-        final solKenarPayi = minX + (genislik * 0.12);
-        final sagKenarPayi = maxX - (genislik * 0.12);
-        if (satir.merkezX < solKenarPayi || satir.merkezX > sagKenarPayi) {
-          continue;
+      if (merkezOdakli) {
+        if (genislik > 200) {
+          final solKenarPayi = minX + (genislik * 0.12);
+          final sagKenarPayi = maxX - (genislik * 0.12);
+          if (satir.merkezX < solKenarPayi || satir.merkezX > sagKenarPayi) {
+            continue;
+          }
+        }
+        if (toplamYukseklik > 200) {
+          // Monitörün veya sayfanın en üst/altındaki web sitesi ilanlarını kes
+          final ustKenarPayi = minY + (toplamYukseklik * 0.08);
+          final altKenarPayi = maxY - (toplamYukseklik * 0.18);
+          if (satir.merkezY < ustKenarPayi || satir.merkezY > altKenarPayi) {
+            continue;
+          }
         }
       }
       gecerliSatirlar.add(satir);
@@ -256,6 +270,23 @@ class FiyatTanimaServisi {
         skor -= 50.0;
       }
 
+      // E) Etiket Yoğunluk Skoru (Gerçek market etiketinde fiyata komşu birçok satır vardır: barkod, kdv, ürün adı)
+      int komsuKutuSayisi = 0;
+      for (final komsu in tumSatirlar) {
+        if (komsu == satirKutusu) continue;
+        final dX = (komsu.merkezX - satirKutusu.merkezX).abs();
+        final dY = (komsu.merkezY - satirKutusu.merkezY).abs();
+        if (dX < 300 && dY < 200) {
+          komsuKutuSayisi++;
+        }
+      }
+      skor += (komsuKutuSayisi * 5.0).clamp(0.0, 35.0);
+
+      // Perakende market ürünleri genellikle 1 TL ile 2000 TL arasındadır
+      if (fiyat > 5000.0) {
+        skor -= 30.0; // Web sitesi toptan paket/koli fiyatlarını aşağı çek
+      }
+
       // Küçük rastgele tamsayıları (4, 6, 7 gibi) cezalandır
       if (!temizHam.contains(',') && !temizHam.contains('.') && fiyat < 10 && !paraBirimiVar) {
         skor -= 30.0;
@@ -367,7 +398,8 @@ class FiyatTanimaServisi {
     // Yasaklı anahtar kelimeler listesi (Kesinlikle ürün adı olamaz!)
     final yasakliKelimeler = {
       'market', 'marketler', 'şok', 'a101', 'bim', 'migros', 'carrefour',
-      'etiket', 'fiyat', 'fiyatı', 'yanlışlığı', 'şikayet', 'şikayetvar',
+      'etiket', 'etiketi', 'fiyat', 'fiyatı', 'yanlışlığı', 'şikayet', 'şikayetvar',
+      'kartı', 'karti', 'kart', 'kartları', 'damga', 'san', 'rulo', 'baskılı',
       'üretim', 'menşei', 'türkiye', 'kdv', 'dahildir', 'barkod',
       'birim', 'tarih', 'kasiyer', 'yerli', 'gaza', 't'
     };
@@ -411,7 +443,12 @@ class FiyatTanimaServisi {
       }
 
       // "Şok Marketler Şok Market..." gibi başlıkları ele
-      if (kucuk.contains('şikayet') || kucuk.contains('yanlışlığı') || kucuk.contains('etiket fiyat')) {
+      if (kucuk.contains('şikayet') ||
+          kucuk.contains('yanlışlığı') ||
+          kucuk.contains('etiket fiyat') ||
+          kucuk.contains('etiket kart') ||
+          kucuk.contains('damga market') ||
+          kucuk.contains('fiyat etiket')) {
         continue;
       }
 

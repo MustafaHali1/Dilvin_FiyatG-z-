@@ -71,6 +71,54 @@ void main() {
       expect(sonuc.tespitEdilenUrunAdi, 'JOY BAHCE HORTUMU 20 M');
     });
 
+    test('E-Ticaret Web Sayfası Senaryosu: Sayfanın altındaki 8268.76 TL ve damga market elenmeli, merkezdeki 299 TL ve JOY BAHCE HORTUMU seçilmeli', () {
+      final satirlar = [
+        // Sayfanın en altındaki toptan kart ilanı ve fiyatı (Y: 650-700)
+        const MetinSatirKutusu(
+          metin: 'damga market San SOK FIYAT Etketi Kartı Market',
+          kutu: Rect.fromLTWH(200, 620, 400, 30),
+        ),
+        const MetinSatirKutusu(
+          metin: '8268.76 ₺',
+          kutu: Rect.fromLTWH(250, 660, 200, 45),
+        ),
+
+        // Merkezdeki asıl market etiketi (Y: 150-350)
+        const MetinSatirKutusu(
+          metin: 'JOY BAHCE HORTUMU 20 M',
+          kutu: Rect.fromLTWH(250, 160, 320, 30),
+        ),
+        const MetinSatirKutusu(
+          metin: 'Üretim: TÜRKİYE',
+          kutu: Rect.fromLTWH(250, 200, 150, 18),
+        ),
+        const MetinSatirKutusu(
+          metin: 'Birim Fiyatı: 299.00 TL/AD',
+          kutu: Rect.fromLTWH(250, 225, 230, 18),
+        ),
+        const MetinSatirKutusu(
+          metin: '299,00 TL',
+          kutu: Rect.fromLTWH(350, 260, 200, 70), // Merkezde ve büyük
+        ),
+        const MetinSatirKutusu(
+          metin: '8 699037 130518',
+          kutu: Rect.fromLTWH(250, 340, 200, 20),
+        ),
+      ];
+
+      final sonuc = servis.satirlardanFiyatVeUrunCikar(
+        satirlar,
+        goruntuGenisligi: 800,
+        goruntuYuksekligi: 800,
+        merkezOdakli: true,
+      );
+
+      expect(sonuc.basarili, isTrue);
+      expect(sonuc.tespitEdilenFiyat, 299.00);
+      expect(sonuc.tespitEdilenUrunAdi, 'JOY BAHCE HORTUMU 20 M');
+      expect(sonuc.tespitEdilenUrunAdi?.contains('damga'), isFalse);
+    });
+
     test('Standart Tek Satır Fiyat ve Ürün Tespiti: Pınar Süt 1L 34.50 TL', () {
       final satirlar = [
         const MetinSatirKutusu(
