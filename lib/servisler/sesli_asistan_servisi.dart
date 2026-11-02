@@ -63,9 +63,9 @@ class SesliAsistanServisi {
     }
   }
 
-  /// Verilen Türkçe metni seslendirir
-  Future<void> konus(String metin, {bool sessizModdaIptal = false}) async {
-    if (metin.trim().isEmpty) return;
+  /// Verilen Türkçe metni seslendirir (tamamı büyük kelimeleri hecelemeyi önler)
+  Future<void> konus(String hamMetin, {bool sessizModdaIptal = false}) async {
+    if (hamMetin.trim().isEmpty) return;
     try {
       if (!_ttsHazir) {
         await ttsBaslat();
@@ -73,10 +73,51 @@ class SesliAsistanServisi {
       if (_konusuyor) {
         await durdur();
       }
-      await _tts?.speak(metin);
+
+      final hazirMetin = _seslendirilecekMetniHazirla(hamMetin);
+      debugPrint('TTS Okunuyor: "$hazirMetin"');
+      await _tts?.speak(hazirMetin);
     } catch (e) {
       debugPrint('Sesli okuma hatası: $e');
     }
+  }
+
+  /// Android Google TTS'in BÜYÜK HARFLİ kelimeleri (LIO, JOY, HORTUMU)
+  /// kısaltma sanıp harf harf (H-O-R-T-U-M-U) kodlamasını engeller.
+  String _seslendirilecekMetniHazirla(String hamMetin) {
+    if (hamMetin.trim().isEmpty) return '';
+
+    var metin = hamMetin;
+
+    // 1. Ölçü birimlerini doğal konuşma diline çevir
+    metin = metin.replaceAll(RegExp(r'\b(\d+)\s*M\b', caseSensitive: false), r'$1 metre');
+    metin = metin.replaceAll(RegExp(r'\b(\d+)\s*(?:LT|L)\b', caseSensitive: false), r'$1 litre');
+    metin = metin.replaceAll(RegExp(r'\b(\d+)\s*(?:GR|G)\b', caseSensitive: false), r'$1 gram');
+    metin = metin.replaceAll(RegExp(r'\b(\d+)\s*KG\b', caseSensitive: false), r'$1 kilogram');
+    metin = metin.replaceAll(RegExp(r'\b(\d+)\s*AD\b', caseSensitive: false), r'$1 adet');
+
+    // 2. Parantez içindeki tireli kalibreleri (321-380) temizle
+    metin = metin.replaceAll(RegExp(r'\(\s*\d+\s*-\s*\d+\s*\)'), '');
+
+    // 3. TAMAMI BÜYÜK HARFLERLE YAZILMIŞ KELİMELERİ DÜZELT:
+    // İlk harf büyük, devamı küçük harfe çevrilir (Title Case).
+    final kelimeler = metin.split(' ');
+    final duzeltilmisKelimeler = kelimeler.map((kelime) {
+      if (kelime.length <= 1) return kelime;
+      final kucuk = kelime.toLowerCase();
+      // Eğer kelimenin tamamı büyük harfse
+      if (kelime == kelime.toUpperCase() && RegExp(r'[A-ZÇĞİÖŞÜ]').hasMatch(kelime)) {
+        return kelime[0].toUpperCase() + kucuk.substring(1);
+      }
+      return kelime;
+    }).toList();
+
+    metin = duzeltilmisKelimeler.join(' ');
+
+    // 4. Noktalama ve para birimleri
+    metin = metin.replaceAll('₺', ' lira ').replaceAll('TL', ' lira ');
+
+    return metin.trim();
   }
 
   /// Aktif sesli okumayı durdurur

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'sabitler/tema_fabrikasi.dart';
+import 'sabitler/uygulama_renkleri.dart';
 import 'servisler/kamera_servisi.dart';
 import 'yoneticiler/sepet_yoneticisi.dart';
 import 'yoneticiler/profil_yoneticisi.dart';
@@ -20,7 +21,6 @@ import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
 import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
 import 'ekranlar/sepet/gorme_engelli_sepet_view.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
-import 'bilesenler/sesli_asistan_sayfasi.dart';
 import 'modeller/urun_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
@@ -171,6 +171,17 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     return Scaffold(
       body: sayfalar[_seciliSayfa],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _sesliAsistaniAc(context),
+        backgroundColor: profil.profilTuru == ProfilTuru.kolayMod
+            ? UygulamaRenkleri.kolayModSari
+            : UygulamaRenkleri.anaZumrut,
+        foregroundColor: profil.profilTuru == ProfilTuru.kolayMod
+            ? Colors.black
+            : Colors.white,
+        icon: const Icon(Icons.mic_rounded, size: 28),
+        label: const Text('Sesli Asistan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _seciliSayfa,
         onDestinationSelected: (index) => setState(() => _seciliSayfa = index),
@@ -266,8 +277,6 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
         MaterialPageRoute(
           builder: (context) => FisDetayEkrani(
             fis: yeniFis,
-            onPaylas: () {},
-            onSesliOku: () {},
           ),
         ),
       );
@@ -275,24 +284,9 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
   }
 
   void _sesliAsistaniAc(BuildContext context) {
-    final profil = context.read<ProfilYoneticisi>().profil;
-    if (profil.profilTuru == ProfilTuru.gormeEngelliModu) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const SesliAsistanDiyalogEkrani(),
-        ),
-      );
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => SesliAsistanSayfasi(
-        onHizliKomut: (komut) {
-          Navigator.of(context).pop();
-        },
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SesliAsistanDiyalogEkrani(),
       ),
     );
   }

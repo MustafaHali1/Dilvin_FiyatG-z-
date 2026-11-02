@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
+import '../../servisler/sesli_asistan_servisi.dart';
+import '../../servisler/sesli_komut_servisi.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
 import '../profil/kullanici_profili_ekrani.dart';
 import '../ayarlar/ayarlar_ekrani.dart';
@@ -51,50 +54,107 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
       }
     });
 
-    // Açılış haptik ve sesli bilgi
     HapticFeedback.mediumImpact();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _canliDinlemeyiBaslat();
+      }
+    });
   }
 
   @override
   void dispose() {
     _waveformTimer?.cancel();
+    SesliAsistanServisi().durdur();
     super.dispose();
   }
 
-  void _seslendir(String metin) {
+  Future<void> _canliDinlemeyiBaslat() async {
+    final asistan = SesliAsistanServisi();
+    final komutServisi = SesliKomutServisi();
+    final sepet = context.read<SepetYoneticisi>();
+    final profil = context.read<ProfilYoneticisi>().profil;
+
+    setState(() {
+      _dinleniyor = true;
+      _kullaniciSorusu = 'Sizi dinliyorum, konuşun...';
+    });
+
+    await asistan.dinle(
+      onSonuc: (metin, sonMu) async {
+        if (!mounted) return;
+        setState(() {
+          _kullaniciSorusu = metin;
+        });
+
+        if (sonMu && metin.isNotEmpty) {
+          final komut = komutServisi.niyetCoz(metin);
+          String yanit = '';
+
+          switch (komut.tur) {
+            case KomutTuru.butceSorgula:
+              final harcanan = sepet.toplamTutar;
+              final kalan = profil.aylikButce - harcanan;
+              if (kalan >= 0) {
+                yanit = 'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
+              } else {
+                yanit = 'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
+              }
+              break;
+
+            case KomutTuru.sepetOzeti:
+              final adet = sepet.toplamUrunAdedi;
+              final cesit = sepet.urunCesitSayisi;
+              final toplam = sepet.toplamTutar;
+              if (adet == 0) {
+                yanit = 'Sepetiniz şu anda boş.';
+              } else {
+                yanit = 'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
+              }
+              break;
+
+            case KomutTuru.urunAra:
+              yanit = '${komut.hedefUrun} aramak için kamera vizörünü açabilirsiniz.';
+              break;
+
+            case KomutTuru.sepeteEkle:
+              yanit = 'Sepetinizdeki ürünler onaylandı.';
+              break;
+
+            case KomutTuru.iptal:
+              yanit = 'İşlem iptal edildi.';
+              break;
+
+            default:
+              yanit = 'Tam anlayamadım. "Sepette ne var" veya "Bütçem ne kadar" diyebilirsiniz.';
+              break;
+          }
+
+          setState(() {
+            _dinleniyor = false;
+            _asistanCevabi = yanit;
+          });
+
+          await _seslendir(yanit);
+        }
+      },
+    );
+  }
+
+  Future<void> _seslendir(String metin) async {
     if (_susturuldu) return;
     HapticFeedback.heavyImpact();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFFFFD600),
-        duration: const Duration(seconds: 3),
-        content: Row(
-          children: [
-            const Icon(Icons.volume_up, color: Colors.black, size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                metin,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    await SesliAsistanServisi().konus(metin);
   }
 
   void _dinlemeDurumuDegistir() {
     HapticFeedback.mediumImpact();
-    setState(() {
-      _dinleniyor = !_dinleniyor;
-    });
-    _seslendir(_dinleniyor ? 'Sizi dinliyorum, konuşun...' : 'Dinleme duraklatıldı.');
+    if (_dinleniyor) {
+      SesliAsistanServisi().dinlemeyiDurdur();
+      setState(() => _dinleniyor = false);
+    } else {
+      _canliDinlemeyiBaslat();
+    }
   }
 
   void _susturDegistir() {

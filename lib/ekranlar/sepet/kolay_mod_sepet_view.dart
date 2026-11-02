@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
+import '../../servisler/sesli_asistan_servisi.dart';
+import '../../servisler/sesli_komut_servisi.dart';
 
 /// Kolay Mod - Sepet Ekranı (Stitch: kolay_mod_sepetim birebir)
 class KolayModSepetView extends StatelessWidget {
@@ -17,6 +21,62 @@ class KolayModSepetView extends StatelessWidget {
     required this.onAlisverisiBitir,
   });
 
+  void _sepetiSesliOku() {
+    if (sepet.urunler.isEmpty) {
+      SesliAsistanServisi().konus('Sepetiniz şu anda boş.');
+      return;
+    }
+    final urunlerMetni = sepet.urunler
+        .map((u) => '${u.adet} adet ${u.ad}, ${u.toplamTutar.toStringAsFixed(2)} lira')
+        .join('. ');
+    final mesaj =
+        'Sepetinizde ${sepet.urunCesitSayisi} çeşit ürün var. $urunlerMetni. Genel toplam ${sepet.toplamTutar.toStringAsFixed(2)} lira.';
+    SesliAsistanServisi().konus(mesaj);
+  }
+
+  void _sepetSesliKomutDinle(BuildContext context) {
+    final asistan = SesliAsistanServisi();
+    final komutServisi = SesliKomutServisi();
+    final profil = context.read<ProfilYoneticisi>().profil;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Sizi dinliyorum... ("Sepeti oku", "Bütçem ne kadar" veya "Alışverişi bitir")'),
+        duration: Duration(seconds: 4),
+        backgroundColor: UygulamaRenkleri.kolayModSari,
+      ),
+    );
+
+    asistan.dinle(
+      onSonuc: (metin, sonMu) {
+        if (sonMu && metin.isNotEmpty) {
+          final sonuc = komutServisi.niyetCoz(metin);
+          switch (sonuc.tur) {
+            case KomutTuru.sepetOzeti:
+              _sepetiSesliOku();
+              break;
+            case KomutTuru.butceSorgula:
+              final harcanan = sepet.toplamTutar;
+              final kalan = profil.aylikButce - harcanan;
+              if (kalan >= 0) {
+                asistan.konus('Toplam ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.');
+              } else {
+                asistan.konus('Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.');
+              }
+              break;
+            case KomutTuru.sepeteEkle:
+              asistan.konus('Alışveriş tamamlanıyor, fiş ekranına gidiliyor.');
+              onAlisverisiBitir();
+              break;
+            default:
+              asistan.konus('Anlayamadım. "Sepeti oku" veya "Bütçem ne kadar" diyebilirsiniz.');
+              break;
+          }
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,8 +85,13 @@ class KolayModSepetView extends StatelessWidget {
         backgroundColor: Colors.black,
         title: Text('SEPETİM (${sepet.toplamUrunAdedi} Ürün)', style: MetinStilleri.kolayModBaslik()),
         actions: [
+          IconButton(
+            onPressed: () => _sepetSesliKomutDinle(context),
+            icon: const Icon(Icons.mic, color: UygulamaRenkleri.kolayModSari, size: 30),
+            tooltip: 'Sesli Asistan ile Konuş',
+          ),
           TextButton.icon(
-            onPressed: () {},
+            onPressed: _sepetiSesliOku,
             icon: const Icon(Icons.volume_up, color: Colors.black),
             label: const Text('SESLİ OKU', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             style: TextButton.styleFrom(

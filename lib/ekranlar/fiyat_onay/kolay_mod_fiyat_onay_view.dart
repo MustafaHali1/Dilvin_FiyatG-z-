@@ -130,6 +130,53 @@ class KolayModFiyatOnayView extends StatelessWidget {
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
 
+          // 3.5. Devasa Sesli Asistan Butonu (Kolay Mod Özel)
+          InkWell(
+            onTap: () {
+              yonetici.sesliKomutDinle(
+                onOnayla: () {
+                  final veri = yonetici.onayVerisiHazirla();
+                  if (veri != null) onOnaylandi(veri);
+                },
+                onIptal: onTekrarCek,
+              );
+            },
+            borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              decoration: BoxDecoration(
+                color: yonetici.dinleniyor ? Colors.red.shade900 : const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
+                border: Border.all(
+                  color: yonetici.dinleniyor ? Colors.red : UygulamaRenkleri.kolayModSari,
+                  width: 3,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+                    color: yonetici.dinleniyor ? Colors.white : UygulamaRenkleri.kolayModSari,
+                    size: 36,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      yonetici.dinleniyor ? 'DİNLİYOR... ("Sepete Ekle" deyin)' : 'SESLE ONAYLA VEYA ADET SÖYLE',
+                      style: TextStyle(
+                        color: yonetici.dinleniyor ? Colors.white : UygulamaRenkleri.kolayModSari,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukBuyuk),
+
           // 4. Alternatif Fiyat Çipleri (Varsa)
           if (adaylar.length > 1) ...[
             Text('DİĞER BULUNAN FİYATLAR:', style: MetinStilleri.kolayModGovde(renk: Colors.white70)),
