@@ -4,10 +4,13 @@ import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
+import '../../bilesenler/fiyat_etiketi.dart';
 import '../../modeller/fis_modeli.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 
-/// Renk Körü Modu - Fiş Görünümü (Stitch: renk_k_r_fi_g_r_n_m birebir)
+/// Renk Körü Modu - Fiş Görünümü
+/// Standart mod ile %100 birebir aynı yerleşime sahiptir.
+/// Yeşil/kırmızı renkler seçilen Okabe-Ito paleti ile boyanır.
 class RenkKoruFisView extends StatelessWidget {
   final FisModeli fis;
   final VoidCallback onPaylas;
@@ -29,27 +32,22 @@ class RenkKoruFisView extends StatelessWidget {
     final anaRenk = palet.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: UygulamaRenkleri.arkaPlan,
       appBar: AppBar(
-        title: Text('Fiş Detayı [${palet.turAdi}]', style: MetinStilleri.baslik2(renk: anaRenk)),
+        title: Text('Dijital Fiş Detayı', style: MetinStilleri.baslik2()),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: IconThemeData(color: anaRenk),
+        iconTheme: const IconThemeData(color: Colors.black),
         actions: [
-          IconButton(
-            tooltip: 'Sesli Asistan',
-            onPressed: onSesliAsistan,
-            icon: Icon(Icons.mic_rounded, color: anaRenk),
-          ),
           IconButton(
             tooltip: 'Paylaş',
             onPressed: onPaylas,
-            icon: Icon(Icons.share_rounded, color: anaRenk),
+            icon: const Icon(Icons.share_rounded, color: Colors.black87),
           ),
           IconButton(
             tooltip: 'Sesli Oku',
             onPressed: onSesliOku,
-            icon: Icon(Icons.volume_up_rounded, color: anaRenk),
+            icon: const Icon(Icons.volume_up_rounded, color: Colors.black87),
           ),
         ],
       ),
@@ -60,42 +58,69 @@ class RenkKoruFisView extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-            border: Border.all(color: anaRenk, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.verified_rounded, color: anaRenk, size: 28),
-                  const SizedBox(width: 8),
-                  Text('FİYATGÖZ ALIŞVERİŞ FİŞİ', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: anaRenk)),
-                ],
+              Icon(Icons.receipt_rounded, size: 48, color: anaRenk),
+              const SizedBox(height: Olculer.boslukKucuk),
+              Text(
+                'FİYATGÖZ ALIŞVERİŞ FİŞİ',
+                style: MetinStilleri.baslik2().copyWith(fontFamily: 'monospace', letterSpacing: 1.2),
               ),
-              Divider(height: 32, thickness: 1.5, color: anaRenk),
+              Text(
+                'Tarih: ${fis.tarih.day}.${fis.tarih.month}.${fis.tarih.year}',
+                style: MetinStilleri.aciklama().copyWith(fontFamily: 'monospace'),
+              ),
+              const Divider(height: 32, thickness: 1, color: Colors.black26),
+
               for (final urun in fis.urunler)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${urun.ad} x${urun.adet}', style: MetinStilleri.govdeKalin()),
-                      Text('${urun.toplamTutar.toStringAsFixed(2)} ₺', style: TextStyle(fontWeight: FontWeight.bold, color: anaRenk)),
+                      Expanded(
+                        child: Text(
+                          '${urun.ad} x${urun.adet}',
+                          style: MetinStilleri.govde().copyWith(fontFamily: 'monospace'),
+                        ),
+                      ),
+                      Text(
+                        '${urun.toplamTutar.toStringAsFixed(2)} ₺',
+                        style: MetinStilleri.govdeKalin().copyWith(fontFamily: 'monospace'),
+                      ),
                     ],
                   ),
                 ),
-              Divider(height: 32, thickness: 1.5, color: anaRenk),
+
+              const Divider(height: 32, thickness: 1, color: Colors.black26),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('ÖDENECEK:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('${fis.toplamTutar.toStringAsFixed(2)} ₺', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: anaRenk)),
+                  Text('TOPLAM:', style: MetinStilleri.baslik1().copyWith(fontFamily: 'monospace')),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: FiyatEtiketi(tutar: fis.toplamTutar, boyut: 24, renk: anaRenk),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: Olculer.boslukBuyuk),
               OzelButon(
-                metin: 'PDF Paylaş / Kaydet',
-                ikon: Icons.share_rounded,
+                metin: 'PDF Olarak Kaydet / Paylaş',
+                ikon: Icons.picture_as_pdf_rounded,
                 renk: anaRenk,
                 onPressed: onPaylas,
               ),

@@ -35,6 +35,11 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
     final fisYoneticisi = context.watch<FisYoneticisi>();
     final profilYoneticisi = context.watch<ProfilYoneticisi>();
     final bool kolayMod = profilYoneticisi.kolayMod;
+    final bool isRenkKoru = profilYoneticisi.renkKoruModu;
+    final palet = RenkKorluguPaleti.getir(profilYoneticisi.profil.renkKorluguTuru);
+    final Color vurguRengi = kolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : (isRenkKoru ? palet.primary : UygulamaRenkleri.anaZumrut);
 
     final kaynakFisler = widget.sadeceHaftalik
         ? fisYoneticisi.buHaftaninFisleri
@@ -122,7 +127,7 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
                     Text(
                       'Toplam: ₺${toplamTutar.toStringAsFixed(2)}',
                       style: TextStyle(
-                        color: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                        color: vurguRengi,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
@@ -249,6 +254,7 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
 
                       return FisKarti(
                         fis: fis,
+                        vurguRengi: isRenkKoru ? palet.primary : null,
                         onDokunuldu: () {
                           if (widget.onFisSecildi != null) {
                             widget.onFisSecildi!(fis);

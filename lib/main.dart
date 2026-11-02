@@ -180,7 +180,13 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
     ];
 
     final isKolayMod = profil.profilTuru == ProfilTuru.kolayMod;
+    final isRenkKoru = profil.profilTuru == ProfilTuru.renkKoruModu;
+    final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
     final isAsistanAcik = profil.sesliAsistanAcik;
+
+    final Color mikrofonRengi = isKolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : (isRenkKoru ? palet.primary : UygulamaRenkleri.anaZumrut);
 
     return Scaffold(
       body: sayfalar[_seciliSayfa.clamp(0, sayfalar.length - 1)],
@@ -233,7 +239,9 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
                           ? LinearGradient(
                               colors: isKolayMod
                                   ? [UygulamaRenkleri.kolayModSari, UygulamaRenkleri.kolayModSari]
-                                  : [const Color(0xFF10B981), const Color(0xFF047857)],
+                                  : (isRenkKoru
+                                      ? [palet.primary, palet.primary]
+                                      : [const Color(0xFF10B981), const Color(0xFF047857)]),
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             )
@@ -244,10 +252,7 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
                       boxShadow: isAsistanAcik
                           ? [
                               BoxShadow(
-                                color: (isKolayMod
-                                        ? UygulamaRenkleri.kolayModSari
-                                        : UygulamaRenkleri.anaZumrut)
-                                    .withValues(alpha: 0.38),
+                                color: mikrofonRengi.withValues(alpha: 0.38),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -301,12 +306,23 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
     required ProfilModeli profil,
   }) {
     final secili = _seciliSayfa == index;
+    final isKolayMod = profil.profilTuru == ProfilTuru.kolayMod;
+    final isRenkKoru = profil.profilTuru == ProfilTuru.renkKoruModu;
+    final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
+
     final aktifRenk = profil.profilTuru == ProfilTuru.kolayMod
         ? UygulamaRenkleri.kolayModSari
-        : UygulamaRenkleri.anaZumrut;
+        : (isRenkKoru ? palet.primary : UygulamaRenkleri.anaZumrut);
     final pasifRenk = profil.profilTuru == ProfilTuru.kolayMod
         ? Colors.white60
         : const Color(0xFF94A3B8);
+
+    // Kırmızı körlüğünde kırmızı rozet YASAK: güvenli turuncu kullanılır
+    final rozetRengi = isRenkKoru
+        ? palet.error
+        : (profil.profilTuru == ProfilTuru.kolayMod
+            ? UygulamaRenkleri.kolayModSari
+            : Colors.redAccent);
 
     Widget ikon = Icon(
       secili ? ikonSecili : ikonNormal,
@@ -316,8 +332,16 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     if (rozetSayisi != null && rozetSayisi > 0) {
       ikon = Badge(
-        label: Text('$rozetSayisi'),
-        backgroundColor: Colors.redAccent,
+        label: Text(
+          '$rozetSayisi',
+          style: TextStyle(
+            color: (isKolayMod || (isRenkKoru && rozetRengi == palet.accent))
+                ? Colors.black
+                : Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: rozetRengi,
         child: ikon,
       );
     }

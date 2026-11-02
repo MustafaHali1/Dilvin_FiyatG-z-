@@ -10,6 +10,7 @@ class ButceOzetKarti extends StatelessWidget {
   final double butce;
   final int fisSayisi;
   final double buHaftaHarcanan;
+  final Color? vurguRengi;
   final VoidCallback? onKayitliFisTap;
   final VoidCallback? onBuHaftaTap;
 
@@ -19,6 +20,7 @@ class ButceOzetKarti extends StatelessWidget {
     required this.butce,
     this.fisSayisi = 14,
     this.buHaftaHarcanan = 840.20,
+    this.vurguRengi,
     this.onKayitliFisTap,
     this.onBuHaftaTap,
   });
@@ -27,6 +29,7 @@ class ButceOzetKarti extends StatelessWidget {
   Widget build(BuildContext context) {
     final yuzde = (harcanan / butce).clamp(0.0, 1.0);
     final kalan = butce - harcanan;
+    final etkinVurgu = vurguRengi ?? UygulamaRenkleri.anaZumrut;
 
     return Container(
       width: double.infinity,
@@ -56,7 +59,7 @@ class ButceOzetKarti extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.wallet_rounded, size: 14, color: UygulamaRenkleri.anaZumrut),
+                    Icon(Icons.wallet_rounded, size: 14, color: etkinVurgu),
                     const SizedBox(width: 4),
                     Text(
                       'Bu Ay Harcanan',
@@ -84,7 +87,7 @@ class ButceOzetKarti extends StatelessWidget {
               value: yuzde,
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: 0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(UygulamaRenkleri.anaZumrut),
+              valueColor: AlwaysStoppedAnimation<Color>(etkinVurgu),
             ),
           ),
           const SizedBox(height: Olculer.boslukKucuk),
@@ -93,7 +96,7 @@ class ButceOzetKarti extends StatelessWidget {
             children: [
               Text(
                 '%${(yuzde * 100).toInt()} kullanıldı',
-                style: MetinStilleri.aciklama(renk: UygulamaRenkleri.anaZumrut),
+                style: MetinStilleri.aciklama(renk: etkinVurgu),
               ),
               Text(
                 'Kalan: ${kalan.toStringAsFixed(2)} ₺',

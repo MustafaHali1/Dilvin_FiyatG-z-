@@ -8,16 +8,21 @@ import 'package:fiyatgoz/modeller/fis_modeli.dart';
 /// Ana sayfadaki fis ogesi karti
 class FisKarti extends StatelessWidget {
   final FisModeli fis;
+  final Color? vurguRengi;
   final VoidCallback? onDokunuldu;
 
   const FisKarti({
     super.key,
     required this.fis,
+    this.vurguRengi,
     this.onDokunuldu,
   });
 
   @override
   Widget build(BuildContext context) {
+    final etkinVurgu = vurguRengi ?? UygulamaRenkleri.anaKoyu;
+    final zeminRengi = vurguRengi != null ? vurguRengi!.withValues(alpha: 0.1) : UygulamaRenkleri.anaAcik;
+
     return InkWell(
       onTap: onDokunuldu,
       borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
@@ -35,12 +40,12 @@ class FisKarti extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: UygulamaRenkleri.anaAcik,
+                color: zeminRengi,
                 borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.shopping_cart_outlined,
-                color: UygulamaRenkleri.anaKoyu,
+                color: etkinVurgu,
               ),
             ),
             const SizedBox(width: Olculer.boslukOrta),
