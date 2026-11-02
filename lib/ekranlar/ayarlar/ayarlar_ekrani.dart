@@ -223,6 +223,40 @@ class AyarlarEkrani extends StatelessWidget {
     );
   }
 
+  Widget _kontrastliRozet({required String etiket, required Color renk}) {
+    // WCAG 2.1 AA/AAA Kontrast: Açık zeminlerde koyu metin, koyu zeminlerde beyaz metin
+    final bool koyuZemin = ThemeData.estimateBrightnessForColor(renk) == Brightness.dark;
+    final Color metinRengi = koyuZemin ? Colors.white : const Color(0xFF0F172A);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: renk,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.25),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Text(
+        etiket,
+        style: TextStyle(
+          color: metinRengi,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+
   Widget _renkKoruTurSatiri({
     required BuildContext context,
     required ProfilYoneticisi yonetici,
@@ -231,72 +265,71 @@ class AyarlarEkrani extends StatelessWidget {
   }) {
     final bool seciliMi = yonetici.profil.renkKorluguTuru == tur;
 
-    return ListTile(
-      leading: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: palet.primary,
-          shape: BoxShape.circle,
+    // Her türün kendine ait 3 kontrastlı renk etiketi (Primary, Secondary, Accent)
+    final Color accentRenk = tur == RenkKorluguTuru.protanopi
+        ? palet.info // Açık Mavi #56B4E9
+        : (tur == RenkKorluguTuru.tritanopi ? palet.warning : palet.error); // Magenta #CC79A7
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: seciliMi ? palet.primary.withValues(alpha: 0.08) : Colors.transparent,
+        borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+        border: Border.all(
+          color: seciliMi ? palet.primary : Colors.transparent,
+          width: 1.5,
         ),
-        child: seciliMi ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
       ),
-      title: Text('${palet.turAdi} (${palet.turAciklamasi})', style: MetinStilleri.govdeKalin()),
-      subtitle: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: palet.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              'Primary',
-              style: TextStyle(color: palet.primary, fontSize: 11, fontWeight: FontWeight.bold),
-            ),
+      child: ListTile(
+        leading: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: palet.primary,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black26, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: palet.primary.withValues(alpha: 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          const SizedBox(width: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: palet.secondary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              'Secondary',
-              style: TextStyle(color: palet.secondary, fontSize: 11, fontWeight: FontWeight.bold),
-            ),
+          child: seciliMi
+              ? const Icon(Icons.check, color: Colors.white, size: 22)
+              : null,
+        ),
+        title: Text('${palet.turAdi} (${palet.turAciklamasi})', style: MetinStilleri.govdeKalin()),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              _kontrastliRozet(etiket: 'Primary', renk: palet.primary),
+              _kontrastliRozet(etiket: 'Secondary', renk: palet.secondary),
+              _kontrastliRozet(etiket: 'Accent', renk: accentRenk),
+            ],
           ),
-          const SizedBox(width: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: palet.warning.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(4),
+        ),
+        trailing: seciliMi
+            ? Icon(Icons.check_circle, color: palet.primary, size: 28)
+            : null,
+        onTap: () {
+          yonetici.renkKorluguTuruAyarla(tur);
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: palet.primary,
+              content: Text(
+                'Palet güncellendi: ${palet.turAdi} (${palet.turAciklamasi})',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
-            child: Text(
-              'Warning',
-              style: TextStyle(color: palet.warning, fontSize: 11, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
+          );
+        },
       ),
-      trailing: seciliMi
-          ? Icon(Icons.check_circle, color: palet.primary)
-          : null,
-      onTap: () {
-        yonetici.renkKorluguTuruAyarla(tur);
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: palet.primary,
-            content: Text(
-              'Palet güncellendi: ${palet.turAdi} (${palet.turAciklamasi})',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -341,11 +374,11 @@ class AyarlarEkrani extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.visibility_rounded, color: UygulamaRenkleri.bilgiMavi),
+                  leading: Icon(Icons.visibility_rounded, color: yonetici.renkPaleti.primary),
                   title: Text('Renk Körü Modu', style: MetinStilleri.govdeKalin()),
-                  subtitle: const Text('Renge bağımlı olmayan güvenli mavi/turuncu palet'),
+                  subtitle: const Text('Renge bağımlı olmayan güvenli Okabe-Ito paleti'),
                   trailing: yonetici.profil.profilTuru == ProfilTuru.renkKoruModu
-                      ? const Icon(Icons.check_circle, color: UygulamaRenkleri.anaZumrut)
+                      ? Icon(Icons.check_circle, color: yonetici.renkPaleti.primary)
                       : null,
                   onTap: () {
                     yonetici.profilAyarla(ProfilTuru.renkKoruModu);

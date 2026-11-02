@@ -47,31 +47,31 @@ class _RenkKorluguSecimEkraniState extends State<RenkKorluguSecimEkrani> {
                 baslik: 'Yeşili ayırt edemiyorum',
                 turAdi: 'Deuteranopi (En Yaygın)',
                 ornekRenkler: const [
-                  Color(0xFF0072B2), // Primary
-                  Color(0xFFE69F00), // Secondary
-                  Color(0xFF56B4E9), // Info
+                  Color(0xFF0072B2), // Primary: Koyu Mavi
+                  Color(0xFFE69F00), // Secondary: Turuncu
+                  Color(0xFFCC79A7), // Accent: Magenta
                 ],
                 seciliMi: _seciliTur == RenkKorluguTuru.deuteranopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.deuteranopi),
               ),
               _TurKarti(
                 baslik: 'Kırmızıyı ayırt edemiyorum',
-                turAdi: 'Protanopi',
+                turAdi: 'Protanopi (Kırmızı Körlüğü)',
                 ornekRenkler: const [
-                  Color(0xFF009E73), // Primary
-                  Color(0xFF56B4E9), // Secondary
-                  Color(0xFFD55E00), // Error
+                  Color(0xFF0072B2), // Primary: Koyu Mavi (Yeşil değil!)
+                  Color(0xFFE69F00), // Secondary: Turuncu
+                  Color(0xFF56B4E9), // Info/Accent: Açık Mavi
                 ],
                 seciliMi: _seciliTur == RenkKorluguTuru.protanopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.protanopi),
               ),
               _TurKarti(
                 baslik: 'Mavi ve sarıyı ayırt edemiyorum',
-                turAdi: 'Tritanopi',
+                turAdi: 'Tritanopi (Mavi-Sarı Körlüğü)',
                 ornekRenkler: const [
-                  Color(0xFFD55E00), // Primary
-                  Color(0xFF009E73), // Secondary
-                  Color(0xFFCC79A7), // Warning
+                  Color(0xFFD55E00), // Primary: Kızıl / Koyu Turuncu
+                  Color(0xFF009E73), // Secondary: Zümrüt Yeşili
+                  Color(0xFFCC79A7), // Warning/Accent: Magenta
                 ],
                 seciliMi: _seciliTur == RenkKorluguTuru.tritanopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.tritanopi),
@@ -122,10 +122,10 @@ class _TurKarti extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
         padding: const EdgeInsets.all(Olculer.boslukOrta),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: seciliMi ? ornekRenkler.first.withValues(alpha: 0.05) : Colors.white,
           borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
           border: Border.all(
-            color: seciliMi ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.cizgi,
+            color: seciliMi ? ornekRenkler.first : UygulamaRenkleri.cizgi,
             width: seciliMi ? 2.5 : 1,
           ),
         ),
@@ -142,17 +142,22 @@ class _TurKarti extends StatelessWidget {
             Row(
               children: ornekRenkler
                   .map((c) => Container(
-                        margin: const EdgeInsets.only(left: 4),
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+                        margin: const EdgeInsets.only(left: 6),
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: c,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black12, width: 1),
+                        ),
                       ))
                   .toList(),
             ),
             const SizedBox(width: 12),
             Icon(
               seciliMi ? Icons.check_circle_rounded : Icons.radio_button_off_rounded,
-              color: seciliMi ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.griYazi,
+              color: seciliMi ? ornekRenkler.first : UygulamaRenkleri.griYazi,
+              size: 24,
             ),
           ],
         ),

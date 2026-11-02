@@ -57,36 +57,36 @@ class RenkKorluguPaleti {
 
   // 1. Deuteranopia (Yeşil Körlüğü)
   static const deuteranopia = RenkKorluguPaleti(
-    primary: Color(0xFF0072B2),   // Kobalt Mavi
-    secondary: Color(0xFFE69F00), // Kehribar Turuncu
+    primary: Color(0xFF0072B2),   // Koyu Mavi
+    secondary: Color(0xFFE69F00), // Turuncu
     success: Color(0xFF0072B2),
-    error: Color(0xFFCC79A7),     // Kırmızımsı Mor
-    warning: Color(0xFFE69F00),
-    info: Color(0xFF56B4E9),      // Gökyüzü Mavisi
+    error: Color(0xFFCC79A7),     // Magenta / Gül Kurusu
+    warning: Color(0xFFE69F00),   // Turuncu
+    info: Color(0xFF56B4E9),      // Açık Mavi
     turAdi: 'Deuteranopi',
     turAciklamasi: 'Yeşil Körlüğü',
   );
 
   // 2. Protanopia (Kırmızı Körlüğü)
   static const protanopia = RenkKorluguPaleti(
-    primary: Color(0xFF009E73),   // Mavimsi Yeşil
-    secondary: Color(0xFF56B4E9), // Gökyüzü Mavisi
-    success: Color(0xFF009E73),
-    error: Color(0xFFD55E00),     // Parlak Turuncu / Vermillion
-    warning: Color(0xFFE69F00),
-    info: Color(0xFF0072B2),      // Kobalt Mavi
+    primary: Color(0xFF0072B2),   // Koyu Mavi (Kırmızı körü için yeşil yerine güvenli mavi)
+    secondary: Color(0xFFE69F00), // Turuncu
+    success: Color(0xFF0072B2),   // Koyu Mavi
+    error: Color(0xFFCC79A7),     // Magenta / Gül Kurusu
+    warning: Color(0xFFE69F00),   // Turuncu
+    info: Color(0xFF56B4E9),      // Açık Mavi
     turAdi: 'Protanopi',
     turAciklamasi: 'Kırmızı Körlüğü',
   );
 
   // 3. Tritanopia (Mavi-Sarı Körlüğü)
   static const tritanopia = RenkKorluguPaleti(
-    primary: Color(0xFFD55E00),   // Parlak Turuncu / Vermillion
-    secondary: Color(0xFF009E73), // Mavimsi Yeşil
-    success: Color(0xFF009E73),
-    error: Color(0xFFD55E00),
-    warning: Color(0xFFCC79A7),   // Kırmızımsı Mor
-    info: Color(0xFF009E73),
+    primary: Color(0xFFD55E00),   // Kızıl / Koyu Turuncu
+    secondary: Color(0xFF009E73), // Zümrüt Yeşili
+    success: Color(0xFF009E73),   // Zümrüt Yeşili
+    error: Color(0xFFD55E00),     // Kızıl
+    warning: Color(0xFFCC79A7),   // Magenta / Pembe
+    info: Color(0xFF009E73),      // Zümrüt Yeşili
     turAdi: 'Tritanopi',
     turAciklamasi: 'Mavi-Sarı Körlüğü',
   );
