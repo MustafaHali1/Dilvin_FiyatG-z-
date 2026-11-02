@@ -9,6 +9,7 @@ import '../../modeller/profil_modeli.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/kullanici_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
+import '../ayarlar/ayarlar_ekrani.dart';
 
 /// Kullanıcı Profili ve E-Posta İndirim Bülteni Yönetim Ekranı
 /// Temiz mimari: İnce ekran yapısı, modüler alt bileşenler, Provider entegrasyonu.
@@ -234,19 +235,34 @@ class _ProfilAvatarKarti extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: anaRenk.withValues(alpha: kolayMod ? 0.2 : 0.12),
-                    borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
-                    border: Border.all(color: anaRenk),
-                  ),
-                  child: Text(
-                    _modEtiketi(profilTuru),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: kolayMod ? UygulamaRenkleri.kolayModSari : anaRenk,
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: anaRenk.withValues(alpha: kolayMod ? 0.2 : 0.12),
+                      borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+                      border: Border.all(color: anaRenk),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _modEtiketi(profilTuru),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: kolayMod ? UygulamaRenkleri.kolayModSari : anaRenk,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.tune_rounded, size: 14, color: kolayMod ? UygulamaRenkleri.kolayModSari : anaRenk),
+                      ],
                     ),
                   ),
                 ),

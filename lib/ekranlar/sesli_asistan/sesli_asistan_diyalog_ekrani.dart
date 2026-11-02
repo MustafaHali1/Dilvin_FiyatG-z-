@@ -6,6 +6,7 @@ import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
 import '../profil/kullanici_profili_ekrani.dart';
+import '../ayarlar/ayarlar_ekrani.dart';
 import '../kamera/kamera_tarayici_ekrani.dart';
 import '../sepet/sepet_ekrani.dart';
 
@@ -223,6 +224,15 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Color(0xFFFFD600), size: 30),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
+              );
+            },
+            tooltip: 'Ayarlar ve Mod Değiştir',
+          ),
           IconButton(
             icon: const Icon(Icons.volume_up, color: Color(0xFFFFD600), size: 30),
             onPressed: () => _seslendir(_asistanCevabi),

@@ -5,6 +5,7 @@ import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
 import '../profil/kullanici_profili_ekrani.dart';
+import '../ayarlar/ayarlar_ekrani.dart';
 import '../kamera/kamera_tarayici_ekrani.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 
@@ -112,6 +113,15 @@ class _GormeEngelliSepetViewState extends State<GormeEngelliSepetView> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Color(0xFFFFD600), size: 30),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
+              );
+            },
+            tooltip: 'Ayarlar ve Mod Değiştir',
+          ),
           IconButton(
             icon: const Icon(Icons.volume_up, color: Color(0xFFFFD600), size: 30),
             onPressed: () => _sepetiBastanSonaOku(sepet),
@@ -633,6 +643,29 @@ class _GormeEngelliSepetViewState extends State<GormeEngelliSepetView> {
                     SizedBox(height: 4),
                     Text(
                       'Asistan',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AyarlarEkrani(),
+                    ),
+                  );
+                },
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.settings, color: Colors.white70, size: 30),
+                    SizedBox(height: 4),
+                    Text(
+                      'Ayarlar',
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],

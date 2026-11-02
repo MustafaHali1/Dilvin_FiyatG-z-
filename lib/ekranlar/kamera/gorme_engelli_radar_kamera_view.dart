@@ -8,6 +8,7 @@ import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../sepet/sepet_ekrani.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import '../profil/kullanici_profili_ekrani.dart';
+import '../ayarlar/ayarlar_ekrani.dart';
 
 /// Görme Engelli / Sesli Radar ve Haptik Kamera Ekranı
 /// (Stitch: sesli_radar_kamera birebir)
@@ -180,6 +181,15 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Color(0xFFFFD600), size: 30),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
+              );
+            },
+            tooltip: 'Ayarlar ve Mod Değiştir',
+          ),
           IconButton(
             icon: const Icon(Icons.volume_up, color: Color(0xFFFFD600), size: 30),
             onPressed: () {
@@ -791,6 +801,29 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
                     SizedBox(height: 4),
                     Text(
                       'Asistan',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AyarlarEkrani(),
+                    ),
+                  );
+                },
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.settings, color: Colors.white70, size: 30),
+                    SizedBox(height: 4),
+                    Text(
+                      'Ayarlar',
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
