@@ -5,9 +5,11 @@ import 'package:fiyatgoz/yoneticiler/profil_yoneticisi.dart';
 import 'package:fiyatgoz/yoneticiler/sepet_yoneticisi.dart';
 import 'package:fiyatgoz/yoneticiler/fis_yoneticisi.dart';
 import 'package:fiyatgoz/yoneticiler/kullanici_yoneticisi.dart';
+import 'package:fiyatgoz/yoneticiler/fiyat_onay_yoneticisi.dart';
 import 'package:fiyatgoz/modeller/kullanici_modeli.dart';
 import 'package:fiyatgoz/modeller/fis_modeli.dart';
 import 'package:fiyatgoz/modeller/urun_modeli.dart';
+import 'package:fiyatgoz/modeller/fiyat_tanima_sonucu.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +67,34 @@ void main() {
     });
   });
 
+  group('Fiyat Tanıma ve OCR Modelleri Testi', () {
+    test('FiyatTanimaSonucu varsayılan ve örnek fabrika metotları', () {
+      final ornek = FiyatTanimaSonucu.ornek();
+      expect(ornek.basarili, true);
+      expect(ornek.tespitEdilenFiyat, 24.90);
+      expect(ornek.adayFiyatlar.length, 2);
+
+      final bos = FiyatTanimaSonucu.bos(hata: 'Hata var');
+      expect(bos.basarili, false);
+      expect(bos.tespitEdilenFiyat, null);
+      expect(bos.hataMesaji, 'Hata var');
+    });
+
+    test('FiyatOnayYoneticisi adet ve onay verisi doğrulaması', () {
+      final yonetici = FiyatOnayYoneticisi();
+      yonetici.urunAdiDenetleyici.text = 'Çay 1000g';
+      yonetici.fiyatDenetleyici.text = '145.50';
+      yonetici.adetArtir();
+      expect(yonetici.adet, 2);
+
+      final veri = yonetici.onayVerisiHazirla();
+      expect(veri, isNotNull);
+      expect(veri!['ad'], 'Çay 1000g');
+      expect(veri['birimFiyat'], 145.50);
+      expect(veri['adet'], 2);
+    });
+  });
+
   group('Uygulama Iskeleti Testi', () {
     testWidgets('Uygulama MultiProvider ile ayağa kalkmalı', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -79,7 +109,6 @@ void main() {
         ),
       );
 
-      // İlk anda CircularProgressIndicator veya ana sayfa aranır
       await tester.pump();
       expect(find.byType(FiyatGozUygulamasi), findsOneWidget);
     });

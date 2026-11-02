@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
+import '../../bilesenler/ozel_buton.dart';
+import '../../yoneticiler/fiyat_onay_yoneticisi.dart';
 
 /// Kolay Mod - Fiyat Onay Ekranı (Stitch: kolay_mod_fiyat_onay birebir)
-class KolayModFiyatOnayView extends StatefulWidget {
+class KolayModFiyatOnayView extends StatelessWidget {
   final String? resimYolu;
   final ValueChanged<Map<String, dynamic>> onOnaylandi;
   final VoidCallback onTekrarCek;
@@ -18,103 +21,140 @@ class KolayModFiyatOnayView extends StatefulWidget {
   });
 
   @override
-  State<KolayModFiyatOnayView> createState() => _KolayModFiyatOnayViewState();
-}
-
-class _KolayModFiyatOnayViewState extends State<KolayModFiyatOnayView> {
-  int _adet = 1;
-  final double _seciliFiyat = 24.90;
-  final TextEditingController _urunAdiDenetleyici =
-      TextEditingController(text: 'Sütaş Tam Yağlı Süt (1 Litre)');
-
-  @override
-  void dispose() {
-    _urunAdiDenetleyici.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final yonetici = context.watch<FiyatOnayYoneticisi>();
+    final seciliFiyat = yonetici.seciliFiyat;
+    final adaylar = yonetici.adayFiyatlar;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('FİYAT VE ÜRÜN ONAYI', style: MetinStilleri.kolayModBaslik()),
         backgroundColor: Colors.black,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),
         children: [
-          // Resim Varsa
-          if (widget.resimYolu != null && File(widget.resimYolu!).existsSync())
+          // 1. Resim Varsa
+          if (resimYolu != null && File(resimYolu!).existsSync())
             ClipRRect(
               borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
               child: SizedBox(
                 height: 160,
                 width: double.infinity,
-                child: Image.file(File(widget.resimYolu!), fit: BoxFit.cover),
+                child: Image.file(File(resimYolu!), fit: BoxFit.cover),
               ),
             ),
           const SizedBox(height: Olculer.boslukBuyuk),
 
-          // Devasa Sarı Kutu: Ürün ve Fiyat
+          // 2. Tarama Bildirimi
+          if (yonetici.yukleniyor) ...[
+            Container(
+              padding: const EdgeInsets.all(Olculer.boslukOrta),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                border: Border.all(color: UygulamaRenkleri.kolayModSari, width: 2),
+              ),
+              child: const Row(
+                children: [
+                  CircularProgressIndicator(color: UygulamaRenkleri.kolayModSari),
+                  SizedBox(width: 16),
+                  Text(
+                    'Etiket Okunuyor...',
+                    style: TextStyle(color: UygulamaRenkleri.kolayModSari, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Olculer.boslukBuyuk),
+          ],
+
+          // 3. Devasa Sarı Kutu: Ürün ve Fiyat
           Container(
             padding: const EdgeInsets.all(Olculer.boslukBuyuk),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E),
+              color: UygulamaRenkleri.kolayModSari,
               borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-              border: Border.all(color: UygulamaRenkleri.kolayModSari, width: 2),
+              border: Border.all(color: Colors.white, width: 3),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.check_circle, color: UygulamaRenkleri.kolayModSari, size: 28),
-                    const SizedBox(width: 8),
-                    Text('ONAYLANAN ÜRÜN', style: MetinStilleri.aciklama(renk: Colors.white70).copyWith(fontWeight: FontWeight.bold)),
+                    Icon(Icons.check_circle_rounded, color: Colors.black, size: 28),
+                    SizedBox(width: 8),
+                    Text(
+                      'ALGILANAN BİLGİ',
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 16),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: Olculer.boslukOrta),
                 Text(
-                  _urunAdiDenetleyici.text,
-                  style: MetinStilleri.kolayModBaslik(renk: Colors.white),
+                  yonetici.urunAdiDenetleyici.text.isNotEmpty
+                      ? yonetici.urunAdiDenetleyici.text
+                      : 'Ürün Adı',
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.black),
                 ),
                 const SizedBox(height: Olculer.boslukOrta),
-                Text('Kasa Fiyatı:', style: MetinStilleri.govde(renk: Colors.white70)),
-                Text('${_seciliFiyat.toStringAsFixed(2)} ₺', style: MetinStilleri.kolayModDev()),
+                Text(
+                  seciliFiyat != null
+                      ? '${seciliFiyat.toStringAsFixed(2)} ₺'
+                      : 'Fiyat Bekleniyor',
+                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.black),
+                ),
               ],
             ),
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
 
-          // Adet Seçimi (Büyük Butonlar)
+          // 4. Alternatif Fiyat Çipleri (Varsa)
+          if (adaylar.length > 1) ...[
+            Text('DİĞER BULUNAN FİYATLAR:', style: MetinStilleri.kolayModGovde(renk: Colors.white70)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 10,
+              children: adaylar.map((f) {
+                final secili = (seciliFiyat != null && (seciliFiyat - f).abs() < 0.01);
+                return ActionChip(
+                  label: Text('${f.toStringAsFixed(2)} ₺', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: secili ? Colors.black : Colors.white)),
+                  backgroundColor: secili ? UygulamaRenkleri.kolayModSari : const Color(0xFF2A2A2A),
+                  side: BorderSide(color: secili ? Colors.white : Colors.white38, width: 2),
+                  onPressed: () => yonetici.fiyatSec(f),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: Olculer.boslukBuyuk),
+          ],
+
+          // 5. Devasa Adet Sayacı
           Container(
-            padding: const EdgeInsets.all(Olculer.boslukOrta),
+            padding: const EdgeInsets.symmetric(horizontal: Olculer.boslukBuyuk, vertical: Olculer.boslukOrta),
             decoration: BoxDecoration(
               color: const Color(0xFF1E1E1E),
-              borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-              border: Border.all(color: Colors.white24, width: 2),
+              borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
+              border: Border.all(color: Colors.white30, width: 2),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('KAÇ ADET ALIYORSUNUZ?', style: MetinStilleri.govdeKalin(renk: Colors.white)),
+                Text('ADET', style: MetinStilleri.kolayModBaslik()),
                 Row(
                   children: [
                     IconButton(
-                      onPressed: _adet > 1 ? () => setState(() => _adet--) : null,
-                      icon: const Icon(Icons.remove, size: 30),
-                      style: IconButton.styleFrom(backgroundColor: const Color(0xFF2E2E2E), foregroundColor: Colors.white),
+                      onPressed: yonetici.adet > 1 ? yonetici.adetAzalt : null,
+                      icon: const Icon(Icons.remove_circle, color: UygulamaRenkleri.kolayModSari, size: 44),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('$_adet', style: MetinStilleri.kolayModBaslik()),
-                    ),
+                    const SizedBox(width: 8),
+                    Text('${yonetici.adet}', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white)),
+                    const SizedBox(width: 8),
                     IconButton(
-                      onPressed: () => setState(() => _adet++),
-                      icon: const Icon(Icons.add, size: 30),
-                      style: IconButton.styleFrom(backgroundColor: UygulamaRenkleri.kolayModSari, foregroundColor: Colors.black),
+                      onPressed: yonetici.adetArtir,
+                      icon: const Icon(Icons.add_circle, color: UygulamaRenkleri.kolayModSari, size: 44),
                     ),
                   ],
                 ),
@@ -123,32 +163,29 @@ class _KolayModFiyatOnayViewState extends State<KolayModFiyatOnayView> {
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
 
-          // 2 Büyük Aksiyon Butonu
-          SizedBox(
-            height: 72,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                widget.onOnaylandi({
-                  'ad': _urunAdiDenetleyici.text,
-                  'birimFiyat': _seciliFiyat,
-                  'adet': _adet,
-                  'resimYolu': widget.resimYolu,
-                });
-              },
-              icon: const Icon(Icons.shopping_cart, color: Colors.black, size: 30),
-              label: Text('SEPETE EKLE (${(_seciliFiyat * _adet).toStringAsFixed(2)} ₺)', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)),
-              style: ElevatedButton.styleFrom(backgroundColor: UygulamaRenkleri.kolayModSari),
-            ),
+          // 6. Büyük Ekle ve Yeniden Çek Butonları
+          OzelButon(
+            metin: 'SEPETE EKLE',
+            ikon: Icons.shopping_cart_rounded,
+            onPressed: () {
+              final veri = yonetici.onayVerisiHazirla();
+              if (veri != null) {
+                onOnaylandi(veri);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lütfen geçerli bir fiyat giriniz.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
           ),
           const SizedBox(height: Olculer.boslukOrta),
-          SizedBox(
-            height: 64,
-            child: ElevatedButton.icon(
-              onPressed: widget.onTekrarCek,
-              icon: const Icon(Icons.camera_alt, color: Colors.white),
-              label: const Text('TEKRAR ÇEK / FARKLI ÜRÜN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E2E2E)),
-            ),
+          OzelButon(
+            metin: 'YENİDEN ÇEK',
+            tip: ButonTipi.cizgili,
+            onPressed: onTekrarCek,
           ),
         ],
       ),
