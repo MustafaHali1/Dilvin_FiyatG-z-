@@ -5,6 +5,9 @@ import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../modeller/profil_modeli.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
+import '../../yoneticiler/kullanici_yoneticisi.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
+import '../profil/kullanici_profili_ekrani.dart';
 
 /// Ayarlar ve Kişiselleştirme Ekranı
 class AyarlarEkrani extends StatelessWidget {
@@ -16,6 +19,7 @@ class AyarlarEkrani extends StatelessWidget {
   Widget build(BuildContext context) {
     final profilYoneticisi = context.watch<ProfilYoneticisi>();
     final profil = profilYoneticisi.profil;
+    final kullanici = context.watch<KullaniciYoneticisi>().kullanici;
 
     return Scaffold(
       backgroundColor: UygulamaRenkleri.arkaPlan,
@@ -27,6 +31,56 @@ class AyarlarEkrani extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),
         children: [
+          // Kullanıcı Hesabı Bölümü
+          Text('KULLANICI HESABI', style: MetinStilleri.aciklama().copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: Olculer.boslukKucuk),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+              );
+            },
+            borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+            child: Container(
+              padding: const EdgeInsets.all(Olculer.boslukOrta),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                border: Border.all(color: UygulamaRenkleri.cizgi),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: UygulamaRenkleri.anaZumrut,
+                    child: Text(
+                      kullanici.adSoyad.isNotEmpty ? kullanici.adSoyad[0].toUpperCase() : 'U',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: Olculer.boslukOrta),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(kullanici.adSoyad, style: MetinStilleri.govdeKalin()),
+                        const SizedBox(height: 2),
+                        Text(
+                          kullanici.eposta,
+                          style: MetinStilleri.aciklama(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: UygulamaRenkleri.griYazi),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukBuyuk),
+
           // Bütçe Ayarları Bölümü
           Text('BÜTÇE AYARLARI', style: MetinStilleri.aciklama().copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: Olculer.boslukKucuk),
@@ -451,11 +505,14 @@ class AyarlarEkrani extends StatelessWidget {
             child: const Text('Vazgeç'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Tüm geçmiş temizlendi.')),
-              );
+              await context.read<FisYoneticisi>().tumFisleriTemizle();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Tüm alışveriş geçmişi veritabanından temizlendi.')),
+                );
+              }
             },
             child: const Text('Sil', style: TextStyle(color: UygulamaRenkleri.tehlikeKirmizi)),
           ),

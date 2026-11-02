@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
+import '../profil/kullanici_profili_ekrani.dart';
 import '../kamera/kamera_tarayici_ekrani.dart';
 import '../sepet/sepet_ekrani.dart';
 
@@ -140,15 +142,31 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
         _asistanCevabi = 'Sütaş Tam Yağlı Süt birim fiyatı 24 lira 90 kuruştur.';
       });
     } else if (komut.contains('fiş')) {
-      setState(() {
-        _asistanCevabi = 'Alışveriş tamamlanıyor, dijital fişiniz ekrana getiriliyor.';
-      });
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const FisDetayEkrani(),
-        ),
-      );
+      if (sepet.urunler.isNotEmpty) {
+        setState(() {
+          _asistanCevabi = 'Alışverişiniz veritabanına kaydedildi, dijital fişiniz ekrana getiriliyor.';
+        });
+        final fisYoneticisi = context.read<FisYoneticisi>();
+        fisYoneticisi.sepettenFisOlusturVeKaydet(
+          urunler: sepet.urunler,
+          marketAdi: 'Market',
+          aciklama: 'Sesli Asistan Alışveriş Fişi',
+        ).then((yeniFis) {
+          sepet.sepetiBosalt();
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FisDetayEkrani(fis: yeniFis),
+              ),
+            );
+          }
+        });
+      } else {
+        setState(() {
+          _asistanCevabi = 'Sepetiniz boş olduğu için fiş oluşturulamadı.';
+        });
+      }
     }
 
     _seslendir(_asistanCevabi);
@@ -210,12 +228,20 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
             onPressed: () => _seslendir(_asistanCevabi),
             tooltip: 'Cevabı Sesli Tekrar Oku',
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: Color(0xFFFFF5DC),
-              child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+                );
+              },
+              borderRadius: BorderRadius.circular(18),
+              child: const CircleAvatar(
+                radius: 18,
+                backgroundColor: Color(0xFFFFF5DC),
+                child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
+              ),
             ),
           ),
         ],

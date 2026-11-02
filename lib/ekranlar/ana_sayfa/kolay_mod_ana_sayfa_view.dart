@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
+import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
+import '../profil/kullanici_profili_ekrani.dart';
+import '../fis_detay/fis_detay_ekrani.dart';
 
 /// Kolay Mod - Ana Sayfa (Stitch: kolay_mod_ana_sayfa birebir)
 class KolayModAnaSayfaView extends StatelessWidget {
@@ -20,6 +25,9 @@ class KolayModAnaSayfaView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sepet = context.watch<SepetYoneticisi>();
+    final fisYoneticisi = context.watch<FisYoneticisi>();
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -49,13 +57,31 @@ class KolayModAnaSayfaView extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
-                  onPressed: onSesliAsistanAc,
-                  icon: const Icon(Icons.volume_up_rounded, color: Colors.black, size: 30),
-                  style: IconButton.styleFrom(
-                    backgroundColor: UygulamaRenkleri.kolayModSari,
-                    padding: const EdgeInsets.all(12),
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+                        );
+                      },
+                      icon: const Icon(Icons.person_rounded, color: Colors.black, size: 28),
+                      style: IconButton.styleFrom(
+                        backgroundColor: UygulamaRenkleri.kolayModSari,
+                        padding: const EdgeInsets.all(10),
+                      ),
+                      tooltip: 'Kullanıcı Profili',
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: onSesliAsistanAc,
+                      icon: const Icon(Icons.volume_up_rounded, color: Colors.black, size: 30),
+                      style: IconButton.styleFrom(
+                        backgroundColor: UygulamaRenkleri.kolayModSari,
+                        padding: const EdgeInsets.all(10),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -240,7 +266,7 @@ class KolayModAnaSayfaView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Sepetime Git', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black)),
-                          const Text('4 Ürün • 287,40 ₺', style: TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
+                          Text('${sepet.toplamUrunAdedi} Ürün • ${sepet.toplamTutar.toStringAsFixed(2)} ₺', style: const TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -251,30 +277,44 @@ class KolayModAnaSayfaView extends StatelessWidget {
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
-            // 4. Son Alışverişler (2 Büyük Kart)
+            // 4. Son Alışverişler (Canlı SQLite)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('SON ALIŞVERİŞLER', style: MetinStilleri.kolayModBaslik()),
-                Text('2 Kayıt', style: MetinStilleri.govde(renk: Colors.white70)),
+                Text('${fisYoneticisi.fisSayisi} Kayıt', style: MetinStilleri.govde(renk: Colors.white70)),
               ],
             ),
             const SizedBox(height: Olculer.boslukOrta),
 
-            _KolayModFisKarti(
-              ad: 'Migros Alışverişi',
-              tarihFiyat: 'Dün • 648,75 ₺',
-              fisNo: 'Fiş #841',
-              onSesliDinle: onSesliAsistanAc,
-              onDetay: onAyarlaraGit,
-            ),
-            _KolayModFisKarti(
-              ad: 'BİM Market',
-              tarihFiyat: '28 Ekim • 342,10 ₺',
-              fisNo: 'Fiş #840',
-              onSesliDinle: onSesliAsistanAc,
-              onDetay: onAyarlaraGit,
-            ),
+            if (fisYoneticisi.fisler.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
+                  border: Border.all(color: Colors.white24, width: 2),
+                ),
+                child: Center(
+                  child: Text(
+                    'Kayıtlı fiş bulunmuyor.',
+                    style: MetinStilleri.kolayModGovde(renk: Colors.white70),
+                  ),
+                ),
+              )
+            else
+              for (final fis in fisYoneticisi.fisler.take(3))
+                _KolayModFisKarti(
+                  ad: fis.aciklama,
+                  tarihFiyat: '${fis.tarih.day}.${fis.tarih.month}.${fis.tarih.year} • ${fis.toplamTutar.toStringAsFixed(2)} ₺',
+                  fisNo: fis.id,
+                  onSesliDinle: onSesliAsistanAc,
+                  onDetay: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => FisDetayEkrani(fis: fis)),
+                    );
+                  },
+                ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
             // En Altta SESLİ YARDIM AL Butonu

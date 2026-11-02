@@ -42,9 +42,10 @@ class UrunModeli {
     );
   }
 
-  Map<String, dynamic> haritayaDonustur() {
+  Map<String, dynamic> toMap({String? fisId}) {
     return {
       'id': id,
+      'fis_id': ?fisId,
       'ad': ad,
       'birim_fiyat': birimFiyat,
       'eski_fiyat': eskiFiyat,
@@ -54,15 +55,20 @@ class UrunModeli {
     };
   }
 
-  factory UrunModeli.haritadanOlustur(Map<String, dynamic> harita) {
+  Map<String, dynamic> haritayaDonustur() => toMap();
+
+  factory UrunModeli.fromMap(Map<String, dynamic> map) {
     return UrunModeli(
-      id: harita['id'] as String,
-      ad: harita['ad'] as String,
-      birimFiyat: (harita['birim_fiyat'] as num).toDouble(),
-      eskiFiyat: harita['eski_fiyat'] != null ? (harita['eski_fiyat'] as num).toDouble() : null,
-      adet: harita['adet'] as int? ?? 1,
-      gorselYolu: harita['gorsel_yolu'] as String?,
-      yapayZekaIleTanindi: (harita['ai_tanidi'] as int? ?? 0) == 1,
+      id: map['id'] as String,
+      ad: map['ad'] as String,
+      birimFiyat: (map['birim_fiyat'] as num).toDouble(),
+      eskiFiyat: map['eski_fiyat'] != null ? (map['eski_fiyat'] as num).toDouble() : null,
+      adet: map['adet'] as int? ?? 1,
+      gorselYolu: map['gorsel_yolu'] as String?,
+      yapayZekaIleTanindi: (map['ai_tanidi'] as int? ?? 0) == 1,
     );
   }
+
+  factory UrunModeli.haritadanOlustur(Map<String, dynamic> harita) =>
+      UrunModeli.fromMap(harita);
 }

@@ -4,6 +4,8 @@ import 'sabitler/tema_fabrikasi.dart';
 import 'servisler/kamera_servisi.dart';
 import 'yoneticiler/sepet_yoneticisi.dart';
 import 'yoneticiler/profil_yoneticisi.dart';
+import 'yoneticiler/fis_yoneticisi.dart';
+import 'yoneticiler/kullanici_yoneticisi.dart';
 import 'ekranlar/onboarding/onboarding_ekrani.dart';
 import 'ekranlar/onboarding/okuma_testi_ekrani.dart';
 import 'ekranlar/onboarding/renk_korlugu_secim_ekrani.dart';
@@ -18,7 +20,6 @@ import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
 import 'ekranlar/sepet/gorme_engelli_sepet_view.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import 'bilesenler/sesli_asistan_sayfasi.dart';
-import 'modeller/fis_modeli.dart';
 import 'modeller/urun_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
@@ -31,6 +32,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ProfilYoneticisi()),
         ChangeNotifierProvider(create: (_) => SepetYoneticisi()),
+        ChangeNotifierProvider(create: (_) => FisYoneticisi()),
+        ChangeNotifierProvider(create: (_) => KullaniciYoneticisi()),
       ],
       child: const FiyatGozUygulamasi(),
     ),
@@ -239,23 +242,34 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
     );
   }
 
-  void _fisDetaySayfasiniAc(BuildContext context, SepetYoneticisi sepet) {
-    final ornekFis = FisModeli(
-      id: 'FG-84920',
-      aciklama: 'Migros Haftalık Alışveriş',
-      tarih: DateTime.now(),
+  void _fisDetaySayfasiniAc(BuildContext context, SepetYoneticisi sepet) async {
+    if (sepet.urunler.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sepetiniz boş. Fiş oluşturmak için ürün ekleyin.')),
+      );
+      return;
+    }
+
+    final fisYoneticisi = context.read<FisYoneticisi>();
+    final yeniFis = await fisYoneticisi.sepettenFisOlusturVeKaydet(
       urunler: sepet.urunler,
+      marketAdi: 'Migros Jet',
+      aciklama: 'Haftalık Market Alışverişi',
     );
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => FisDetayEkrani(
-          fis: ornekFis,
-          onPaylas: () {},
-          onSesliOku: () {},
+    sepet.sepetiBosalt();
+
+    if (context.mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => FisDetayEkrani(
+            fis: yeniFis,
+            onPaylas: () {},
+            onSesliOku: () {},
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   void _sesliAsistaniAc(BuildContext context) {

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
+import '../profil/kullanici_profili_ekrani.dart';
 import '../kamera/kamera_tarayici_ekrani.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 
@@ -115,12 +117,20 @@ class _GormeEngelliSepetViewState extends State<GormeEngelliSepetView> {
             onPressed: () => _sepetiBastanSonaOku(sepet),
             tooltip: 'Sepeti Sesli Tekrar Oku',
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: Color(0xFFFFF5DC),
-              child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+                );
+              },
+              borderRadius: BorderRadius.circular(18),
+              child: const CircleAvatar(
+                radius: 18,
+                backgroundColor: Color(0xFFFFF5DC),
+                child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
+              ),
             ),
           ),
         ],
@@ -438,14 +448,27 @@ class _GormeEngelliSepetViewState extends State<GormeEngelliSepetView> {
                   const SizedBox(height: 16),
                   // Alışverişi Bitir & Fişi Dinle Butonu (Min 80px)
                   ElevatedButton(
-                    onPressed: () {
-                      _seslendir('Alışveriş tamamlandı. Dijital fiş ekranına geçiliyor.');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FisDetayEkrani(),
-                        ),
+                    onPressed: () async {
+                      if (sepet.urunler.isEmpty) {
+                        _seslendir('Sepetiniz boş. Fiş oluşturulamıyor.');
+                        return;
+                      }
+                      _seslendir('Alışveriş tamamlandı. Fişiniz veritabanına kaydedildi ve detay ekranına geçiliyor.');
+                      final fisYoneticisi = context.read<FisYoneticisi>();
+                      final yeniFis = await fisYoneticisi.sepettenFisOlusturVeKaydet(
+                        urunler: sepet.urunler,
+                        marketAdi: 'Market',
+                        aciklama: 'Sesli Alışveriş Fişi',
                       );
+                      sepet.sepetiBosalt();
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FisDetayEkrani(fis: yeniFis),
+                          ),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFD600),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../modeller/profil_modeli.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
 import 'standart_sepet_view.dart';
 import 'kolay_mod_sepet_view.dart';
 import 'renk_koru_sepet_view.dart';
@@ -40,13 +41,28 @@ class SepetEkrani extends StatelessWidget {
         };
 
     final varsayilanAlisverisiBitir = onAlisverisiBitir ??
-        () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (ctx) => const FisDetayEkrani(),
-            ),
+        () async {
+          if (sepet.urunler.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Sepetiniz boş. Fiş oluşturmak için ürün ekleyin.')),
+            );
+            return;
+          }
+          final fisYoneticisi = context.read<FisYoneticisi>();
+          final yeniFis = await fisYoneticisi.sepettenFisOlusturVeKaydet(
+            urunler: sepet.urunler,
+            marketAdi: 'Migros Jet',
+            aciklama: 'Haftalık Alışveriş Fişi',
           );
+          sepet.sepetiBosalt();
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => FisDetayEkrani(fis: yeniFis),
+              ),
+            );
+          }
         };
 
     switch (profil.profilTuru) {

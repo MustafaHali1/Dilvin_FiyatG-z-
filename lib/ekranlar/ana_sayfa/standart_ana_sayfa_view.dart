@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
-import '../../modeller/fis_modeli.dart';
-import '../../modeller/urun_modeli.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
+import '../../yoneticiler/kullanici_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
+import '../profil/kullanici_profili_ekrani.dart';
+import '../fis_detay/fis_detay_ekrani.dart';
 import 'bilesenler/butce_ozet_karti.dart';
 import 'bilesenler/fis_karti.dart';
 
@@ -33,39 +37,16 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
 
   final filtreler = ['Tümü', 'Kasım 2026', 'Ekim 2026', 'Eylül 2026'];
 
-  final ornekFisler = [
-    FisModeli(
-      id: '1',
-      aciklama: 'Migros Haftalık Alışveriş',
-      marketAdi: 'Migros',
-      tarih: DateTime.now(),
-      urunler: [
-        const UrunModeli(id: '1', ad: 'Süt', birimFiyat: 24.90, adet: 2),
-      ],
-    ),
-    FisModeli(
-      id: '2',
-      aciklama: 'BİM Temizlik ve Kahvaltı',
-      marketAdi: 'BİM',
-      tarih: DateTime.now().subtract(const Duration(days: 3)),
-      urunler: [
-        const UrunModeli(id: '2', ad: 'Peynir', birimFiyat: 148.70, adet: 1),
-      ],
-    ),
-    FisModeli(
-      id: '3',
-      aciklama: 'A101 Manav & Süt',
-      marketAdi: 'A101',
-      tarih: DateTime.now().subtract(const Duration(days: 7)),
-      urunler: [
-        const UrunModeli(id: '3', ad: 'Yumurta', birimFiyat: 64.90, adet: 1),
-      ],
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final filtrelenmis = ornekFisler.where((f) {
+    final fisYoneticisi = context.watch<FisYoneticisi>();
+    final kullaniciYoneticisi = context.watch<KullaniciYoneticisi>();
+    final profilYoneticisi = context.watch<ProfilYoneticisi>();
+
+    final kullaniciAdi = kullaniciYoneticisi.kullanici.adSoyad.split(' ').first;
+    final fisler = fisYoneticisi.fisler;
+
+    final filtrelenmis = fisler.where((f) {
       if (_arama.isEmpty) return true;
       return f.aciklama.toLowerCase().contains(_arama.toLowerCase()) ||
           f.marketAdi.toLowerCase().contains(_arama.toLowerCase());
@@ -84,7 +65,7 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Merhaba 👋', style: MetinStilleri.baslik1()),
+                    Text('Merhaba $kullaniciAdi 👋', style: MetinStilleri.baslik1()),
                     const SizedBox(height: 2),
                     Text(
                       'Alışveriş harcamalarını kolayca takip et',
@@ -94,11 +75,28 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                 ),
                 Row(
                   children: [
+                    // Profil Butonu
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const KullaniciProfiliEkrani(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.person_rounded, color: UygulamaRenkleri.anaKoyu, size: 24),
+                      style: IconButton.styleFrom(
+                        backgroundColor: UygulamaRenkleri.anaAcik,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
+                      ),
+                      tooltip: 'Kullanıcı Profili',
+                    ),
+                    const SizedBox(width: 8),
                     IconButton(
                       onPressed: widget.onSesliAsistanAc,
                       icon: const Icon(Icons.mic_rounded, color: UygulamaRenkleri.anaZumrut, size: 24),
                       style: IconButton.styleFrom(
-                        backgroundColor: UygulamaRenkleri.anaAcik,
+                        backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
                       ),
                     ),
@@ -117,8 +115,11 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
-            // Bütçe Özet Kartı
-            const ButceOzetKarti(harcanan: 3482.50, butce: 5000.00),
+            // Canlı SQLite Bütçe Özet Kartı
+            ButceOzetKarti(
+              harcanan: fisYoneticisi.buAyHarcama,
+              butce: profilYoneticisi.profil.aylikButce,
+            ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
             // Arama Çubuğu
@@ -184,8 +185,41 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
             ),
             const SizedBox(height: Olculer.boslukOrta),
 
-            // Fiş Listesi
-            for (final fis in filtrelenmis) FisKarti(fis: fis),
+            // Fiş Listesi veya Boş Durum
+            if (filtrelenmis.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                  border: Border.all(color: UygulamaRenkleri.cizgi),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.receipt_long_outlined, size: 48, color: UygulamaRenkleri.griYazi),
+                    const SizedBox(height: 8),
+                    Text('Henüz Kayıtlı Fiş Yok', style: MetinStilleri.govdeKalin()),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Sepeti tamamlayıp ilk alışveriş fişinizi kaydedin.',
+                      style: MetinStilleri.aciklama(),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              for (final fis in filtrelenmis)
+                FisKarti(
+                  fis: fis,
+                  onDokunuldu: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => FisDetayEkrani(fis: fis),
+                      ),
+                    );
+                  },
+                ),
           ],
         ),
       ),

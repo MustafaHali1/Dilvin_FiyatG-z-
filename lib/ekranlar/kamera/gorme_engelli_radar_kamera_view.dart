@@ -7,6 +7,7 @@ import '../../modeller/urun_modeli.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../sepet/sepet_ekrani.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
+import '../profil/kullanici_profili_ekrani.dart';
 
 /// Görme Engelli / Sesli Radar ve Haptik Kamera Ekranı
 /// (Stitch: sesli_radar_kamera birebir)
@@ -186,12 +187,20 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
             },
             tooltip: 'Ekranı Sesli Tekrar Oku',
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: Color(0xFFFFF5DC),
-              child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+                );
+              },
+              borderRadius: BorderRadius.circular(18),
+              child: const CircleAvatar(
+                radius: 18,
+                backgroundColor: Color(0xFFFFF5DC),
+                child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
+              ),
             ),
           ),
         ],

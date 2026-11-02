@@ -5,6 +5,9 @@ import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
+import '../../yoneticiler/fis_yoneticisi.dart';
+import '../profil/kullanici_profili_ekrani.dart';
+import '../fis_detay/fis_detay_ekrani.dart';
 
 /// Renk Körü Modu - Ana Sayfa (Stitch: renk_k_r_ana_sayfa birebir)
 class RenkKoruAnaSayfaView extends StatelessWidget {
@@ -25,10 +28,16 @@ class RenkKoruAnaSayfaView extends StatelessWidget {
   Widget build(BuildContext context) {
     final profil = context.watch<ProfilYoneticisi>().profil;
     final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
+    final fisYoneticisi = context.watch<FisYoneticisi>();
 
     final anaRenk = palet.primary;
     final ikincilRenk = palet.secondary;
     final uyariRenk = palet.warning;
+
+    final harcanan = fisYoneticisi.buAyHarcama;
+    final butce = profil.aylikButce;
+    final yuzde = butce > 0 ? (harcanan / butce) : 0.0;
+    final kalan = butce - harcanan;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -57,10 +66,25 @@ class RenkKoruAnaSayfaView extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
-                  onPressed: onSesliAsistanAc,
-                  icon: const Icon(Icons.mic_rounded, color: Colors.white),
-                  style: IconButton.styleFrom(backgroundColor: anaRenk),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+                        );
+                      },
+                      icon: const Icon(Icons.person_rounded, color: Colors.white),
+                      style: IconButton.styleFrom(backgroundColor: anaRenk),
+                      tooltip: 'Kullanıcı Profili',
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: onSesliAsistanAc,
+                      icon: const Icon(Icons.mic_rounded, color: Colors.white),
+                      style: IconButton.styleFrom(backgroundColor: anaRenk),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -91,17 +115,17 @@ class RenkKoruAnaSayfaView extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Text('Hedef: ${profil.aylikButce.toStringAsFixed(0)} ₺', style: const TextStyle(color: Colors.white70)),
+                      Text('Hedef: ${butce.toStringAsFixed(0)} ₺', style: const TextStyle(color: Colors.white70)),
                     ],
                   ),
                   const SizedBox(height: Olculer.boslukOrta),
-                  const Text('3.482,50 ₺', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white)),
+                  Text('${harcanan.toStringAsFixed(2)} ₺', style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white)),
                   const SizedBox(height: Olculer.boslukOrta),
                   // İki Renkli Güvenli Çubuk
                   ClipRRect(
                     borderRadius: BorderRadius.circular(Olculer.yariCapTam),
                     child: LinearProgressIndicator(
-                      value: 0.70,
+                      value: yuzde.clamp(0.0, 1.0),
                       minHeight: 12,
                       backgroundColor: Colors.white24,
                       valueColor: AlwaysStoppedAnimation<Color>(anaRenk),
@@ -111,8 +135,8 @@ class RenkKoruAnaSayfaView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('%70 Dolu [✓ Güvenli]', style: TextStyle(color: anaRenk, fontWeight: FontWeight.bold)),
-                      Text('Kalan: +1.517,50 ₺', style: TextStyle(color: uyariRenk, fontWeight: FontWeight.bold)),
+                      Text('%${(yuzde * 100).toStringAsFixed(0)} Dolu [✓ Güvenli]', style: TextStyle(color: anaRenk, fontWeight: FontWeight.bold)),
+                      Text('Kalan: ${kalan >= 0 ? "+" : ""}${kalan.toStringAsFixed(2)} ₺', style: TextStyle(color: uyariRenk, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -137,30 +161,39 @@ class RenkKoruAnaSayfaView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(border: Border.all(color: anaRenk), borderRadius: BorderRadius.circular(4)),
-                  child: Text('2 Fiş Kayıtlı', style: TextStyle(color: anaRenk, fontWeight: FontWeight.bold)),
+                  child: Text('${fisYoneticisi.fisSayisi} Fiş Kayıtlı', style: TextStyle(color: anaRenk, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
             const SizedBox(height: Olculer.boslukOrta),
 
-            _RenkKoruFisKarti(
-              ad: 'Migros Haftalık Alışveriş',
-              market: 'Migros',
-              fiyat: '648,75 ₺',
-              urunSayisi: 8,
-              vurguRengi: anaRenk,
-              ikincilRenk: ikincilRenk,
-              onTap: onAyarlaraGit,
-            ),
-            _RenkKoruFisKarti(
-              ad: 'BİM Temizlik ve Kahvaltı',
-              market: 'BİM',
-              fiyat: '342,10 ₺',
-              urunSayisi: 4,
-              vurguRengi: anaRenk,
-              ikincilRenk: ikincilRenk,
-              onTap: onAyarlaraGit,
-            ),
+            if (fisYoneticisi.fisler.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                  border: Border.all(color: anaRenk, width: 1.5),
+                ),
+                child: Center(
+                  child: Text('Kayıtlı fiş bulunmuyor.', style: TextStyle(color: anaRenk, fontWeight: FontWeight.bold)),
+                ),
+              )
+            else
+              for (final fis in fisYoneticisi.fisler)
+                _RenkKoruFisKarti(
+                  ad: fis.aciklama,
+                  market: fis.marketAdi,
+                  fiyat: '${fis.toplamTutar.toStringAsFixed(2)} ₺',
+                  urunSayisi: fis.toplamUrunAdedi,
+                  vurguRengi: anaRenk,
+                  ikincilRenk: ikincilRenk,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => FisDetayEkrani(fis: fis)),
+                    );
+                  },
+                ),
           ],
         ),
       ),
@@ -189,44 +222,59 @@ class _RenkKoruFisKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
-      padding: const EdgeInsets.all(Olculer.boslukOrta),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-        border: Border.all(color: vurguRengi, width: 2), // Kalın çerçeve
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: vurguRengi.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
+        padding: const EdgeInsets.all(Olculer.boslukOrta),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+          border: Border.all(color: vurguRengi, width: 2), // Kalın kenarlıkla garanti görünürlük
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: vurguRengi.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+                border: Border.all(color: vurguRengi),
+              ),
+              child: Icon(Icons.shopping_bag_outlined, color: vurguRengi),
             ),
-            child: Icon(Icons.receipt_long_rounded, color: vurguRengi),
-          ),
-          const SizedBox(width: Olculer.boslukOrta),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: Olculer.boslukOrta),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ad, style: MetinStilleri.govdeKalin(), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: ikincilRenk.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
+                        child: Text(market, style: TextStyle(color: ikincilRenk, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('$urunSayisi ürün', style: MetinStilleri.aciklama()),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(ad, style: MetinStilleri.govdeKalin()),
-                Row(
-                  children: [
-                    Text('[$market]', style: TextStyle(fontWeight: FontWeight.bold, color: vurguRengi)),
-                    const SizedBox(width: 6),
-                    Text('$urunSayisi ürün', style: MetinStilleri.aciklama()),
-                  ],
-                ),
+                Text(fiyat, style: MetinStilleri.fiyat(boyut: 18, renk: vurguRengi)),
+                const Icon(Icons.chevron_right_rounded, color: Colors.black45),
               ],
             ),
-          ),
-          Text(fiyat, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)),
-          const SizedBox(width: 4),
-          Icon(Icons.arrow_forward_ios_rounded, size: 16, color: vurguRengi),
-        ],
+          ],
+        ),
       ),
     );
   }
