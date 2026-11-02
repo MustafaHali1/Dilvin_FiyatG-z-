@@ -101,7 +101,16 @@ class StandartFisView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('TOPLAM:', style: MetinStilleri.baslik1().copyWith(fontFamily: 'monospace')),
-                  FiyatEtiketi(tutar: fis.toplamTutar, boyut: 24),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: FiyatEtiketi(tutar: fis.toplamTutar, boyut: 24),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: Olculer.boslukBuyuk),

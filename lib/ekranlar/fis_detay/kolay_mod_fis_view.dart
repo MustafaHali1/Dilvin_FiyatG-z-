@@ -98,13 +98,21 @@ class KolayModFisView extends StatelessWidget {
 
               const Divider(height: 36, thickness: 2, color: Colors.white24),
 
+              // Toplam Tutar Satırı (FittedBox ile 0px taşma garantisi)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('TOPLAM:', style: MetinStilleri.kolayModBaslik()),
-                  Text(
-                    '${fis.toplamTutar.toStringAsFixed(2)} ₺',
-                    style: MetinStilleri.kolayModDev(),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '${fis.toplamTutar.toStringAsFixed(2)} ₺',
+                        style: MetinStilleri.kolayModDev(),
+                      ),
+                    ),
                   ),
                 ],
               ),
