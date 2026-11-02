@@ -24,7 +24,17 @@ class StandartSepetView extends StatelessWidget {
     required this.onAlisverisiBitir,
   });
 
-  void _sepetiSesliOku() {
+  void _sepetiSesliOku(BuildContext context) {
+    final profil = context.read<ProfilYoneticisi>().profil;
+    if (!profil.sesliAsistanAcik) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sesli okuma ayarlardan kapalı.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     if (sepet.urunler.isEmpty) {
       SesliAsistanServisi().konus('Sepetiniz şu anda boş.');
       return;
@@ -38,9 +48,18 @@ class StandartSepetView extends StatelessWidget {
   }
 
   void _sepetSesliKomutDinle(BuildContext context) {
+    final profil = context.read<ProfilYoneticisi>().profil;
+    if (!profil.sesliAsistanAcik) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sesli Asistan ayarlardan kapalı.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     final asistan = SesliAsistanServisi();
     final komutServisi = SesliKomutServisi();
-    final profil = context.read<ProfilYoneticisi>().profil;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -56,7 +75,7 @@ class StandartSepetView extends StatelessWidget {
           final sonuc = komutServisi.niyetCoz(metin);
           switch (sonuc.tur) {
             case KomutTuru.sepetOzeti:
-              _sepetiSesliOku();
+              _sepetiSesliOku(context);
               break;
             case KomutTuru.butceSorgula:
               final harcanan = sepet.toplamTutar;
@@ -95,7 +114,7 @@ class StandartSepetView extends StatelessWidget {
             tooltip: 'Sesli Asistan ile Konuş',
           ),
           IconButton(
-            onPressed: _sepetiSesliOku,
+            onPressed: () => _sepetiSesliOku(context),
             icon: const Icon(Icons.volume_up_rounded, color: UygulamaRenkleri.anaKoyu, size: 28),
             tooltip: 'Toplamı Sesli Oku',
           ),

@@ -210,13 +210,29 @@ class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
                     IconButton(
                       tooltip: 'Sesli Asistan',
                       onPressed: () {
+                        final profil = context.read<ProfilYoneticisi>().profil;
+                        if (!profil.sesliAsistanAcik) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Sesli Asistan ayarlardan kapalı.'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const SesliAsistanDiyalogEkrani(),
                           ),
                         );
                       },
-                      icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 28),
+                      icon: Icon(
+                        context.watch<ProfilYoneticisi>().profil.sesliAsistanAcik
+                            ? Icons.mic_rounded
+                            : Icons.mic_off_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                       style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(14)),
                     ),
                   ],

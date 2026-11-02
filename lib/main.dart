@@ -180,6 +180,7 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
     ];
 
     final isKolayMod = profil.profilTuru == ProfilTuru.kolayMod;
+    final isAsistanAcik = profil.sesliAsistanAcik;
 
     return Scaffold(
       body: sayfalar[_seciliSayfa.clamp(0, sayfalar.length - 1)],
@@ -220,7 +221,7 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
                   profil: profil,
                 ),
 
-                // 3. Ortada Göz Alıcı Sesli Asistan Mikrofon Butonu (Yuvarlak 6 Çözümü)
+                // 3. Ortada Sesli Asistan Butonu (Ayarlardan kapalıysa sessiz durur ve uyarır)
                 GestureDetector(
                   onTap: () => _sesliAsistaniAc(context),
                   child: Container(
@@ -228,29 +229,38 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
                     height: 56,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: isKolayMod
-                            ? [UygulamaRenkleri.kolayModSari, UygulamaRenkleri.kolayModSari]
-                            : [const Color(0xFF10B981), const Color(0xFF047857)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (isKolayMod
-                                  ? UygulamaRenkleri.kolayModSari
-                                  : UygulamaRenkleri.anaZumrut)
-                              .withValues(alpha: 0.38),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      gradient: isAsistanAcik
+                          ? LinearGradient(
+                              colors: isKolayMod
+                                  ? [UygulamaRenkleri.kolayModSari, UygulamaRenkleri.kolayModSari]
+                                  : [const Color(0xFF10B981), const Color(0xFF047857)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: isAsistanAcik
+                          ? null
+                          : (isKolayMod ? const Color(0xFF262626) : const Color(0xFFE2E8F0)),
+                      boxShadow: isAsistanAcik
+                          ? [
+                              BoxShadow(
+                                color: (isKolayMod
+                                        ? UygulamaRenkleri.kolayModSari
+                                        : UygulamaRenkleri.anaZumrut)
+                                    .withValues(alpha: 0.38),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [],
                     ),
                     child: Center(
                       child: Icon(
-                        Icons.mic_rounded,
-                        color: isKolayMod ? Colors.black : Colors.white,
-                        size: 30,
+                        isAsistanAcik ? Icons.mic_rounded : Icons.mic_off_rounded,
+                        color: isAsistanAcik
+                            ? (isKolayMod ? Colors.black : Colors.white)
+                            : (isKolayMod ? Colors.white38 : const Color(0xFF94A3B8)),
+                        size: 28,
                       ),
                     ),
                   ),
@@ -410,6 +420,30 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
   }
 
   void _sesliAsistaniAc(BuildContext context) {
+    final profilYoneticisi = context.read<ProfilYoneticisi>();
+    if (!profilYoneticisi.profil.sesliAsistanAcik) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Sesli Asistan ayarlardan kapalı.'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          action: SnackBarAction(
+            label: 'Aktif Et',
+            textColor: UygulamaRenkleri.anaZumrut,
+            onPressed: () {
+              profilYoneticisi.sesliAsistanDegistir(true);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SesliAsistanDiyalogEkrani(),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const SesliAsistanDiyalogEkrani(),

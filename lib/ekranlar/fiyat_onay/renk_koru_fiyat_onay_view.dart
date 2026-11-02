@@ -41,11 +41,23 @@ class RenkKoruFiyatOnayView extends StatelessWidget {
         iconTheme: IconThemeData(color: anaRenk),
         actions: [
           IconButton(
+            tooltip: 'Sesli Asistan',
             icon: Icon(
-              yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+              yonetici.dinleniyor
+                  ? Icons.mic
+                  : (profil.sesliAsistanAcik ? Icons.mic_none_rounded : Icons.mic_off_rounded),
               color: yonetici.dinleniyor ? Colors.red : anaRenk,
             ),
             onPressed: () {
+              if (!profil.sesliAsistanAcik) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sesli Asistan ayarlardan kapalı.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               yonetici.sesliKomutDinle(
                 onOnayla: () {
                   final veri = yonetici.onayVerisiHazirla();

@@ -59,6 +59,15 @@ class FisDetayEkrani extends StatelessWidget {
 
     final etkinSesliOku = onSesliOku ??
         () async {
+          if (!profil.sesliAsistanAcik) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Sesli okuma ayarlardan kapalı.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return;
+          }
           HapticFeedback.heavyImpact();
           final asistan = SesliAsistanServisi();
           final urunMetni = etkinFis.urunler
@@ -71,6 +80,15 @@ class FisDetayEkrani extends StatelessWidget {
 
     final etkinSesliAsistan = onSesliAsistan ??
         () {
+          if (!profil.sesliAsistanAcik) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Sesli Asistan ayarlardan kapalı.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return;
+          }
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const SesliAsistanDiyalogEkrani(),

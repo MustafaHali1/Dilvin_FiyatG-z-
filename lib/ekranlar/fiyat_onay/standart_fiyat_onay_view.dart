@@ -7,6 +7,7 @@ import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
 import '../../bilesenler/durum_rozeti.dart';
 import '../../yoneticiler/fiyat_onay_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 
 /// Standart Mod - Fiyat Onay Ekranı (Stitch: fiyat_onay_s_ta_s_t_1l birebir)
 class StandartFiyatOnayView extends StatelessWidget {
@@ -37,10 +38,24 @@ class StandartFiyatOnayView extends StatelessWidget {
           IconButton(
             tooltip: 'Sesli Asistan',
             icon: Icon(
-              yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+              yonetici.dinleniyor
+                  ? Icons.mic
+                  : (context.watch<ProfilYoneticisi>().profil.sesliAsistanAcik
+                      ? Icons.mic_none_rounded
+                      : Icons.mic_off_rounded),
               color: yonetici.dinleniyor ? Colors.red : UygulamaRenkleri.anaZumrut,
             ),
             onPressed: () {
+              final profil = context.read<ProfilYoneticisi>().profil;
+              if (!profil.sesliAsistanAcik) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sesli Asistan ayarlardan kapalı.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               yonetici.sesliKomutDinle(
                 onOnayla: () {
                   final veri = yonetici.onayVerisiHazirla();

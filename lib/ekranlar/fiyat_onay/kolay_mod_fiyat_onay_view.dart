@@ -6,6 +6,7 @@ import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../bilesenler/ozel_buton.dart';
 import '../../yoneticiler/fiyat_onay_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 
 /// Kolay Mod - Fiyat Onay Ekranı (Stitch: kolay_mod_fiyat_onay birebir)
 class KolayModFiyatOnayView extends StatelessWidget {
@@ -35,12 +36,27 @@ class KolayModFiyatOnayView extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
+            tooltip: 'Sesli Asistan',
             icon: Icon(
-              yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+              yonetici.dinleniyor
+                  ? Icons.mic
+                  : (context.watch<ProfilYoneticisi>().profil.sesliAsistanAcik
+                      ? Icons.mic_none_rounded
+                      : Icons.mic_off_rounded),
               color: yonetici.dinleniyor ? Colors.red : const Color(0xFFFFD700),
               size: 32,
             ),
             onPressed: () {
+              final profil = context.read<ProfilYoneticisi>().profil;
+              if (!profil.sesliAsistanAcik) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sesli Asistan ayarlardan kapalı.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               yonetici.sesliKomutDinle(
                 onOnayla: () {
                   final veri = yonetici.onayVerisiHazirla();
@@ -133,6 +149,16 @@ class KolayModFiyatOnayView extends StatelessWidget {
           // 3.5. Devasa Sesli Asistan Butonu (Kolay Mod Özel)
           InkWell(
             onTap: () {
+              final profil = context.read<ProfilYoneticisi>().profil;
+              if (!profil.sesliAsistanAcik) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sesli Asistan ayarlardan kapalı.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               yonetici.sesliKomutDinle(
                 onOnayla: () {
                   final veri = yonetici.onayVerisiHazirla();

@@ -21,7 +21,17 @@ class KolayModSepetView extends StatelessWidget {
     required this.onAlisverisiBitir,
   });
 
-  void _sepetiSesliOku() {
+  void _sepetiSesliOku(BuildContext context) {
+    final profil = context.read<ProfilYoneticisi>().profil;
+    if (!profil.sesliAsistanAcik) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sesli okuma ayarlardan kapalı.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     if (sepet.urunler.isEmpty) {
       SesliAsistanServisi().konus('Sepetiniz şu anda boş.');
       return;
@@ -35,9 +45,18 @@ class KolayModSepetView extends StatelessWidget {
   }
 
   void _sepetSesliKomutDinle(BuildContext context) {
+    final profil = context.read<ProfilYoneticisi>().profil;
+    if (!profil.sesliAsistanAcik) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sesli Asistan ayarlardan kapalı.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     final asistan = SesliAsistanServisi();
     final komutServisi = SesliKomutServisi();
-    final profil = context.read<ProfilYoneticisi>().profil;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -53,7 +72,7 @@ class KolayModSepetView extends StatelessWidget {
           final sonuc = komutServisi.niyetCoz(metin);
           switch (sonuc.tur) {
             case KomutTuru.sepetOzeti:
-              _sepetiSesliOku();
+              _sepetiSesliOku(context);
               break;
             case KomutTuru.butceSorgula:
               final harcanan = sepet.toplamTutar;
@@ -91,7 +110,7 @@ class KolayModSepetView extends StatelessWidget {
             tooltip: 'Sesli Asistan ile Konuş',
           ),
           TextButton.icon(
-            onPressed: _sepetiSesliOku,
+            onPressed: () => _sepetiSesliOku(context),
             icon: const Icon(Icons.volume_up, color: Colors.black),
             label: const Text('SESLİ OKU', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             style: TextButton.styleFrom(
