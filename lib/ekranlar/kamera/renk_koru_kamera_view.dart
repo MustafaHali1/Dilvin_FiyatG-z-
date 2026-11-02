@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../bilesenler/kamera_hedef_maskesi.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
@@ -57,25 +58,12 @@ class RenkKoruKameraView extends StatelessWidget {
             ),
           ),
 
-          // Artı İbreli Hedef Çerçevesi
-          Center(
-            child: Container(
-              width: 290,
-              height: 170,
-              decoration: BoxDecoration(
-                border: Border.all(color: anaRenk, width: 3),
-                borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-              ),
-              child: const Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    bottom: 12,
-                    child: Text('Fiyat etiketini ortala', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, backgroundColor: Colors.black54)),
-                  ),
-                ],
-              ),
-            ),
+          // Hedef Çerçevesi ve Dış Alanı Karartan Maske (Spotlight)
+          KameraHedefMaskesi(
+            cerceveRengi: anaRenk,
+            genislik: 300,
+            yukseklik: 180,
+            ipucuMetni: 'Fiyat etiketini kutuya hizalayın',
           ),
 
           // Deklanşör Butonu

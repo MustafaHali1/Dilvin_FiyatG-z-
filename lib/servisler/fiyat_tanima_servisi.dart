@@ -97,9 +97,9 @@ class FiyatTanimaServisi {
           }
         }
         if (toplamYukseklik > 200) {
-          // Monitörün veya sayfanın en üst/altındaki web sitesi ilanlarını kes
-          final ustKenarPayi = minY + (toplamYukseklik * 0.08);
-          final altKenarPayi = maxY - (toplamYukseklik * 0.18);
+          // Hedef çerçevesi dışındaki alt ve üst marjinleri kes
+          final ustKenarPayi = minY + (toplamYukseklik * 0.10);
+          final altKenarPayi = maxY - (toplamYukseklik * 0.15);
           if (satir.merkezY < ustKenarPayi || satir.merkezY > altKenarPayi) {
             continue;
           }
@@ -400,6 +400,7 @@ class FiyatTanimaServisi {
       'market', 'marketler', 'şok', 'a101', 'bim', 'migros', 'carrefour',
       'etiket', 'etiketi', 'fiyat', 'fiyatı', 'yanlışlığı', 'şikayet', 'şikayetvar',
       'kartı', 'karti', 'kart', 'kartları', 'damga', 'san', 'rulo', 'baskılı',
+      'ikaz', 'takılabilir', 'takilabilir', 'rafa',
       'üretim', 'menşei', 'türkiye', 'kdv', 'dahildir', 'barkod',
       'birim', 'tarih', 'kasiyer', 'yerli', 'gaza', 't'
     };
@@ -448,7 +449,15 @@ class FiyatTanimaServisi {
           kucuk.contains('etiket fiyat') ||
           kucuk.contains('etiket kart') ||
           kucuk.contains('damga market') ||
+          kucuk.contains('ikaz etiket') ||
+          kucuk.contains('fiyat ikaz') ||
+          kucuk.contains('rafa takıl') ||
           kucuk.contains('fiyat etiket')) {
+        continue;
+      }
+
+      // Fiyat içeren satırlar (örn: "299,00 TL" veya "299 TL") kesinlikle ürün adı olamaz!
+      if (metin.contains('₺') || kucuk.contains('tl') || RegExp(r'\b\d+[,.]\d{2}\b').hasMatch(metin)) {
         continue;
       }
 

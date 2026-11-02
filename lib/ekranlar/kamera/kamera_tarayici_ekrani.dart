@@ -10,6 +10,7 @@ import 'kamera_izni_gerekli_ekrani.dart';
 import 'kolay_mod_kamera_view.dart';
 import 'renk_koru_kamera_view.dart';
 import 'gorme_engelli_radar_kamera_view.dart';
+import '../../bilesenler/kamera_hedef_maskesi.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../bilesenler/durum_rozeti.dart';
@@ -165,24 +166,12 @@ class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
             ),
           ),
 
-          Center(
-            child: Container(
-              width: 300,
-              height: 180,
-              decoration: BoxDecoration(
-                border: Border.all(color: UygulamaRenkleri.anaZumrut, width: 3),
-                borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-              ),
-              child: const Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    bottom: 12,
-                    child: Text('Fiyat etiketini çerçeveye hizala', style: TextStyle(color: Colors.white, backgroundColor: Colors.black54)),
-                  ),
-                ],
-              ),
-            ),
+          // Dış Alanı Karartan Hedef Çerçevesi (Spotlight Mask)
+          const KameraHedefMaskesi(
+            cerceveRengi: UygulamaRenkleri.anaZumrut,
+            genislik: 300,
+            yukseklik: 180,
+            ipucuMetni: 'Fiyat etiketini çerçeveye hizala',
           ),
 
           Align(
