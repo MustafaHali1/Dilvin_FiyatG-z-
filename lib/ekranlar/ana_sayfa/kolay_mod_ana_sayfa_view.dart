@@ -5,11 +5,14 @@ import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
+import '../../yoneticiler/kullanici_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 import '../profil/kullanici_profili_ekrani.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
+import '../fisler/tum_fisler_ekrani.dart';
 
-/// Kolay Mod - Ana Sayfa (Stitch: kolay_mod_ana_sayfa birebir)
-class KolayModAnaSayfaView extends StatelessWidget {
+/// Kolay Mod - Ana Sayfa (Yüksek Kontrast, Erişilebilir, Büyük Dokunma Alanları)
+class KolayModAnaSayfaView extends StatefulWidget {
   final VoidCallback onKameraAc;
   final VoidCallback onSepeteGit;
   final VoidCallback onSesliAsistanAc;
@@ -24,9 +27,28 @@ class KolayModAnaSayfaView extends StatelessWidget {
   });
 
   @override
+  State<KolayModAnaSayfaView> createState() => _KolayModAnaSayfaViewState();
+}
+
+class _KolayModAnaSayfaViewState extends State<KolayModAnaSayfaView> {
+  // Kullanıcının isteği: Geçmiş fişler yanındaki tırnak ile açılıp kapansın
+  bool _gecmisFislerAcik = true;
+
+  @override
   Widget build(BuildContext context) {
     final sepet = context.watch<SepetYoneticisi>();
     final fisYoneticisi = context.watch<FisYoneticisi>();
+    final kullanici = context.watch<KullaniciYoneticisi>().kullanici;
+    final profil = context.watch<ProfilYoneticisi>().profil;
+
+    final String kullaniciAdi = kullanici.adSoyad.isNotEmpty
+        ? kullanici.adSoyad.split(' ').first
+        : 'Kullanıcı';
+
+    final double harcananTutar = fisYoneticisi.buAyHarcama;
+    final double butce = profil.aylikButce > 0 ? profil.aylikButce : 5000.0;
+    final double kalanButce = butce - harcananTutar;
+    final double ilerleme = (harcananTutar / butce).clamp(0.0, 1.0);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -34,126 +56,64 @@ class KolayModAnaSayfaView extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(Olculer.boslukBuyuk),
           children: [
-            // Üst Header
+            // 1. Üst Header (Yuvarlak 1 ve Yuvarlak 2 Çözümü: 0px taşma, kişi adı tebriği)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.visibility_rounded, color: UygulamaRenkleri.kolayModSari, size: 36),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('FiyatGöz', style: MetinStilleri.kolayModBaslik()),
-                        Text(
-                          'KOLAY MOD / YÜKSEK KARŞITLIK',
-                          style: MetinStilleri.aciklama(renk: Colors.white70).copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
-                        );
-                      },
-                      icon: const Icon(Icons.person_rounded, color: Colors.black, size: 28),
-                      style: IconButton.styleFrom(
-                        backgroundColor: UygulamaRenkleri.kolayModSari,
-                        padding: const EdgeInsets.all(10),
-                      ),
-                      tooltip: 'Kullanıcı Profili',
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: onSesliAsistanAc,
-                      icon: const Icon(Icons.volume_up_rounded, color: Colors.black, size: 30),
-                      style: IconButton.styleFrom(
-                        backgroundColor: UygulamaRenkleri.kolayModSari,
-                        padding: const EdgeInsets.all(10),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: Olculer.boslukBuyuk),
-
-            // 1. Durum Kartı (Yaşlı & Yüksek Kontrast Aktif)
-            Container(
-              padding: const EdgeInsets.all(Olculer.boslukOrta),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Expanded(
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.elderly_rounded, color: UygulamaRenkleri.kolayModSari, size: 32),
-                          const SizedBox(width: 8),
-                          Text('KOLAY MOD: ANA SAYFA', style: MetinStilleri.govdeKalin(renk: Colors.white)),
-                        ],
+                      const Icon(
+                        Icons.visibility_rounded,
+                        color: UygulamaRenkleri.kolayModSari,
+                        size: 34,
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: UygulamaRenkleri.kolayModSari,
-                          borderRadius: BorderRadius.circular(Olculer.yariCapTam),
-                        ),
-                        child: Row(
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.check_circle, size: 16, color: Colors.black),
-                            const SizedBox(width: 4),
-                            Text('Aktif', style: MetinStilleri.aciklama(renk: Colors.black).copyWith(fontWeight: FontWeight.bold)),
+                            Text(
+                              'Merhaba $kullaniciAdi 👋',
+                              style: MetinStilleri.kolayModBaslik().copyWith(fontSize: 22),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const Text(
+                              'Alışveriş harcamalarını kolayca takip et',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: Olculer.boslukKucuk),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Büyük Yazı & Yüksek Karşıtlık Açık', style: MetinStilleri.aciklama(renk: Colors.white)),
-                        InkWell(
-                          onTap: onAyarlaraGit,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2E2E2E),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text('A+', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
+                    );
+                  },
+                  icon: const Icon(Icons.person_rounded, color: Colors.black, size: 28),
+                  style: IconButton.styleFrom(
+                    backgroundColor: UygulamaRenkleri.kolayModSari,
+                    padding: const EdgeInsets.all(10),
                   ),
-                ],
-              ),
+                  tooltip: 'Kullanıcı Profili',
+                ),
+              ],
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
-            // 2. Büyük Harcama Kartı (Siyah Kutu + Sarı Devasa Rakam)
+            // 2. Büyük Harcama Kartı (Canlı Veritabanı ve Bütçe Çubuğu)
             Container(
               padding: const EdgeInsets.all(Olculer.boslukBuyuk),
               decoration: BoxDecoration(
@@ -168,35 +128,63 @@ class KolayModAnaSayfaView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('BU AY HARCANAN', style: MetinStilleri.govdeKalin(renk: Colors.white)),
-                      IconButton(
-                        onPressed: onSesliAsistanAc,
-                        icon: const Icon(Icons.volume_up_rounded, color: Colors.black),
-                        style: IconButton.styleFrom(backgroundColor: UygulamaRenkleri.kolayModSari),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: UygulamaRenkleri.kolayModSari.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+                          border: Border.all(color: UygulamaRenkleri.kolayModSari),
+                        ),
+                        child: Text(
+                          '%${(ilerleme * 100).toInt()} Kullanıldı',
+                          style: const TextStyle(
+                            color: UygulamaRenkleri.kolayModSari,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: Olculer.boslukKucuk),
-                  Text('3.482,50 ₺', style: MetinStilleri.kolayModDev()),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${harcananTutar.toStringAsFixed(2)} ₺',
+                      style: MetinStilleri.kolayModDev(),
+                    ),
+                  ),
                   const SizedBox(height: Olculer.boslukOrta),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Aylık Bütçe Limiti:', style: MetinStilleri.govde(renk: Colors.white70)),
-                      Text('5.000,00 ₺', style: MetinStilleri.govdeKalin(renk: UygulamaRenkleri.kolayModSari)),
+                      Text(
+                        '${butce.toStringAsFixed(2)} ₺',
+                        style: MetinStilleri.govdeKalin(renk: UygulamaRenkleri.kolayModSari),
+                      ),
                     ],
                   ),
                   const SizedBox(height: Olculer.boslukKucuk),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(Olculer.yariCapTam),
-                    child: const LinearProgressIndicator(
-                      value: 0.70,
+                    child: LinearProgressIndicator(
+                      value: ilerleme,
                       minHeight: 12,
                       backgroundColor: Colors.white24,
-                      valueColor: AlwaysStoppedAnimation<Color>(UygulamaRenkleri.kolayModSari),
+                      valueColor: const AlwaysStoppedAnimation<Color>(UygulamaRenkleri.kolayModSari),
                     ),
                   ),
                   const SizedBox(height: Olculer.boslukKucuk),
-                  Text('Kalan Bütçe: +1.517,50 ₺', style: MetinStilleri.govdeKalin(renk: Colors.white)),
+                  Text(
+                    kalanButce >= 0
+                        ? 'Kalan Bütçe: +${kalanButce.toStringAsFixed(2)} ₺'
+                        : 'Bütçe Aşımı: ${(-kalanButce).toStringAsFixed(2)} ₺ ⚠️',
+                    style: MetinStilleri.govdeKalin(
+                      renk: kalanButce >= 0 ? Colors.white : Colors.redAccent,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -205,7 +193,7 @@ class KolayModAnaSayfaView extends StatelessWidget {
             // 3. İki Tane Dev Aksiyon Butonu
             // A) FİYAT OKU (Kamera) Butonu
             InkWell(
-              onTap: onKameraAc,
+              onTap: widget.onKameraAc,
               borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
               child: Container(
                 height: 84,
@@ -242,7 +230,7 @@ class KolayModAnaSayfaView extends StatelessWidget {
 
             // B) Sepetime Git Butonu
             InkWell(
-              onTap: onSepeteGit,
+              onTap: widget.onSepeteGit,
               borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
               child: Container(
                 height: 80,
@@ -277,67 +265,97 @@ class KolayModAnaSayfaView extends StatelessWidget {
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
-            // 4. Son Alışverişler (Canlı SQLite)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('SON ALIŞVERİŞLER', style: MetinStilleri.kolayModBaslik()),
-                Text('${fisYoneticisi.fisSayisi} Kayıt', style: MetinStilleri.govde(renk: Colors.white70)),
-              ],
-            ),
-            const SizedBox(height: Olculer.boslukOrta),
-
-            if (fisYoneticisi.fisler.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(Olculer.boslukBuyuk),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-                  border: Border.all(color: Colors.white24, width: 2),
-                ),
-                child: Center(
-                  child: Text(
-                    'Kayıtlı fiş bulunmuyor.',
-                    style: MetinStilleri.kolayModGovde(renk: Colors.white70),
-                  ),
-                ),
-              )
-            else
-              for (final fis in fisYoneticisi.fisler.take(3))
-                _KolayModFisKarti(
-                  ad: fis.aciklama,
-                  tarihFiyat: '${fis.tarih.day}.${fis.tarih.month}.${fis.tarih.year} • ${fis.toplamTutar.toStringAsFixed(2)} ₺',
-                  fisNo: fis.id,
-                  onSesliDinle: onSesliAsistanAc,
-                  onDetay: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => FisDetayEkrani(fis: fis)),
-                    );
-                  },
-                ),
-            const SizedBox(height: Olculer.boslukBuyuk),
-
-            // En Altta SESLİ YARDIM AL Butonu
+            // 4. Son Alışverişler (Accordion Tırnak + Son 3 Fiş + Tüm Fişleri Gör Butonu)
             InkWell(
-              onTap: onSesliAsistanAc,
-              borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-              child: Container(
-                height: 72,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
-                  border: Border.all(color: UygulamaRenkleri.kolayModSari, width: 2),
-                ),
+              onTap: () {
+                setState(() => _gecmisFislerAcik = !_gecmisFislerAcik);
+              },
+              borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.mic_rounded, color: UygulamaRenkleri.kolayModSari, size: 32),
-                    const SizedBox(width: 12),
-                    Text('SESLİ YARDIM AL', style: MetinStilleri.kolayModBaslik(renk: UygulamaRenkleri.kolayModSari)),
+                    Row(
+                      children: [
+                        Text('SON ALIŞVERİŞLER', style: MetinStilleri.kolayModBaslik()),
+                        const SizedBox(width: 8),
+                        Icon(
+                          _gecmisFislerAcik ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                          color: UygulamaRenkleri.kolayModSari,
+                          size: 32,
+                        ),
+                      ],
+                    ),
+                    Text('${fisYoneticisi.fisSayisi} Fiş', style: MetinStilleri.govde(renk: Colors.white70)),
                   ],
                 ),
               ),
             ),
+            const SizedBox(height: Olculer.boslukOrta),
+
+            if (_gecmisFislerAcik) ...[
+              if (fisYoneticisi.fisler.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
+                    border: Border.all(color: Colors.white24, width: 2),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Kayıtlı fiş bulunmuyor.',
+                      style: MetinStilleri.kolayModGovde(renk: Colors.white70),
+                    ),
+                  ),
+                )
+              else ...[
+                // Yalnızca son 3 fişi gösteriyoruz (Kullanıcı talebi: son 3 göstersin)
+                for (final fis in fisYoneticisi.fisler.take(3))
+                  _KolayModFisKarti(
+                    ad: fis.aciklama,
+                    tarihFiyat: '${fis.tarih.day}.${fis.tarih.month}.${fis.tarih.year} • ${fis.toplamTutar.toStringAsFixed(2)} ₺',
+                    fisNo: fis.id,
+                    onSesliDinle: widget.onSesliAsistanAc,
+                    onDetay: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => FisDetayEkrani(fis: fis)),
+                      );
+                    },
+                  ),
+                const SizedBox(height: Olculer.boslukKucuk),
+                // Tüm Fişleri Gör Butonu
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const TumFislerEkrani(baslik: 'Tüm Geçmiş Fişler'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.receipt_long_rounded, color: UygulamaRenkleri.kolayModSari),
+                  label: const Text(
+                    'Tüm Fişleri Gör',
+                    style: TextStyle(
+                      color: UygulamaRenkleri.kolayModSari,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: UygulamaRenkleri.kolayModSari, width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+
+            // Alttaki gezinti çubuğunun (bottom navigation) altında kalmaması için ferah boşluk
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -368,57 +386,47 @@ class _KolayModFisKarti extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: Colors.white24, width: 2),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+              border: Border.all(color: UygulamaRenkleri.kolayModSari),
+            ),
+            child: const Icon(Icons.receipt_rounded, color: UygulamaRenkleri.kolayModSari, size: 28),
+          ),
+          const SizedBox(width: Olculer.boslukOrta),
+          Expanded(
+            child: InkWell(
+              onTap: onDetay,
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(ad, style: MetinStilleri.kolayModBaslik()),
-                  Text(tarihFiyat, style: MetinStilleri.govdeKalin(renk: UygulamaRenkleri.kolayModSari)),
+                  Text(
+                    ad,
+                    style: MetinStilleri.kolayModGovde(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(tarihFiyat, style: MetinStilleri.govde(renk: Colors.white70)),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
-                ),
-                child: Text(fisNo, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: Olculer.boslukOrta),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onSesliDinle,
-                  icon: const Icon(Icons.volume_up, color: Colors.black),
-                  label: const Text('Sesli Dinle', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: UygulamaRenkleri.kolayModSari,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onDetay,
-                  icon: const Icon(Icons.receipt_long, color: Colors.white),
-                  label: const Text('Detayı Gör', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E2E2E),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-              ),
-            ],
+          IconButton(
+            onPressed: onSesliDinle,
+            icon: const Icon(Icons.volume_up_rounded, color: Colors.black, size: 26),
+            style: IconButton.styleFrom(
+              backgroundColor: UygulamaRenkleri.kolayModSari,
+              padding: const EdgeInsets.all(8),
+            ),
+            tooltip: 'Sesli Dinle',
           ),
         ],
       ),

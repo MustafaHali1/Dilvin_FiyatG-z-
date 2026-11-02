@@ -5,10 +5,12 @@ import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../modeller/fis_modeli.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 import '../ana_sayfa/bilesenler/fis_karti.dart';
 import '../fis_detay/fis_detay_ekrani.dart';
 
-/// Kullanıcının tüm kayıtlı fişlerini veya haftalık fişlerini detaylı arama ve filtreleme ile listeleyen modern ekran
+/// Kullanıcının tüm kayıtlı fişlerini veya haftalık fişlerini detaylı arama ve filtreleme ile listeleyen ekran
+/// Kolay Mod ve Standart Mod temalarını tam uyumlu şekilde destekler.
 class TumFislerEkrani extends StatefulWidget {
   final String baslik;
   final bool sadeceHaftalik;
@@ -31,6 +33,9 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
   @override
   Widget build(BuildContext context) {
     final fisYoneticisi = context.watch<FisYoneticisi>();
+    final profilYoneticisi = context.watch<ProfilYoneticisi>();
+    final bool kolayMod = profilYoneticisi.kolayMod;
+
     final kaynakFisler = widget.sadeceHaftalik
         ? fisYoneticisi.buHaftaninFisleri
         : fisYoneticisi.fisler;
@@ -47,18 +52,26 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
     final toplamTutar = filtrelenmis.fold(0.0, (toplam, f) => toplam + f.toplamTutar);
 
     return Scaffold(
-      backgroundColor: UygulamaRenkleri.arkaPlan,
+      backgroundColor: kolayMod ? Colors.black : UygulamaRenkleri.arkaPlan,
       appBar: AppBar(
-        title: Text(widget.baslik, style: MetinStilleri.baslik2()),
-        backgroundColor: Colors.white,
+        title: Text(
+          widget.baslik,
+          style: kolayMod
+              ? MetinStilleri.kolayModBaslik()
+              : MetinStilleri.baslik2(),
+        ),
+        backgroundColor: kolayMod ? Colors.black : Colors.white,
         elevation: 0,
         centerTitle: false,
+        iconTheme: IconThemeData(
+          color: kolayMod ? UygulamaRenkleri.kolayModSari : Colors.black,
+        ),
       ),
       body: Column(
         children: [
           // Arama ve İstatistik Özeti
           Container(
-            color: Colors.white,
+            color: kolayMod ? const Color(0xFF1E1E1E) : Colors.white,
             padding: const EdgeInsets.fromLTRB(
               Olculer.boslukBuyuk,
               0,
@@ -69,15 +82,28 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
               children: [
                 TextField(
                   onChanged: (val) => setState(() => _aramaMetni = val.trim()),
+                  style: TextStyle(color: kolayMod ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Fiş, market veya ürün ara...',
-                    prefixIcon: const Icon(Icons.search_rounded, color: UygulamaRenkleri.griYazi),
+                    hintStyle: TextStyle(color: kolayMod ? Colors.white60 : UygulamaRenkleri.griYazi),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.griYazi,
+                    ),
                     filled: true,
-                    fillColor: UygulamaRenkleri.arkaPlan,
+                    fillColor: kolayMod ? Colors.black : UygulamaRenkleri.arkaPlan,
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                      borderSide: BorderSide.none,
+                      borderSide: kolayMod
+                          ? const BorderSide(color: Colors.white24)
+                          : BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                      borderSide: kolayMod
+                          ? const BorderSide(color: Colors.white24)
+                          : BorderSide.none,
                     ),
                   ),
                 ),
@@ -87,11 +113,19 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
                   children: [
                     Text(
                       '${filtrelenmis.length} Fiş Listeleniyor',
-                      style: MetinStilleri.aciklama(),
+                      style: TextStyle(
+                        color: kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       'Toplam: ₺${toplamTutar.toStringAsFixed(2)}',
-                      style: MetinStilleri.govdeKalin(renk: UygulamaRenkleri.anaZumrut),
+                      style: TextStyle(
+                        color: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -113,20 +147,27 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
                                 ? Icons.calendar_today_rounded
                                 : Icons.receipt_long_rounded,
                             size: 64,
-                            color: Colors.grey.shade400,
+                            color: kolayMod ? Colors.white38 : Colors.grey.shade400,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             widget.sadeceHaftalik
                                 ? 'Bu hafta henüz fiş kaydı yok.'
                                 : 'Henüz kayıtlı fişiniz bulunmuyor.',
-                            style: MetinStilleri.govdeKalin(renk: Colors.grey.shade700),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: kolayMod ? Colors.white70 : Colors.grey.shade700,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'Alışverişinizi tamamladığınızda fişleriniz burada listelenir.',
-                            style: MetinStilleri.aciklama(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: kolayMod ? Colors.white38 : Colors.grey.shade500,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -138,6 +179,74 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
                     itemCount: filtrelenmis.length,
                     itemBuilder: (context, index) {
                       final fis = filtrelenmis[index];
+
+                      if (kolayMod) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
+                          padding: const EdgeInsets.all(Olculer.boslukOrta),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1E1E),
+                            borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                            border: Border.all(color: Colors.white24, width: 2),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              if (widget.onFisSecildi != null) {
+                                widget.onFisSecildi!(fis);
+                              } else {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => FisDetayEkrani(fis: fis),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
+                                    border: Border.all(color: UygulamaRenkleri.kolayModSari),
+                                  ),
+                                  child: const Icon(
+                                    Icons.receipt_rounded,
+                                    color: UygulamaRenkleri.kolayModSari,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: Olculer.boslukOrta),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        fis.aciklama,
+                                        style: MetinStilleri.kolayModGovde(),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${fis.tarih.day}.${fis.tarih.month}.${fis.tarih.year} • ₺${fis.toplamTutar.toStringAsFixed(2)}',
+                                        style: MetinStilleri.govde(renk: Colors.white70),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: UygulamaRenkleri.kolayModSari,
+                                  size: 32,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
                       return FisKarti(
                         fis: fis,
                         onDokunuldu: () {

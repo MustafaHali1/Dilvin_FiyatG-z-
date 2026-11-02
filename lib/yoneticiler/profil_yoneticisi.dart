@@ -16,6 +16,7 @@ class ProfilYoneticisi extends ChangeNotifier {
   static const String _keyKurulumTamamlandi = 'ayar_kurulum_tamamlandi';
   static const String _keySesliAsistan = 'ayar_sesli_asistan';
   static const String _keyTitresim = 'ayar_titresim';
+  static const String _keyYaziBoyutu = 'ayar_yazi_boyutu';
 
   ProfilYoneticisi() {
     _tercihleriYukle();
@@ -41,6 +42,7 @@ class ProfilYoneticisi extends ChangeNotifier {
       final kurulum = prefs.getBool(_keyKurulumTamamlandi);
       final sesli = prefs.getBool(_keySesliAsistan);
       final titresim = prefs.getBool(_keyTitresim);
+      final yaziBoyutu = prefs.getDouble(_keyYaziBoyutu);
 
       _profil = _profil.kopyala(
         profilTuru: profilIndex != null && profilIndex < ProfilTuru.values.length
@@ -52,6 +54,7 @@ class ProfilYoneticisi extends ChangeNotifier {
         aylikButce: butce ?? 5000.0,
         sesliAsistanAcik: sesli ?? true,
         titresimAcik: titresim ?? true,
+        yaziBoyutu: yaziBoyutu ?? 16.0,
       );
 
       _kurulumTamamlandi = kurulum ?? false;
@@ -90,9 +93,13 @@ class ProfilYoneticisi extends ChangeNotifier {
     } catch (_) {}
   }
 
-  void yaziBoyutuAyarla(double yeniBoyut) {
+  Future<void> yaziBoyutuAyarla(double yeniBoyut) async {
     _profil = _profil.kopyala(yaziBoyutu: yeniBoyut);
     notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(_keyYaziBoyutu, yeniBoyut);
+    } catch (_) {}
   }
 
   void kontrastAyarla(String kontrast) {
