@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../modeller/fis_modeli.dart';
 import '../../modeller/profil_modeli.dart';
-import '../../yoneticiler/profil_yoneticisi.dart';
-import 'package:flutter/services.dart';
 import '../../modeller/urun_modeli.dart';
+import '../../servisler/fis_pdf_servisi.dart';
+import '../../servisler/sesli_asistan_servisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import 'standart_fis_view.dart';
 import 'kolay_mod_fis_view.dart';
@@ -44,25 +46,24 @@ class FisDetayEkrani extends StatelessWidget {
         );
 
     final etkinPaylas = onPaylas ??
-        () {
+        () async {
           HapticFeedback.lightImpact();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Fiş PDF olarak dışa aktarıldı ve paylaşıldı.')),
+            const SnackBar(content: Text('Fiş PDF olarak oluşturuluyor ve paylaşılıyor...')),
           );
+          await FisPdfServisi.fisiPdfOlarakPaylas(etkinFis);
         };
 
     final etkinSesliOku = onSesliOku ??
-        () {
+        () async {
           HapticFeedback.heavyImpact();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: const Color(0xFFFFD600),
-              content: Text(
-                'Fiş okunuyor: ${etkinFis.magazaAdi}, Toplam Tutar: ${etkinFis.toplamTutar.toStringAsFixed(2)} TL. ${etkinFis.urunler.length} kalem ürün alındı.',
-                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-            ),
-          );
+          final asistan = SesliAsistanServisi();
+          final urunMetni = etkinFis.urunler
+              .map((u) => '${u.adet} adet ${u.ad}, ${u.toplamTutar.toStringAsFixed(2)} lira')
+              .join('. ');
+          final metin =
+              '${etkinFis.marketAdi} fişi. Toplam tutar: ${etkinFis.toplamTutar.toStringAsFixed(2)} lira. Alınan ürünler: $urunMetni.';
+          await asistan.konus(metin);
         };
 
     switch (profil.profilTuru) {

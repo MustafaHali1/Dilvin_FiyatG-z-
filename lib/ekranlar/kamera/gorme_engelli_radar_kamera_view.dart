@@ -3,8 +3,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../modeller/urun_modeli.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
+import '../../yoneticiler/profil_yoneticisi.dart';
+import '../../yoneticiler/sesli_radar_yoneticisi.dart';
+import '../../servisler/sesli_asistan_servisi.dart';
 import '../sepet/sepet_ekrani.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import '../profil/kullanici_profili_ekrani.dart';
@@ -62,6 +64,12 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
     });
 
     HapticFeedback.mediumImpact();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final profil = context.read<ProfilYoneticisi>().profil;
+        context.read<SesliRadarYoneticisi>().baslat(profil.sesliAsistanAcik);
+      }
+    });
   }
 
   @override
@@ -100,14 +108,9 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
 
   void _sepeteEkleVeBildir() {
     final sepet = context.read<SepetYoneticisi>();
-    sepet.urunEkle(
-      UrunModeli(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        ad: 'Sütaş Süt 1L',
-        birimFiyat: 24.90,
-      ),
-    );
-    _sesliGeriBildirim('Sütaş Süt sepete eklendi! Toplam: ${sepet.toplamTutar.toStringAsFixed(2)} ₺');
+    final profil = context.read<ProfilYoneticisi>().profil;
+    final radar = context.read<SesliRadarYoneticisi>();
+    radar.ekranaCiftDokunuldu(sepet: sepet, profil: profil);
   }
 
   void _dokunmaIsle(BuildContext ctx) {
@@ -119,6 +122,11 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
     } else {
       _sonDokunmaZamani = simdi;
       HapticFeedback.lightImpact();
+      final radar = context.read<SesliRadarYoneticisi>();
+      final profil = context.read<ProfilYoneticisi>().profil;
+      if (profil.sesliAsistanAcik) {
+        SesliAsistanServisi().konus(radar.asistanMesaji);
+      }
     }
   }
 
@@ -132,6 +140,10 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
 
   @override
   Widget build(BuildContext context) {
+    final radar = context.watch<SesliRadarYoneticisi>();
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final sepet = context.watch<SepetYoneticisi>();
+
     return Scaffold(
       backgroundColor: const Color(0xFF0E0E11),
       appBar: AppBar(
@@ -182,6 +194,15 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
         ),
         actions: [
           IconButton(
+            icon: Icon(
+              radar.durum == RadarDurumu.dinliyor ? Icons.mic : Icons.mic_none,
+              color: radar.durum == RadarDurumu.dinliyor ? Colors.red : const Color(0xFFFFD600),
+              size: 30,
+            ),
+            onPressed: () => radar.dinlemeyiBaslat(sepet: sepet, profil: profil),
+            tooltip: 'Sesli Asistan ile Konuş',
+          ),
+          IconButton(
             icon: const Icon(Icons.settings, color: Color(0xFFFFD600), size: 30),
             onPressed: () {
               Navigator.of(context).push(
@@ -193,7 +214,7 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
           IconButton(
             icon: const Icon(Icons.volume_up, color: Color(0xFFFFD600), size: 30),
             onPressed: () {
-              _sesliGeriBildirim('Etiket kadrajda ortalandı. Fiyat 24 lira 90 kuruş. Çift dokunarak sepete ekleyebilirsiniz.');
+              SesliAsistanServisi().konus(radar.asistanMesaji);
             },
             tooltip: 'Ekranı Sesli Tekrar Oku',
           ),
@@ -216,6 +237,9 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
         ],
       ),
       body: GestureDetector(
+        onDoubleTap: _sepeteEkleVeBildir,
+        onLongPress: () => radar.dinlemeyiBaslat(sepet: sepet, profil: profil),
+        onHorizontalDragEnd: (_) => radar.ekranKaydirildi(profil),
         onVerticalDragEnd: (details) {
           if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
             _fenerDegistir();
@@ -255,14 +279,14 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
                           child: const Icon(Icons.volume_up, color: Colors.black, size: 28),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            '“Etiket kadrajda ortalandı, otomatik çekildi”',
-                            style: TextStyle(
+                            '“${radar.asistanMesaji}”',
+                            style: const TextStyle(
                               color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              height: 1.2,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              height: 1.25,
                             ),
                           ),
                         ),
@@ -520,39 +544,54 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
                               ),
                             ),
                           ),
-                          const Row(
-                            children: [
-                              Icon(Icons.replay, color: Color(0xFFFFD600), size: 20),
-                              SizedBox(width: 4),
-                              Text(
-                                'Dinle',
-                                style: TextStyle(
-                                  color: Color(0xFFFFD600),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                          InkWell(
+                            onTap: () {
+                              if (radar.sonBulunanUrun != null) {
+                                SesliAsistanServisi().konus(
+                                  '${radar.sonBulunanUrun!.ad}, ${radar.sonBulunanUrun!.birimFiyat.toStringAsFixed(2)} lira.',
+                                );
+                              } else {
+                                SesliAsistanServisi().konus('Henüz bir ürün algılanmadı.');
+                              }
+                            },
+                            child: const Row(
+                              children: [
+                                Icon(Icons.replay, color: Color(0xFFFFD600), size: 20),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Dinle',
+                                  style: TextStyle(
+                                    color: Color(0xFFFFD600),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Sütaş Süt 1L',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Text(
+                              radar.sonBulunanUrun?.ad ?? 'Etiket Taranıyor...',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           Text(
-                            '24,90 ₺',
-                            style: TextStyle(
+                            radar.sonBulunanUrun != null
+                                ? '${radar.sonBulunanUrun!.birimFiyat.toStringAsFixed(2)} ₺'
+                                : '--.-- ₺',
+                            style: const TextStyle(
                               color: Color(0xFFFFD600),
-                              fontSize: 32,
+                              fontSize: 28,
                               fontWeight: FontWeight.w900,
                             ),
                           ),

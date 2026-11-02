@@ -33,6 +33,24 @@ class KolayModFiyatOnayView extends StatelessWidget {
         backgroundColor: Colors.black,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: Icon(
+              yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+              color: yonetici.dinleniyor ? Colors.red : const Color(0xFFFFD700),
+              size: 32,
+            ),
+            onPressed: () {
+              yonetici.sesliKomutDinle(
+                onOnayla: () {
+                  final veri = yonetici.onayVerisiHazirla();
+                  if (veri != null) onOnaylandi(veri);
+                },
+                onIptal: onTekrarCek,
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),

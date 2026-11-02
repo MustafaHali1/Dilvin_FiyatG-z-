@@ -39,6 +39,23 @@ class RenkKoruFiyatOnayView extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: anaRenk),
+        actions: [
+          IconButton(
+            icon: Icon(
+              yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+              color: yonetici.dinleniyor ? Colors.red : anaRenk,
+            ),
+            onPressed: () {
+              yonetici.sesliKomutDinle(
+                onOnayla: () {
+                  final veri = yonetici.onayVerisiHazirla();
+                  if (veri != null) onOnaylandi(veri);
+                },
+                onIptal: onTekrarCek,
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),

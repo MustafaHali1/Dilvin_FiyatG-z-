@@ -35,6 +35,22 @@ class StandartFiyatOnayView extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
+            tooltip: 'Sesli Asistan',
+            icon: Icon(
+              yonetici.dinleniyor ? Icons.mic : Icons.mic_none_rounded,
+              color: yonetici.dinleniyor ? Colors.red : UygulamaRenkleri.anaZumrut,
+            ),
+            onPressed: () {
+              yonetici.sesliKomutDinle(
+                onOnayla: () {
+                  final veri = yonetici.onayVerisiHazirla();
+                  if (veri != null) onOnaylandi(veri);
+                },
+                onIptal: onTekrarCek,
+              );
+            },
+          ),
+          IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.close_rounded),
           ),

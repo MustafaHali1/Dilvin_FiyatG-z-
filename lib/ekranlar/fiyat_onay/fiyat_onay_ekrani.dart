@@ -22,12 +22,15 @@ class FiyatOnayEkrani extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => FiyatOnayYoneticisi(resimYolu: resimYolu),
-      child: Consumer<ProfilYoneticisi>(
-        builder: (context, profilYoneticisi, _) {
-          final profil = profilYoneticisi.profil;
+    final profil = context.watch<ProfilYoneticisi>().profil;
 
+    return ChangeNotifierProvider(
+      create: (_) => FiyatOnayYoneticisi(
+        resimYolu: resimYolu,
+        otomatikSeslendir: profil.sesliAsistanAcik,
+      ),
+      child: Builder(
+        builder: (context) {
           switch (profil.profilTuru) {
             case ProfilTuru.kolayMod:
             case ProfilTuru.gormeEngelliModu:

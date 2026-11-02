@@ -6,6 +6,7 @@ import 'yoneticiler/sepet_yoneticisi.dart';
 import 'yoneticiler/profil_yoneticisi.dart';
 import 'yoneticiler/fis_yoneticisi.dart';
 import 'yoneticiler/kullanici_yoneticisi.dart';
+import 'yoneticiler/sesli_radar_yoneticisi.dart';
 import 'ekranlar/onboarding/onboarding_ekrani.dart';
 import 'ekranlar/onboarding/okuma_testi_ekrani.dart';
 import 'ekranlar/onboarding/renk_korlugu_secim_ekrani.dart';
@@ -34,6 +35,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SepetYoneticisi()),
         ChangeNotifierProvider(create: (_) => FisYoneticisi()),
         ChangeNotifierProvider(create: (_) => KullaniciYoneticisi()),
+        ChangeNotifierProvider(create: (_) => SesliRadarYoneticisi()),
       ],
       child: const FiyatGozUygulamasi(),
     ),
