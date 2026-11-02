@@ -125,12 +125,33 @@ class FiyatTanimaServisi {
     // 4. Fiyat Adaylarını Ayıkla ve Puanla
     final adaylar = <_AkilliFiyatAdayi>[];
 
+    // Etikette "Birim Fiyatı: 299.00 TL/AD" gibi yasal referans fiyat var mı tespit et
+    double? referansFiyat;
+    for (final s in islenecekSatirlar) {
+      if (s.metin.toLowerCase().contains('birim fiyat')) {
+        final m = RegExp(r'(\d{1,4}(?:[.,]\d{1,2}))').firstMatch(s.metin);
+        if (m != null) {
+          referansFiyat = _fiyatNormalizeEt(m.group(1)!);
+        }
+      }
+    }
+
     // Önce yatayda birbirine bitişik [Büyük Tamsayı: 299] + [Küçük Kuruş: ,00 TL] kutularını birleştir
     _bitisikKuruslariBirlestirVeEkle(islenecekSatirlar, maxYatayYukseklik, adaylar);
 
     // Ardından tek satırda geçen fiyatları analiz et
     for (final satir in islenecekSatirlar) {
       _satirdanAkilliFiyatCikar(satir, islenecekSatirlar, maxYatayYukseklik, adaylar);
+    }
+
+    // Referans birim fiyatla eşleşen adaya süper onay puanı (+80) ver
+    if (referansFiyat != null) {
+      for (int i = 0; i < adaylar.length; i++) {
+        final a = adaylar[i];
+        if ((a.fiyat - referansFiyat).abs() < 0.05) {
+          adaylar[i] = _AkilliFiyatAdayi(fiyat: a.fiyat, skor: a.skor + 80.0, kutu: a.kutu);
+        }
+      }
     }
 
     if (adaylar.isEmpty) {
@@ -191,7 +212,14 @@ class FiyatTanimaServisi {
     // 1. Tarih ve Saat Kalıplarını Tamamen Ele (Örn: 01-05-2024)
     if (RegExp(r'\b\d{2}[./-]\d{2}[./-]\d{2,4}\b').hasMatch(satir)) return;
 
-    // 2. Ölçü Birimlerine Yapışık Sayıları Tespit Et (KARA LİSTE)
+    // 2. Barkod ve Stok Kodu Satırlarını Ele (Örn: "8 699037 130518", "00077038", "GA7A")
+    if (RegExp(r'^\s*\d{1,2}\s+\d{4,8}\s+\d{4,8}\s*$').hasMatch(satir) ||
+        RegExp(r'^\s*0{2,}\d+\s*$').hasMatch(satir) ||
+        kucukSatir.contains('barkod')) {
+      return;
+    }
+
+    // 3. Ölçü Birimlerine Yapışık Sayıları Tespit Et (KARA LİSTE - Örn: "20 M")
     final olcuRegex = RegExp(
       r'\b(\d+(?:[.,]\d+)?)\s*(?:m|mt|metre|cm|mm|kg|kilo|gr|gram|g|lt|l|litre|ml|ad|adet|pk|paket|koli|parca|parça|kat|x|%)\b',
       caseSensitive: false,
@@ -234,6 +262,12 @@ class FiyatTanimaServisi {
         continue;
       }
 
+      // Para birimi olmayan ve kuruşsuz rastgele sayıları (örn: barkod parçaları 37, 18, 77) ele
+      final paraBirimiVar = satir.contains('₺') || kucukSatir.contains('tl') || _komsuKutudaParaBirimiVarMi(satirKutusu.kutu, tumSatirlar);
+      if (!temizHam.contains(',') && !temizHam.contains('.') && !paraBirimiVar) {
+        continue;
+      }
+
       // Skor Hesaplama (Maksimum 150 üzerinden)
       double skor = 20.0;
 
@@ -246,11 +280,6 @@ class FiyatTanimaServisi {
       }
 
       // B) Para Birimi Vurgusu (Satırda veya komşu kutularda ₺ veya TL var mı?)
-      bool paraBirimiVar = satir.contains('₺') || kucukSatir.contains('tl');
-      if (!paraBirimiVar) {
-        // Altında veya sağında TL kutusu var mı kontrol et
-        paraBirimiVar = _komsuKutudaParaBirimiVarMi(satirKutusu.kutu, tumSatirlar);
-      }
       if (paraBirimiVar) {
         skor += 35.0; // Para birimi eşleşmesine +35 puan
       }
@@ -294,6 +323,26 @@ class FiyatTanimaServisi {
       }
 
       adaylar.add(_AkilliFiyatAdayi(fiyat: fiyat, skor: skor, kutu: satirKutusu.kutu));
+
+      // OCR Düzeltmesi 1: Eğer tamsayı 4 basamaklıysa ve 9 ile bitiyorsa (örn: 2999.00)
+      // Bu, etiketteki virgülün yuvarlak başlığının '9' sanılmasından kaynaklanır (299, -> 2999)!
+      if (fiyat >= 1000.0 && fiyat < 10000.0) {
+        final tam = fiyat.truncate();
+        final kurus = ((fiyat - tam) * 100).round();
+        if (tam % 10 == 9) {
+          final duzeltilmisTam = tam ~/ 10;
+          final duzeltilmisFiyat = duzeltilmisTam + (kurus / 100.0);
+          adaylar.add(_AkilliFiyatAdayi(fiyat: duzeltilmisFiyat, skor: skor + 40.0, kutu: satirKutusu.kutu));
+        }
+        // OCR Düzeltmesi 2: Sol kenar çerçevesi '|' 1 sanıldıysa (örn: 1299.00 -> 299.00)
+        if (tam.toString().startsWith('1')) {
+          final kirpilmisTam = int.tryParse(tam.toString().substring(1));
+          if (kirpilmisTam != null && kirpilmisTam > 10) {
+            final duzeltilmisFiyat = kirpilmisTam + (kurus / 100.0);
+            adaylar.add(_AkilliFiyatAdayi(fiyat: duzeltilmisFiyat, skor: skor + 35.0, kutu: satirKutusu.kutu));
+          }
+        }
+      }
     }
   }
 
@@ -375,6 +424,26 @@ class FiyatTanimaServisi {
             }
 
             adaylar.add(_AkilliFiyatAdayi(fiyat: birlesmisFiyat, skor: skor, kutu: birlesikKutu));
+
+            // OCR Düzeltmesi 1: Eğer tamsayı 4 basamaklıysa ve 9 ile bitiyorsa (örn: 2999 ve ,00)
+            if (tamKisim >= 1000 && tamKisim % 10 == 9) {
+              final duzeltilmisTam = tamKisim ~/ 10;
+              final duzeltilmisFiyat = double.tryParse('$duzeltilmisTam.$kurusStr');
+              if (duzeltilmisFiyat != null) {
+                adaylar.add(_AkilliFiyatAdayi(fiyat: duzeltilmisFiyat, skor: skor + 40.0, kutu: birlesikKutu));
+              }
+            }
+
+            // OCR Düzeltmesi 2: Sol kenar çerçevesi '|' 1 sanıldıysa (örn: 1299 ve ,00 -> 299.00)
+            if (tamKisim >= 1000 && tamKisim.toString().startsWith('1')) {
+              final kirpilmisTam = int.tryParse(tamKisim.toString().substring(1));
+              if (kirpilmisTam != null && kirpilmisTam > 10) {
+                final duzeltilmisFiyat = double.tryParse('$kirpilmisTam.$kurusStr');
+                if (duzeltilmisFiyat != null) {
+                  adaylar.add(_AkilliFiyatAdayi(fiyat: duzeltilmisFiyat, skor: skor + 35.0, kutu: birlesikKutu));
+                }
+              }
+            }
           }
         }
       }

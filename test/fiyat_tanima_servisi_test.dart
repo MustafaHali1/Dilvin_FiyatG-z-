@@ -119,6 +119,44 @@ void main() {
       expect(sonuc.tespitEdilenUrunAdi?.contains('damga'), isFalse);
     });
 
+    test('Virgülün 9 Olarak Okunması (2999) ve Çerçeve Çizgisi (1299) Senaryosu: 299.00 TL Doğrulanmalı', () {
+      final satirlar = [
+        const MetinSatirKutusu(
+          metin: 'JOY BAHCE HORTUMU 20 M',
+          kutu: Rect.fromLTWH(100, 100, 300, 30),
+        ),
+        // Yasal etiket referans birim fiyatı
+        const MetinSatirKutusu(
+          metin: 'Birim Fiyatı: 299.00 TL/AD',
+          kutu: Rect.fromLTWH(100, 140, 250, 18),
+        ),
+        // OCR virgülü 9 okuyarak 2999,00 çıkarmış
+        const MetinSatirKutusu(
+          metin: '2999,00',
+          kutu: Rect.fromLTWH(150, 180, 200, 70),
+        ),
+        const MetinSatirKutusu(
+          metin: 'TL',
+          kutu: Rect.fromLTWH(360, 210, 40, 30),
+        ),
+        // Barkod satırı parçaları
+        const MetinSatirKutusu(
+          metin: '8 699037 130518',
+          kutu: Rect.fromLTWH(100, 280, 200, 20),
+        ),
+      ];
+
+      final sonuc = servis.satirlardanFiyatVeUrunCikar(satirlar);
+
+      expect(sonuc.basarili, isTrue);
+      // 2999.00 yerine düzeltilmiş ve referansla doğrulanmış 299.00 seçilmeli!
+      expect(sonuc.tespitEdilenFiyat, 299.00);
+      expect(sonuc.tespitEdilenUrunAdi, 'JOY BAHCE HORTUMU 20 M');
+      // Barkod parçaları (18, 37, 77) aday olmamalı
+      expect(sonuc.adayFiyatlar.contains(18.0), isFalse);
+      expect(sonuc.adayFiyatlar.contains(37.0), isFalse);
+    });
+
     test('Standart Tek Satır Fiyat ve Ürün Tespiti: Pınar Süt 1L 34.50 TL', () {
       final satirlar = [
         const MetinSatirKutusu(
