@@ -26,7 +26,9 @@ class SesliAsistanDiyalogEkrani extends StatefulWidget {
 class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
   bool _dinleniyor = true;
   bool _susturuldu = false;
+  bool _cevapVeriyor = false;
   String _kullaniciSorusu = 'Toplam ne kadar harcadım, sepette neler var?';
+  String _yakalananMetin = '';
   String _asistanCevabi =
       'Sepetinde şu an 4 farklı ürün, toplam 7 adet var. Genel tutar 287 lira 40 kuruş. Bütçe limitini 47 lira 40 kuruş aştın.';
 
@@ -37,7 +39,7 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
   void initState() {
     super.initState();
     _waveformTimer = Timer.periodic(const Duration(milliseconds: 180), (timer) {
-      if (mounted && _dinleniyor && !_susturuldu) {
+      if (mounted && _dinleniyor && !_susturuldu && !_cevapVeriyor) {
         setState(() {
           _barHeights = [
             16.0 + (timer.tick % 4) * 8,
@@ -55,6 +57,24 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
     });
 
     HapticFeedback.mediumImpact();
+
+    SesliAsistanServisi().durumDinleyicisiAyarla((durum) {
+      if (!mounted || _susturuldu || _cevapVeriyor) return;
+      if (durum == 'notListening' || durum == 'done') {
+        if (_yakalananMetin.trim().isNotEmpty) {
+          final islenecek = _yakalananMetin;
+          _yakalananMetin = '';
+          _komutuIsle(islenecek);
+        } else if (_dinleniyor) {
+          Timer(const Duration(milliseconds: 350), () {
+            if (mounted && _dinleniyor && !_susturuldu && !_cevapVeriyor) {
+              _canliDinlemeyiBaslat();
+            }
+          });
+        }
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _canliDinlemeyiBaslat();
@@ -65,103 +85,123 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
   @override
   void dispose() {
     _waveformTimer?.cancel();
+    SesliAsistanServisi().durumDinleyicisiAyarla(null);
     SesliAsistanServisi().durdur();
     super.dispose();
   }
 
   Future<void> _canliDinlemeyiBaslat() async {
     final asistan = SesliAsistanServisi();
-    final komutServisi = SesliKomutServisi();
-    final sepet = context.read<SepetYoneticisi>();
-    final profil = context.read<ProfilYoneticisi>().profil;
 
+    if (!mounted || _cevapVeriyor) return;
     setState(() {
       _dinleniyor = true;
       _kullaniciSorusu = 'Sizi dinliyorum, konuşun...';
+      _yakalananMetin = '';
     });
 
     await asistan.dinle(
+      dinlemeSuresi: const Duration(seconds: 30),
+      sessizlikSuresi: const Duration(seconds: 4),
       onSonuc: (metin, sonMu) async {
-        if (!mounted) return;
+        if (!mounted || _cevapVeriyor) return;
+        _yakalananMetin = metin;
         setState(() {
           _kullaniciSorusu = metin;
         });
 
-        if (sonMu && metin.isNotEmpty) {
-          final komut = komutServisi.niyetCoz(metin);
-          String yanit = '';
-
-          switch (komut.tur) {
-            case KomutTuru.selamlama:
-              yanit = 'Merhabalar! Alışverişinizde size yardımcı olmak için buradayım. Fiyat sorabilir, sepetinizi veya bütçenizi kontrol edebilirsiniz.';
-              break;
-
-            case KomutTuru.tesekkurVeda:
-              yanit = 'Rica ederim, her zaman buradayım! İyi alışverişler dilerim.';
-              break;
-
-            case KomutTuru.yardim:
-              yanit = 'Ben FiyatGöz Asistanı. Ürün etiketlerini okuyabilir, sepetinizi hesaplayabilir, bütçenizi takip edebilir ve aradığınız ürünleri bulabilirim.';
-              break;
-
-            case KomutTuru.sepetiSifirla:
-              sepet.sepetiBosalt();
-              yanit = 'Sepetiniz tamamen temizlendi, baştan başlıyoruz.';
-              break;
-
-            case KomutTuru.butceSorgula:
-              final harcanan = sepet.toplamTutar;
-              final kalan = profil.aylikButce - harcanan;
-              if (kalan >= 0) {
-                yanit = 'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
-              } else {
-                yanit = 'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
-              }
-              break;
-
-            case KomutTuru.sepetOzeti:
-              final adet = sepet.toplamUrunAdedi;
-              final cesit = sepet.urunCesitSayisi;
-              final toplam = sepet.toplamTutar;
-              if (adet == 0) {
-                yanit = 'Sepetiniz şu anda boş.';
-              } else {
-                yanit = 'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
-              }
-              break;
-
-            case KomutTuru.urunAra:
-              yanit = '${komut.hedefUrun} aramak için kamera vizörünü açabilirsiniz.';
-              break;
-
-            case KomutTuru.sepeteEkle:
-              yanit = 'Sepetinizdeki ürünler onaylandı.';
-              break;
-
-            case KomutTuru.iptal:
-              yanit = 'İşlem iptal edildi.';
-              break;
-
-            default:
-              yanit = 'Tam anlayamadım. "Sepette ne var" veya "Bütçem ne kadar" diyebilirsiniz.';
-              break;
-          }
-
-          setState(() {
-            _dinleniyor = false;
-            _asistanCevabi = yanit;
-          });
-
-          await _seslendir(yanit);
+        if (sonMu && metin.trim().isNotEmpty) {
+          final islenecek = metin;
+          _yakalananMetin = '';
+          await _komutuIsle(islenecek);
         }
       },
     );
   }
 
+  Future<void> _komutuIsle(String metin) async {
+    final komutServisi = SesliKomutServisi();
+    final sepet = context.read<SepetYoneticisi>();
+    final profil = context.read<ProfilYoneticisi>().profil;
+
+    final komut = komutServisi.niyetCoz(metin);
+    String yanit = '';
+
+    switch (komut.tur) {
+      case KomutTuru.selamlama:
+        yanit = 'Merhabalar! Alışverişinizde size yardımcı olmak için buradayım. Fiyat sorabilir, sepetinizi veya bütçenizi kontrol edebilirsiniz.';
+        break;
+
+      case KomutTuru.tesekkurVeda:
+        yanit = 'Rica ederim, her zaman buradayım! İyi alışverişler dilerim.';
+        break;
+
+      case KomutTuru.yardim:
+        yanit = 'Ben Dilvin · SepetGöz Asistanı. Ürün etiketlerini okuyabilir, sepetinizi hesaplayabilir, bütçenizi takip edebilir ve aradığınız ürünleri bulabilirim.';
+        break;
+
+      case KomutTuru.sepetiSifirla:
+        sepet.sepetiBosalt();
+        yanit = 'Sepetiniz tamamen temizlendi, baştan başlıyoruz.';
+        break;
+
+      case KomutTuru.butceSorgula:
+        final harcanan = sepet.toplamTutar;
+        final kalan = profil.aylikButce - harcanan;
+        if (kalan >= 0) {
+          yanit = 'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
+        } else {
+          yanit = 'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
+        }
+        break;
+
+      case KomutTuru.sepetOzeti:
+        final adet = sepet.toplamUrunAdedi;
+        final cesit = sepet.urunCesitSayisi;
+        final toplam = sepet.toplamTutar;
+        if (adet == 0) {
+          yanit = 'Sepetiniz şu anda boş.';
+        } else {
+          yanit = 'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
+        }
+        break;
+
+      case KomutTuru.urunAra:
+        yanit = '${komut.hedefUrun} aramak için kamera vizörünü açabilirsiniz.';
+        break;
+
+      case KomutTuru.sepeteEkle:
+        yanit = 'Sepetinizdeki ürünler onaylandı.';
+        break;
+
+      case KomutTuru.iptal:
+        yanit = 'İşlem iptal edildi.';
+        break;
+
+      default:
+        yanit = 'Tam anlayamadım. "Sepette ne var" veya "Bütçem ne kadar" diyebilirsiniz.';
+        break;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _dinleniyor = false;
+      _asistanCevabi = yanit;
+    });
+
+    await _seslendir(yanit);
+  }
+
   Future<void> _seslendir(String metin) async {
     if (_susturuldu) return;
+    _cevapVeriyor = true;
     HapticFeedback.heavyImpact();
     await SesliAsistanServisi().konus(metin);
+    _cevapVeriyor = false;
+
+    if (mounted && !_susturuldu && _dinleniyor) {
+      _canliDinlemeyiBaslat();
+    }
   }
 
   void _dinlemeDurumuDegistir() {
