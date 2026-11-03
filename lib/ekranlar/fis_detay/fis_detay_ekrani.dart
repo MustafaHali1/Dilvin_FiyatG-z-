@@ -9,6 +9,7 @@ import '../../servisler/sesli_asistan_servisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
+import '../sesli_asistan/sesli_asistan_paneli.dart';
 import 'standart_fis_view.dart';
 import 'kolay_mod_fis_view.dart';
 import 'renk_koru_fis_view.dart';
@@ -89,11 +90,15 @@ class FisDetayEkrani extends StatelessWidget {
             );
             return;
           }
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const SesliAsistanDiyalogEkrani(),
-            ),
-          );
+          if (profil.profilTuru == ProfilTuru.gormeEngelliModu) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SesliAsistanDiyalogEkrani(),
+              ),
+            );
+          } else {
+            SesliAsistanPaneli.goster(context);
+          }
         };
 
     switch (profil.profilTuru) {

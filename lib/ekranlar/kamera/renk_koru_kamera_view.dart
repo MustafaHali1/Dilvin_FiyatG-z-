@@ -5,7 +5,7 @@ import '../../bilesenler/kamera_hedef_maskesi.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
-import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
+import '../sesli_asistan/sesli_asistan_paneli.dart';
 
 /// Renk Körü Modu - Kamera Ekranı (Stitch: renk_k_r_kamera birebir)
 class RenkKoruKameraView extends StatelessWidget {
@@ -55,13 +55,7 @@ class RenkKoruKameraView extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Sesli Asistan',
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SesliAsistanDiyalogEkrani(),
-                        ),
-                      );
-                    },
+                    onPressed: () => SesliAsistanPaneli.goster(context),
                     icon: const Icon(Icons.mic_rounded, color: Colors.white, size: 28),
                     style: IconButton.styleFrom(backgroundColor: Colors.black54),
                   ),

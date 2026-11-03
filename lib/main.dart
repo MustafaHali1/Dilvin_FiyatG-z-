@@ -22,6 +22,7 @@ import 'ekranlar/fisler/tum_fisler_ekrani.dart';
 import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
 import 'ekranlar/sepet/gorme_engelli_sepet_view.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
+import 'ekranlar/sesli_asistan/sesli_asistan_paneli.dart';
 import 'modeller/urun_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
@@ -445,7 +446,15 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
   void _sesliAsistaniAc(BuildContext context) {
     final profilYoneticisi = context.read<ProfilYoneticisi>();
+    final profilTuru = profilYoneticisi.profil.profilTuru;
+
     if (!profilYoneticisi.profil.sesliAsistanAcik) {
+      final Color aktifVurgu = profilYoneticisi.kolayMod
+          ? UygulamaRenkleri.kolayModSari
+          : (profilTuru == ProfilTuru.renkKoruModu
+              ? profilYoneticisi.renkPaleti.primary
+              : UygulamaRenkleri.anaZumrut);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Sesli Asistan ayarlardan kapalı.'),
@@ -453,14 +462,18 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           action: SnackBarAction(
             label: 'Aktif Et',
-            textColor: UygulamaRenkleri.anaZumrut,
+            textColor: aktifVurgu,
             onPressed: () {
               profilYoneticisi.sesliAsistanDegistir(true);
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const SesliAsistanDiyalogEkrani(),
-                ),
-              );
+              if (profilTuru == ProfilTuru.gormeEngelliModu) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SesliAsistanDiyalogEkrani(),
+                  ),
+                );
+              } else {
+                SesliAsistanPaneli.goster(context);
+              }
             },
           ),
         ),
@@ -468,10 +481,16 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
       return;
     }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const SesliAsistanDiyalogEkrani(),
-      ),
-    );
+    if (profilTuru == ProfilTuru.gormeEngelliModu) {
+      // Sadece görme engelliler modu için tam ekran sesli radar & asistan
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const SesliAsistanDiyalogEkrani(),
+        ),
+      );
+    } else {
+      // Standart Mod ve Renk Körlüğü Modlarında (ve Kolay modda) şık yarım panel
+      SesliAsistanPaneli.goster(context);
+    }
   }
 }

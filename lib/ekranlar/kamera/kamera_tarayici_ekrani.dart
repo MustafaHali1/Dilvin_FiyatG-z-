@@ -16,6 +16,7 @@ import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../bilesenler/durum_rozeti.dart';
 import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
+import '../sesli_asistan/sesli_asistan_paneli.dart';
 
 /// Kullanıcının seçtiği profile göre birebir Kamera tasarımını ekrana getiren dinamik bağlayıcı
 class KameraTarayiciEkrani extends StatefulWidget {
@@ -210,8 +211,8 @@ class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
                     IconButton(
                       tooltip: 'Sesli Asistan',
                       onPressed: () {
-                        final profil = context.read<ProfilYoneticisi>().profil;
-                        if (!profil.sesliAsistanAcik) {
+                        final profilYoneticisi = context.read<ProfilYoneticisi>();
+                        if (!profilYoneticisi.profil.sesliAsistanAcik) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Sesli Asistan ayarlardan kapalı.'),
@@ -220,11 +221,15 @@ class _KameraTarayiciEkraniState extends State<KameraTarayiciEkrani> {
                           );
                           return;
                         }
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const SesliAsistanDiyalogEkrani(),
-                          ),
-                        );
+                        if (profilYoneticisi.profil.profilTuru == ProfilTuru.gormeEngelliModu) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const SesliAsistanDiyalogEkrani(),
+                            ),
+                          );
+                        } else {
+                          SesliAsistanPaneli.goster(context);
+                        }
                       },
                       icon: Icon(
                         context.watch<ProfilYoneticisi>().profil.sesliAsistanAcik
