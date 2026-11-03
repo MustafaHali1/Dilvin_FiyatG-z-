@@ -369,7 +369,7 @@ class AyarlarEkrani extends StatelessWidget {
                     ),
                   ),
                   subtitle: Text(
-                    'Cihazdaki SQLite veritabanını temizler',
+                    'Kayıtlı tüm alışveriş fişlerini ve geçmişi temizler',
                     style: TextStyle(color: altMetinRengi),
                   ),
                   onTap: () => _tumFisleriSilOnay(context),
@@ -913,7 +913,7 @@ class AyarlarEkrani extends StatelessWidget {
               await context.read<FisYoneticisi>().tumFisleriTemizle();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tüm alışveriş geçmişi veritabanından temizlendi.')),
+                  const SnackBar(content: Text('Tüm alışveriş geçmişiniz başarıyla temizlendi.')),
                 );
               }
             },

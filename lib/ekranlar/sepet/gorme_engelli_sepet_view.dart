@@ -463,7 +463,7 @@ class _GormeEngelliSepetViewState extends State<GormeEngelliSepetView> {
                         _seslendir('Sepetiniz boş. Fiş oluşturulamıyor.');
                         return;
                       }
-                      _seslendir('Alışveriş tamamlandı. Fişiniz veritabanına kaydedildi ve detay ekranına geçiliyor.');
+                      _seslendir('Alışveriş tamamlandı. Fişiniz kaydedildi ve detay ekranına geçiliyor.');
                       final fisYoneticisi = context.read<FisYoneticisi>();
                       final yeniFis = await fisYoneticisi.sepettenFisOlusturVeKaydet(
                         urunler: sepet.urunler,

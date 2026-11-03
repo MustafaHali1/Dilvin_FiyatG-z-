@@ -264,7 +264,7 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
     } else if (komut.contains('fiş')) {
       if (sepet.urunler.isNotEmpty) {
         setState(() {
-          _asistanCevabi = 'Alışverişiniz veritabanına kaydedildi, dijital fişiniz ekrana getiriliyor.';
+          _asistanCevabi = 'Alışverişiniz onaylandı, dijital fişiniz ekrana getiriliyor.';
         });
         final fisYoneticisi = context.read<FisYoneticisi>();
         fisYoneticisi.sepettenFisOlusturVeKaydet(

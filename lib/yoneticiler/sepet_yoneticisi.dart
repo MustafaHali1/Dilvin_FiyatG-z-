@@ -3,35 +3,7 @@ import '../modeller/urun_modeli.dart';
 
 /// Alışveriş sepetini ve canlı toplam hesabını yöneten ViewModel
 class SepetYoneticisi extends ChangeNotifier {
-  final List<UrunModeli> _urunler = [
-    // Stitch tasarımındaki birebir sahte veriler
-    const UrunModeli(
-      id: '1',
-      ad: 'Sütaş Tam Yağlı Süt 1L',
-      birimFiyat: 24.90,
-      eskiFiyat: 29.90,
-      adet: 2,
-      yapayZekaIleTanindi: true,
-    ),
-    const UrunModeli(
-      id: '2',
-      ad: 'Halk Ekmek 250g',
-      birimFiyat: 8.00,
-      adet: 3,
-    ),
-    const UrunModeli(
-      id: '3',
-      ad: 'Gezen Tavuk Yumurtası 10\'lu',
-      birimFiyat: 64.90,
-      adet: 1,
-    ),
-    const UrunModeli(
-      id: '4',
-      ad: 'Ezine Beyaz Peynir 500g',
-      birimFiyat: 148.70,
-      adet: 1,
-    ),
-  ];
+  final List<UrunModeli> _urunler = [];
 
   List<UrunModeli> get urunler => List.unmodifiable(_urunler);
 
