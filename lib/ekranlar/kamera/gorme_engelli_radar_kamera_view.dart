@@ -32,7 +32,7 @@ class GormeEngelliRadarKameraView extends StatefulWidget {
 }
 
 class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? _yerelKameraDenetleyici;
   bool _kameraHazir = false;
   bool _tariyor = false;
@@ -42,6 +42,8 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -63,14 +65,25 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
     });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Uygulama arka plana geçtiğinde veya kilitlendiğinde kamerayı güvenle serbest bırakıyoruz
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _otomatikTaramaZamanlayici?.cancel();
+      _yerelKameraDenetleyici?.dispose();
+      _yerelKameraDenetleyici = null;
+      if (mounted) setState(() => _kameraHazir = false);
+    } else if (state == AppLifecycleState.resumed) {
+      _kameraBaslat();
+    }
+  }
+
   Future<void> _kameraBaslat() async {
-    if (widget.cameraController != null && widget.cameraController!.value.isInitialized) {
-      if (mounted) {
-        setState(() {
-          _yerelKameraDenetleyici = widget.cameraController;
-          _kameraHazir = true;
-        });
-      }
+    if (!mounted) return;
+    if (_yerelKameraDenetleyici != null && _yerelKameraDenetleyici!.value.isInitialized) {
+      if (mounted) setState(() => _kameraHazir = true);
       _otomatikTaramayiBaslat();
       return;
     }
@@ -81,6 +94,7 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
         kamera,
         ResolutionPreset.medium,
         enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
       try {
         await controller.initialize();
@@ -90,9 +104,12 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
             _kameraHazir = true;
           });
           _otomatikTaramayiBaslat();
+        } else {
+          controller.dispose();
         }
       } catch (e) {
         debugPrint('Görme engelli kamera başlatma hatası: $e');
+        controller.dispose();
       }
     }
   }
@@ -100,9 +117,14 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
   /// Arka planda periyodik olarak kamerayı dinleyip etiket yakalar
   void _otomatikTaramayiBaslat() {
     _otomatikTaramaZamanlayici?.cancel();
-    _otomatikTaramaZamanlayici = Timer.periodic(const Duration(milliseconds: 3200), (timer) async {
+    _otomatikTaramaZamanlayici = Timer.periodic(const Duration(milliseconds: 3500), (timer) async {
       final radar = context.read<SesliRadarYoneticisi>();
-      if (!mounted || _tariyor || radar.konusuyor || _yerelKameraDenetleyici == null || !_yerelKameraDenetleyici!.value.isInitialized) {
+      if (!mounted ||
+          _tariyor ||
+          radar.konusuyor ||
+          _yerelKameraDenetleyici == null ||
+          !_yerelKameraDenetleyici!.value.isInitialized ||
+          _yerelKameraDenetleyici!.value.isTakingPicture) {
         return;
       }
 
@@ -111,14 +133,16 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
 
       _tariyor = true;
       try {
-        final XFile resim = await _yerelKameraDenetleyici!.takePicture();
-        final kirpilmis = await ResimKirpmaServisi.hedefKutusunuKirp(resim.path);
-        final sonuc = await FiyatTanimaServisi().resmiTara(kirpilmis);
+        if (_yerelKameraDenetleyici != null && _yerelKameraDenetleyici!.value.isInitialized) {
+          final XFile resim = await _yerelKameraDenetleyici!.takePicture();
+          final kirpilmis = await ResimKirpmaServisi.hedefKutusunuKirp(resim.path);
+          final sonuc = await FiyatTanimaServisi().resmiTara(kirpilmis);
 
-        if (mounted && sonuc.basarili && sonuc.tespitEdilenFiyat != null) {
-          final profil = context.read<ProfilYoneticisi>().profil;
-          final sepet = context.read<SepetYoneticisi>();
-          await radar.etiketAlgilandi(sonuc, profil: profil, sepet: sepet);
+          if (mounted && sonuc.basarili && sonuc.tespitEdilenFiyat != null) {
+            final profil = context.read<ProfilYoneticisi>().profil;
+            final sepet = context.read<SepetYoneticisi>();
+            await radar.etiketAlgilandi(sonuc, profil: profil, sepet: sepet);
+          }
         }
       } catch (e) {
         debugPrint('Otomatik OCR tarama hatası: $e');
@@ -130,11 +154,11 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _otomatikTaramaZamanlayici?.cancel();
     _pulseController.dispose();
-    if (widget.cameraController == null) {
-      _yerelKameraDenetleyici?.dispose();
-    }
+    _yerelKameraDenetleyici?.dispose();
+    _yerelKameraDenetleyici = null;
     super.dispose();
   }
 
