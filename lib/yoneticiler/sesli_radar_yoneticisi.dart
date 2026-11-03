@@ -29,6 +29,7 @@ class SesliRadarYoneticisi extends ChangeNotifier {
   String _kullaniciMetni = '';
   int _seciliAdet = 1;
   bool _konusuyor = false;
+  bool _aktifMi = false;
 
   RadarDurumu get durum => _durum;
   String? get hedefUrun => _hedefUrun;
@@ -38,12 +39,21 @@ class SesliRadarYoneticisi extends ChangeNotifier {
   int get seciliAdet => _seciliAdet;
   bool get konusuyor => _konusuyor;
 
+  /// Radarı ve sesli asistanı güvenli şekilde durdurur
+  Future<void> durdur() async {
+    _aktifMi = false;
+    _konusuyor = false;
+    _durum = RadarDurumu.bosta;
+    await _asistan.durdur();
+  }
+
   /// Açılış karşılama mesajı
   Future<void> baslat({
     required bool sesliAsistanAcik,
     required SepetYoneticisi sepet,
     required ProfilModeli profil,
   }) async {
+    _aktifMi = true;
     _durum = RadarDurumu.taraniyor;
     _asistanMesaji = 'Sesli radar devrede. Kamerayı etiketlere doğru tutun, sizi dinliyorum.';
     notifyListeners();
@@ -53,6 +63,7 @@ class SesliRadarYoneticisi extends ChangeNotifier {
       notifyListeners();
       await _asistan.konus(_asistanMesaji);
       _konusuyor = false;
+      if (!_aktifMi) return;
       notifyListeners();
 
       // Konuşma bitince dinlemeyi başlat
@@ -250,6 +261,7 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     required SepetYoneticisi sepet,
     required ProfilModeli profil,
   }) async {
+    if (!_aktifMi) return;
     _konusuyor = true;
     notifyListeners();
 
@@ -258,6 +270,7 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     }
 
     _konusuyor = false;
+    if (!_aktifMi) return;
     notifyListeners();
 
     // Kullanıcıya tekrar mikrofon açılır

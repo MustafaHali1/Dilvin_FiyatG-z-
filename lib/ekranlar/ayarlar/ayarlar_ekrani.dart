@@ -632,6 +632,9 @@ class AyarlarEkrani extends StatelessWidget {
                   onTap: () {
                     yonetici.profilAyarla(ProfilTuru.standart);
                     Navigator.of(bottomSheetContext).pop();
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Standart moda geçildi.')),
                     );
@@ -657,6 +660,9 @@ class AyarlarEkrani extends StatelessWidget {
                             await yonetici.profilAyarla(ProfilTuru.kolayMod);
                             if (context.mounted) {
                               Navigator.of(context).pop();
+                              if (Navigator.of(context).canPop()) {
+                                Navigator.of(context).pop();
+                              }
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   backgroundColor: UygulamaRenkleri.kolayModSari,
@@ -692,6 +698,9 @@ class AyarlarEkrani extends StatelessWidget {
                             await yonetici.profilAyarla(ProfilTuru.renkKoruModu);
                             if (context.mounted) {
                               Navigator.of(context).pop();
+                              if (Navigator.of(context).canPop()) {
+                                Navigator.of(context).pop();
+                              }
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   backgroundColor: RenkKorluguPaleti.getir(tur).primary,
@@ -710,6 +719,12 @@ class AyarlarEkrani extends StatelessWidget {
                                   onTestTamamlandi: () {
                                     yonetici.profilAyarla(ProfilTuru.renkKoruModu);
                                     Navigator.of(context).pop();
+                                    if (Navigator.of(context).canPop()) {
+                                      Navigator.of(context).pop();
+                                    }
+                                    if (Navigator.of(context).canPop()) {
+                                      Navigator.of(context).pop();
+                                    }
                                   },
                                 ),
                               ),
@@ -732,6 +747,9 @@ class AyarlarEkrani extends StatelessWidget {
                   onTap: () {
                     yonetici.profilAyarla(ProfilTuru.gormeEngelliModu);
                     Navigator.of(bottomSheetContext).pop();
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Görme Engelli Sesli Radar moduna geçildi.')),
                     );

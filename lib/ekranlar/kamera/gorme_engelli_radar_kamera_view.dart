@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import '../../modeller/profil_modeli.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/sesli_radar_yoneticisi.dart';
@@ -34,10 +36,14 @@ class GormeEngelliRadarKameraView extends StatefulWidget {
 class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? _yerelKameraDenetleyici;
+  SesliRadarYoneticisi? _radarReferansi;
   bool _kameraHazir = false;
   bool _tariyor = false;
   Timer? _otomatikTaramaZamanlayici;
   late AnimationController _pulseController;
+
+  CameraController? get _aktifKamera =>
+      widget.cameraController ?? _yerelKameraDenetleyici;
 
   @override
   void initState() {
@@ -56,6 +62,7 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
         final profil = context.read<ProfilYoneticisi>().profil;
         final sepet = context.read<SepetYoneticisi>();
         final radar = context.read<SesliRadarYoneticisi>();
+        _radarReferansi = radar;
         radar.baslat(
           sesliAsistanAcik: profil.sesliAsistanAcik,
           sepet: sepet,
@@ -72,9 +79,12 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _otomatikTaramaZamanlayici?.cancel();
-      _yerelKameraDenetleyici?.dispose();
+      final eskiController = _yerelKameraDenetleyici;
       _yerelKameraDenetleyici = null;
-      if (mounted) setState(() => _kameraHazir = false);
+      if (mounted) {
+        setState(() => _kameraHazir = false);
+      }
+      eskiController?.dispose();
     } else if (state == AppLifecycleState.resumed) {
       _kameraBaslat();
     }
@@ -82,11 +92,33 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
 
   Future<void> _kameraBaslat() async {
     if (!mounted) return;
+
+    // Dışarıdan hazır bir controller verildiyse onu kullan (ikinci kez açıp çakışma yaratma)
+    if (widget.cameraController != null) {
+      if (widget.cameraController!.value.isInitialized) {
+        if (mounted) setState(() => _kameraHazir = true);
+        _otomatikTaramayiBaslat();
+      }
+      return;
+    }
+
     if (_yerelKameraDenetleyici != null && _yerelKameraDenetleyici!.value.isInitialized) {
       if (mounted) setState(() => _kameraHazir = true);
       _otomatikTaramayiBaslat();
       return;
     }
+
+    try {
+      final kameraIzni = await Permission.camera.request();
+      if (!kameraIzni.isGranted || !mounted) return;
+    } catch (e) {
+      debugPrint('Kamera izni kontrol hatası: $e');
+    }
+
+    if (!KameraServisi.hazirMi) {
+      await KameraServisi.baslat();
+    }
+    if (!mounted) return;
 
     final kamera = KameraServisi.varsayilanArkaKamera;
     if (kamera != null) {
@@ -105,11 +137,11 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
           });
           _otomatikTaramayiBaslat();
         } else {
-          controller.dispose();
+          await controller.dispose();
         }
       } catch (e) {
         debugPrint('Görme engelli kamera başlatma hatası: $e');
-        controller.dispose();
+        await controller.dispose();
       }
     }
   }
@@ -118,13 +150,14 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
   void _otomatikTaramayiBaslat() {
     _otomatikTaramaZamanlayici?.cancel();
     _otomatikTaramaZamanlayici = Timer.periodic(const Duration(milliseconds: 3500), (timer) async {
+      if (!mounted) return;
       final radar = context.read<SesliRadarYoneticisi>();
-      if (!mounted ||
-          _tariyor ||
+      final kamera = _aktifKamera;
+      if (_tariyor ||
           radar.konusuyor ||
-          _yerelKameraDenetleyici == null ||
-          !_yerelKameraDenetleyici!.value.isInitialized ||
-          _yerelKameraDenetleyici!.value.isTakingPicture) {
+          kamera == null ||
+          !kamera.value.isInitialized ||
+          kamera.value.isTakingPicture) {
         return;
       }
 
@@ -133,9 +166,11 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
 
       _tariyor = true;
       try {
-        if (_yerelKameraDenetleyici != null && _yerelKameraDenetleyici!.value.isInitialized) {
-          final XFile resim = await _yerelKameraDenetleyici!.takePicture();
+        if (mounted && kamera.value.isInitialized && !kamera.value.isTakingPicture) {
+          final XFile resim = await kamera.takePicture();
+          if (!mounted) return;
           final kirpilmis = await ResimKirpmaServisi.hedefKutusunuKirp(resim.path);
+          if (!mounted) return;
           final sonuc = await FiyatTanimaServisi().resmiTara(kirpilmis);
 
           if (mounted && sonuc.basarili && sonuc.tespitEdilenFiyat != null) {
@@ -156,9 +191,11 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _otomatikTaramaZamanlayici?.cancel();
+    _radarReferansi?.durdur();
     _pulseController.dispose();
-    _yerelKameraDenetleyici?.dispose();
+    final eskiController = _yerelKameraDenetleyici;
     _yerelKameraDenetleyici = null;
+    eskiController?.dispose();
     super.dispose();
   }
 
@@ -177,6 +214,10 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
   @override
   Widget build(BuildContext context) {
     final radar = context.watch<SesliRadarYoneticisi>();
+    final aktifKamera = _aktifKamera;
+    final bool onizlemeGoster = _kameraHazir &&
+        aktifKamera != null &&
+        aktifKamera.value.isInitialized;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -187,10 +228,10 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
           fit: StackFit.expand,
           children: [
             // 1. Arka Planda Canlı Kamera (Görmeyen için gereksiz yere göz almasın diye yarı saydam)
-            if (_kameraHazir && _yerelKameraDenetleyici != null)
+            if (onizlemeGoster)
               Opacity(
                 opacity: 0.35,
-                child: CameraPreview(_yerelKameraDenetleyici!),
+                child: CameraPreview(aktifKamera),
               )
             else
               Container(color: Colors.black),
@@ -230,10 +271,23 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
                       IconButton(
                         tooltip: 'Ayarlar',
                         icon: const Icon(Icons.settings_rounded, color: Color(0xFFFFD600), size: 28),
-                        onPressed: () {
-                          Navigator.of(context).push(
+                        onPressed: () async {
+                          _otomatikTaramaZamanlayici?.cancel();
+                          await context.read<SesliRadarYoneticisi>().durdur();
+                          if (!context.mounted) return;
+                          await Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
                           );
+                          if (!context.mounted) return;
+                          final guncelProfil = context.read<ProfilYoneticisi>().profil;
+                          if (guncelProfil.profilTuru == ProfilTuru.gormeEngelliModu) {
+                            _otomatikTaramayiBaslat();
+                            context.read<SesliRadarYoneticisi>().baslat(
+                                  sesliAsistanAcik: guncelProfil.sesliAsistanAcik,
+                                  sepet: context.read<SepetYoneticisi>(),
+                                  profil: guncelProfil,
+                                );
+                          }
                         },
                       ),
                     ],
