@@ -70,8 +70,10 @@ class UygulamaGirisKontrolcusu extends StatelessWidget {
 
     if (!yonetici.yuklendi) {
       return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: Color(0xFF00A86B),
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       );
     }
 
