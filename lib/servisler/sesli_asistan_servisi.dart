@@ -28,11 +28,17 @@ class SesliAsistanServisi {
   bool _sttHazir = false;
   bool _konusuyor = false;
   bool _dinliyor = false;
+  Function(String durum)? _hariciDurumDinleyicisi;
 
   bool get konusuyorMu => _konusuyor;
   bool get dinliyorMu => _dinliyor;
   bool get ttsHazir => _ttsHazir;
   bool get sttHazir => _sttHazir;
+
+  /// Dışarıdan STT durumunu (listening, notListening, done) dinlemek için kaydedici
+  void durumDinleyicisiAyarla(Function(String durum)? dinleyici) {
+    _hariciDurumDinleyicisi = dinleyici;
+  }
 
   /// TTS Motorunu başlatır ve Türkçe ayarlamalarını yapar
   Future<void> ttsBaslat() async {
@@ -90,6 +96,8 @@ class SesliAsistanServisi {
       debugPrint('TTS Okunuyor: "$hazirMetin"');
       _konusuyor = true;
       await _tts?.speak(hazirMetin);
+      // Hoparlör ses yankısının mikrofon tarafından anında algılanmasını önlemek için kısa bir anti-echo payı
+      await Future.delayed(const Duration(milliseconds: 380));
     } catch (e) {
       debugPrint('Sesli okuma hatası: $e');
     } finally {
@@ -156,10 +164,12 @@ class SesliAsistanServisi {
         onError: (val) {
           _dinliyor = false;
           debugPrint('STT Hatası: ${val.errorMsg}');
+          _hariciDurumDinleyicisi?.call('error');
         },
         onStatus: (val) {
           _dinliyor = val == 'listening';
           debugPrint('STT Durumu: $val');
+          _hariciDurumDinleyicisi?.call(val);
         },
       );
       return _sttHazir;
@@ -170,10 +180,11 @@ class SesliAsistanServisi {
     }
   }
 
-  /// Mikrofonu açıp kullanıcının konuşmasını dinler
+  /// Mikrofonu açıp kullanıcının konuşmasını dinler (Doğal diksiyon modu, yüksek hassasiyet)
   Future<void> dinle({
     required Function(String metin, bool sonMu) onSonuc,
-    Duration dinlemeSuresi = const Duration(seconds: 6),
+    Duration dinlemeSuresi = const Duration(seconds: 30),
+    Duration sessizlikSuresi = const Duration(seconds: 4),
   }) async {
     try {
       if (!_sttHazir) {
@@ -195,11 +206,11 @@ class SesliAsistanServisi {
         },
         listenOptions: stt.SpeechListenOptions(
           partialResults: true,
-          cancelOnError: true,
-          listenMode: stt.ListenMode.confirmation,
+          cancelOnError: false,
+          listenMode: stt.ListenMode.dictation, // Normal konuşma sesi ve fısıltıya yüksek hassasiyet
           localeId: 'tr_TR',
-          listenFor: dinlemeSuresi,
-          pauseFor: const Duration(seconds: 2),
+          listenFor: dinlemeSuresi, // 30 saniye boyunca açık kalsın
+          pauseFor: sessizlikSuresi, // 4 saniye nefes ve duraksama payı (lafı kesilmez)
         ),
       );
     } catch (e) {

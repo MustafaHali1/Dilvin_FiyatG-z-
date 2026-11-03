@@ -44,6 +44,7 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     _aktifMi = false;
     _konusuyor = false;
     _durum = RadarDurumu.bosta;
+    _asistan.durumDinleyicisiAyarla(null);
     await _asistan.durdur();
   }
 
@@ -57,6 +58,26 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     _durum = RadarDurumu.taraniyor;
     _asistanMesaji = 'Sesli radar devrede. Kamerayı etiketlere doğru tutun, sizi dinliyorum.';
     notifyListeners();
+
+    // Dinleyiciyi kaydet: Sessizlikten mikrofon kapanırsa uyanık kalması için arka planda tazeleyelim
+    _asistan.durumDinleyicisiAyarla((durum) {
+      if (!_aktifMi || _konusuyor) return;
+      if (durum == 'notListening' || durum == 'done') {
+        // Eğer kullanıcı bir şey söylediyse ve finalResult tetiklenmeden kapanmışsa işle
+        if (_kullaniciMetni.trim().isNotEmpty) {
+          final islenecek = _kullaniciMetni;
+          _kullaniciMetni = '';
+          _komutuYonet(islenecek, sepet: sepet, profil: profil);
+        } else {
+          // Sessizlikten kapandıysa kullanıcı bağırmak zorunda kalmasın diye dinlemeyi hemen tazele
+          Timer(const Duration(milliseconds: 350), () {
+            if (_aktifMi && !_konusuyor && !_asistan.dinliyorMu) {
+              dinlemeyiBaslat(sepet: sepet, profil: profil);
+            }
+          });
+        }
+      }
+    });
 
     if (sesliAsistanAcik) {
       _konusuyor = true;
@@ -76,17 +97,22 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     required SepetYoneticisi sepet,
     required ProfilModeli profil,
   }) async {
-    if (_konusuyor) return;
+    if (_konusuyor || !_aktifMi) return;
     _durum = RadarDurumu.dinliyor;
     notifyListeners();
 
     await _asistan.dinle(
+      dinlemeSuresi: const Duration(seconds: 30),
+      sessizlikSuresi: const Duration(seconds: 4),
       onSonuc: (metin, sonMu) async {
+        if (!_aktifMi || _konusuyor) return;
         _kullaniciMetni = metin;
         notifyListeners();
 
-        if (sonMu && metin.isNotEmpty) {
-          await _komutuYonet(metin, sepet: sepet, profil: profil);
+        if (sonMu && metin.trim().isNotEmpty) {
+          final islenecek = metin;
+          _kullaniciMetni = '';
+          await _komutuYonet(islenecek, sepet: sepet, profil: profil);
         }
       },
     );
@@ -283,7 +309,14 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     required ProfilModeli profil,
     required SepetYoneticisi sepet,
   }) async {
-    if (!sonuc.basarili || sonuc.tespitEdilenFiyat == null || _konusuyor) return;
+    // Kullanıcı konuşurken veya asistan konuşurken KESİNLİKLE araya girip lafını kesme!
+    if (!sonuc.basarili ||
+        sonuc.tespitEdilenFiyat == null ||
+        _konusuyor ||
+        _kullaniciMetni.trim().isNotEmpty ||
+        _durum == RadarDurumu.urunBulundu) {
+      return;
+    }
 
     final urunAdi = sonuc.tespitEdilenUrunAdi ?? 'Market Ürünü';
     final fiyat = sonuc.tespitEdilenFiyat!;

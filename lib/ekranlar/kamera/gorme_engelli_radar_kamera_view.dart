@@ -153,16 +153,17 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
       if (!mounted) return;
       final radar = context.read<SesliRadarYoneticisi>();
       final kamera = _aktifKamera;
+      // Kullanıcı konuşurken, mikrofona ses gelirken veya ürün onay beklerken
+      // kamera taraması KESİNLİKLE araya girip lafı kesmez
       if (_tariyor ||
           radar.konusuyor ||
+          radar.kullaniciMetni.trim().isNotEmpty ||
+          radar.durum == RadarDurumu.urunBulundu ||
           kamera == null ||
           !kamera.value.isInitialized ||
           kamera.value.isTakingPicture) {
         return;
       }
-
-      // Eğer ürün bulunmuş ve kullanıcıdan onay bekleniyorsa taramayı beklet
-      if (radar.durum == RadarDurumu.urunBulundu) return;
 
       _tariyor = true;
       try {
