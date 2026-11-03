@@ -24,6 +24,13 @@ class AyarlarEkrani extends StatelessWidget {
     final profil = profilYoneticisi.profil;
     final kullanici = context.watch<KullaniciYoneticisi>().kullanici;
     final bool kolayMod = profilYoneticisi.kolayMod;
+    final bool renkKoruModu = profilYoneticisi.renkKoruModu;
+    final palet = profilYoneticisi.renkPaleti;
+
+    // Aktif moda/palete göre dinamik vurgu rengi
+    final Color temaVurguRengi = kolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : (renkKoruModu ? palet.primary : UygulamaRenkleri.anaZumrut);
 
     final Color arkaPlanRengi = kolayMod ? Colors.black : UygulamaRenkleri.arkaPlan;
     final Color kartRengi = kolayMod ? const Color(0xFF1E1E1E) : Colors.white;
@@ -31,7 +38,7 @@ class AyarlarEkrani extends StatelessWidget {
     final Color anaMetinRengi = kolayMod ? Colors.white : UygulamaRenkleri.koyuYazi;
     final Color altMetinRengi = kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi;
     final Color baslikBolumRengi = kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.griYazi;
-    final Color ikonRengi = kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaKoyu;
+    final Color ikonRengi = kolayMod ? UygulamaRenkleri.kolayModSari : (renkKoruModu ? palet.primary : UygulamaRenkleri.anaKoyu);
 
     return Scaffold(
       backgroundColor: arkaPlanRengi,
@@ -78,7 +85,7 @@ class AyarlarEkrani extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                    backgroundColor: temaVurguRengi,
                     child: Text(
                       kullanici.adSoyad.isNotEmpty ? kullanici.adSoyad[0].toUpperCase() : 'U',
                       style: TextStyle(
@@ -166,7 +173,7 @@ class AyarlarEkrani extends StatelessWidget {
                 TextButton(
                   onPressed: () => _butceDuzenleDiyalogu(context, profilYoneticisi),
                   style: TextButton.styleFrom(
-                    foregroundColor: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                    foregroundColor: temaVurguRengi,
                   ),
                   child: Text(
                     'Değiştir',
@@ -220,30 +227,23 @@ class AyarlarEkrani extends StatelessWidget {
                 if (profil.profilTuru == ProfilTuru.renkKoruModu) ...[
                   Divider(height: 1, color: kartBorderRengi),
                   ListTile(
-                    leading: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: RenkKorluguPaleti.getir(profil.renkKorluguTuru).primary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+                    leading: _buildTurIkonu(profil.renkKorluguTuru, false, size: 28),
                     title: Text(
                       'Renk Körlüğü Türü',
                       style: TextStyle(fontWeight: FontWeight.bold, color: anaMetinRengi),
                     ),
                     subtitle: Text(
-                      '${RenkKorluguPaleti.getir(profil.renkKorluguTuru).turAdi} (${RenkKorluguPaleti.getir(profil.renkKorluguTuru).turAciklamasi})',
+                      '${palet.turAdi} (${palet.turAciklamasi})',
                       style: TextStyle(color: altMetinRengi),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _renkNoktasi(RenkKorluguPaleti.getir(profil.renkKorluguTuru).primary),
+                        _renkNoktasi(palet.primary),
                         const SizedBox(width: 4),
-                        _renkNoktasi(RenkKorluguPaleti.getir(profil.renkKorluguTuru).secondary),
+                        _renkNoktasi(palet.secondary),
                         const SizedBox(width: 4),
-                        _renkNoktasi(RenkKorluguPaleti.getir(profil.renkKorluguTuru).warning),
+                        _renkNoktasi(palet.accent),
                         const SizedBox(width: 8),
                         Icon(Icons.chevron_right_rounded, color: altMetinRengi),
                       ],
@@ -267,7 +267,8 @@ class AyarlarEkrani extends StatelessWidget {
                     style: TextStyle(color: altMetinRengi),
                   ),
                   value: profil.sesliAsistanAcik,
-                  activeThumbColor: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                  activeThumbColor: temaVurguRengi,
+                  activeTrackColor: temaVurguRengi.withValues(alpha: 0.45),
                   onChanged: (val) => profilYoneticisi.sesliAsistanDegistir(val),
                 ),
                 Divider(height: 1, color: kartBorderRengi),
@@ -286,7 +287,8 @@ class AyarlarEkrani extends StatelessWidget {
                     style: TextStyle(color: altMetinRengi),
                   ),
                   value: profil.titresimAcik,
-                  activeThumbColor: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                  activeThumbColor: temaVurguRengi,
+                  activeTrackColor: temaVurguRengi.withValues(alpha: 0.45),
                   onChanged: (val) => profilYoneticisi.titresimDegistir(val),
                 ),
               ],
@@ -316,7 +318,7 @@ class AyarlarEkrani extends StatelessWidget {
                 ListTile(
                   leading: Icon(
                     Icons.restart_alt_rounded,
-                    color: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.anaZumrut,
+                    color: temaVurguRengi,
                   ),
                   title: Text(
                     'Kurulum Testlerini Yeniden Yap',
@@ -367,6 +369,63 @@ class AyarlarEkrani extends StatelessWidget {
       width: 12,
       height: 12,
       decoration: BoxDecoration(color: renk, shape: BoxShape.circle),
+    );
+  }
+
+  /// Körlük türünü temsil eden renkli ikon:
+  /// 1. Deuteranopi: Yeşil
+  /// 2. Protanopi: Kırmızı
+  /// 3. Tritanopi: Mavi ve sarı ikiye bölünerek
+  Widget _buildTurIkonu(RenkKorluguTuru tur, bool seciliMi, {double size = 36}) {
+    Widget ic;
+    switch (tur) {
+      case RenkKorluguTuru.deuteranopi:
+        ic = Container(color: const Color(0xFF2E7D32)); // Yeşil
+        break;
+      case RenkKorluguTuru.protanopi:
+        ic = Container(color: const Color(0xFFD32F2F)); // Kırmızı
+        break;
+      case RenkKorluguTuru.tritanopi:
+        ic = Row(
+          children: [
+            Expanded(child: Container(color: const Color(0xFF1976D2))), // Mavi
+            Expanded(child: Container(color: const Color(0xFFFFD600))), // Sarı
+          ],
+        );
+        break;
+    }
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.black26, width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 3,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(child: ic),
+            if (seciliMi)
+              Icon(
+                Icons.check,
+                color: Colors.white,
+                size: size * 0.6,
+                shadows: const [
+                  Shadow(color: Colors.black87, blurRadius: 4),
+                ],
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -496,25 +555,7 @@ class AyarlarEkrani extends StatelessWidget {
         ),
       ),
       child: ListTile(
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: palet.primary,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.black26, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: palet.primary.withValues(alpha: 0.3),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: seciliMi
-              ? const Icon(Icons.check, color: Colors.white, size: 22)
-              : null,
-        ),
+        leading: _buildTurIkonu(tur, seciliMi, size: 36),
         title: Text(
           '${palet.turAdi} (${palet.turAciklamasi})',
           style: TextStyle(
@@ -686,7 +727,7 @@ class AyarlarEkrani extends StatelessWidget {
                   title: Text('Görme Engelli (Sesli Radar Modu)', style: TextStyle(fontWeight: FontWeight.bold, color: baslikRengi)),
                   subtitle: Text('Tam sesli okuma, haptik radar ve konuşan asistan', style: TextStyle(color: altRengi)),
                   trailing: yonetici.profil.profilTuru == ProfilTuru.gormeEngelliModu
-                      ? const Icon(Icons.check_circle, color: UygulamaRenkleri.anaZumrut, size: 26)
+                      ? const Icon(Icons.check_circle, color: Color(0xFFFFD600), size: 26)
                       : null,
                   onTap: () {
                     yonetici.profilAyarla(ProfilTuru.gormeEngelliModu);
