@@ -6,14 +6,14 @@ import 'package:provider/provider.dart';
 import '../../yoneticiler/sepet_yoneticisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/sesli_radar_yoneticisi.dart';
-import '../../servisler/sesli_asistan_servisi.dart';
-import '../sepet/sepet_ekrani.dart';
-import '../sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
-import '../profil/kullanici_profili_ekrani.dart';
+import '../../servisler/kamera_servisi.dart';
+import '../../servisler/fiyat_tanima_servisi.dart';
+import '../../servisler/resim_kirpma_servisi.dart';
 import '../ayarlar/ayarlar_ekrani.dart';
 
-/// Görme Engelli / Sesli Radar ve Haptik Kamera Ekranı
-/// (Stitch: sesli_radar_kamera birebir)
+/// %100 Ses ve Konuşma Odaklı Görme Engelli Radarı & Canlı Kamera Ekranı
+/// Karışık butonlar, dönen çizgiler ve jest ezberleri tamamen kaldırılmıştır.
+/// Kullanıcı yalnızca konuşarak asistanla diyalog kurar.
 class GormeEngelliRadarKameraView extends StatefulWidget {
   final CameraController? cameraController;
   final VoidCallback onFotoCek;
@@ -33,837 +33,323 @@ class GormeEngelliRadarKameraView extends StatefulWidget {
 
 class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraView>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  Timer? _waveformTimer;
-  List<double> _waveformHeights = [14, 28, 42, 24, 38, 18, 32];
-  bool _fenerAcik = false;
-  DateTime? _sonDokunmaZamani;
+  CameraController? _yerelKameraDenetleyici;
+  bool _kameraHazir = false;
+  bool _tariyor = false;
+  Timer? _otomatikTaramaZamanlayici;
+  late AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
+    _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
 
-    _waveformTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (mounted) {
-        setState(() {
-          _waveformHeights = [
-            12.0 + (timer.tick % 4) * 6,
-            24.0 + (timer.tick % 5) * 5,
-            38.0 + (timer.tick % 3) * 6,
-            20.0 + (timer.tick % 6) * 4,
-            34.0 + (timer.tick % 4) * 7,
-            16.0 + (timer.tick % 5) * 5,
-            30.0 + (timer.tick % 3) * 8,
-          ];
-        });
-      }
-    });
+    _kameraBaslat();
 
-    HapticFeedback.mediumImpact();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final profil = context.read<ProfilYoneticisi>().profil;
-        context.read<SesliRadarYoneticisi>().baslat(profil.sesliAsistanAcik);
+        final sepet = context.read<SepetYoneticisi>();
+        final radar = context.read<SesliRadarYoneticisi>();
+        radar.baslat(
+          sesliAsistanAcik: profil.sesliAsistanAcik,
+          sepet: sepet,
+          profil: profil,
+        );
+      }
+    });
+  }
+
+  Future<void> _kameraBaslat() async {
+    if (widget.cameraController != null && widget.cameraController!.value.isInitialized) {
+      if (mounted) {
+        setState(() {
+          _yerelKameraDenetleyici = widget.cameraController;
+          _kameraHazir = true;
+        });
+      }
+      _otomatikTaramayiBaslat();
+      return;
+    }
+
+    final kamera = KameraServisi.varsayilanArkaKamera;
+    if (kamera != null) {
+      final controller = CameraController(
+        kamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+      try {
+        await controller.initialize();
+        if (mounted) {
+          setState(() {
+            _yerelKameraDenetleyici = controller;
+            _kameraHazir = true;
+          });
+          _otomatikTaramayiBaslat();
+        }
+      } catch (e) {
+        debugPrint('Görme engelli kamera başlatma hatası: $e');
+      }
+    }
+  }
+
+  /// Arka planda periyodik olarak kamerayı dinleyip etiket yakalar
+  void _otomatikTaramayiBaslat() {
+    _otomatikTaramaZamanlayici?.cancel();
+    _otomatikTaramaZamanlayici = Timer.periodic(const Duration(milliseconds: 3200), (timer) async {
+      final radar = context.read<SesliRadarYoneticisi>();
+      if (!mounted || _tariyor || radar.konusuyor || _yerelKameraDenetleyici == null || !_yerelKameraDenetleyici!.value.isInitialized) {
+        return;
+      }
+
+      // Eğer ürün bulunmuş ve kullanıcıdan onay bekleniyorsa taramayı beklet
+      if (radar.durum == RadarDurumu.urunBulundu) return;
+
+      _tariyor = true;
+      try {
+        final XFile resim = await _yerelKameraDenetleyici!.takePicture();
+        final kirpilmis = await ResimKirpmaServisi.hedefKutusunuKirp(resim.path);
+        final sonuc = await FiyatTanimaServisi().resmiTara(kirpilmis);
+
+        if (mounted && sonuc.basarili && sonuc.tespitEdilenFiyat != null) {
+          final profil = context.read<ProfilYoneticisi>().profil;
+          final sepet = context.read<SepetYoneticisi>();
+          await radar.etiketAlgilandi(sonuc, profil: profil, sepet: sepet);
+        }
+      } catch (e) {
+        debugPrint('Otomatik OCR tarama hatası: $e');
+      } finally {
+        _tariyor = false;
       }
     });
   }
 
   @override
   void dispose() {
-    _animController.dispose();
-    _waveformTimer?.cancel();
+    _otomatikTaramaZamanlayici?.cancel();
+    _pulseController.dispose();
+    if (widget.cameraController == null) {
+      _yerelKameraDenetleyici?.dispose();
+    }
     super.dispose();
   }
 
-  void _sesliGeriBildirim(String mesaj) {
-    HapticFeedback.heavyImpact();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFFFFD600),
-        duration: const Duration(seconds: 2),
-        content: Row(
-          children: [
-            const Icon(Icons.volume_up, color: Colors.black, size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                mesaj,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _sepeteEkleVeBildir() {
-    final sepet = context.read<SepetYoneticisi>();
-    final profil = context.read<ProfilYoneticisi>().profil;
-    final radar = context.read<SesliRadarYoneticisi>();
-    radar.ekranaCiftDokunuldu(sepet: sepet, profil: profil);
-  }
-
-  void _dokunmaIsle(BuildContext ctx) {
-    final simdi = DateTime.now();
-    if (_sonDokunmaZamani != null &&
-        simdi.difference(_sonDokunmaZamani!) < const Duration(milliseconds: 500)) {
-      _sepeteEkleVeBildir();
-      _sonDokunmaZamani = null;
-    } else {
-      _sonDokunmaZamani = simdi;
-      HapticFeedback.lightImpact();
-      final radar = context.read<SesliRadarYoneticisi>();
-      final profil = context.read<ProfilYoneticisi>().profil;
-      if (profil.sesliAsistanAcik) {
-        SesliAsistanServisi().konus(radar.asistanMesaji);
-      }
-    }
-  }
-
-  void _fenerDegistir() {
-    setState(() {
-      _fenerAcik = !_fenerAcik;
-    });
+  void _ekranaDokunuldu() {
     HapticFeedback.mediumImpact();
-    _sesliGeriBildirim(_fenerAcik ? 'Kamera feneri açıldı' : 'Kamera feneri kapatıldı');
+    final radar = context.read<SesliRadarYoneticisi>();
+    final profil = context.read<ProfilYoneticisi>().profil;
+    final sepet = context.read<SepetYoneticisi>();
+
+    // Eğer asistan konuşmuyorsa dinlemeyi tazele
+    if (!radar.konusuyor) {
+      radar.dinlemeyiBaslat(sepet: sepet, profil: profil);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final radar = context.watch<SesliRadarYoneticisi>();
-    final profil = context.watch<ProfilYoneticisi>().profil;
-    final sepet = context.watch<SepetYoneticisi>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0E0E11),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0E0E11).withValues(alpha: 0.95),
-        elevation: 4,
-        toolbarHeight: 76,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFFFFD600), size: 30),
-          onPressed: widget.onKapat,
-          tooltip: 'Geri Dön',
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFD600),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'SESLİ MOD AKTİF',
-                  style: TextStyle(
-                    color: Color(0xFFFFD600),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            const Text(
-              'Sesli Radar',
-              style: TextStyle(
-                color: Color(0xFFE4E1E6),
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              radar.durum == RadarDurumu.dinliyor ? Icons.mic : Icons.mic_none,
-              color: radar.durum == RadarDurumu.dinliyor ? Colors.red : const Color(0xFFFFD600),
-              size: 30,
-            ),
-            onPressed: () => radar.dinlemeyiBaslat(sepet: sepet, profil: profil),
-            tooltip: 'Sesli Asistan ile Konuş',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings, color: Color(0xFFFFD600), size: 30),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
-              );
-            },
-            tooltip: 'Ayarlar ve Mod Değiştir',
-          ),
-          IconButton(
-            icon: const Icon(Icons.volume_up, color: Color(0xFFFFD600), size: 30),
-            onPressed: () {
-              SesliAsistanServisi().konus(radar.asistanMesaji);
-            },
-            tooltip: 'Ekranı Sesli Tekrar Oku',
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: InkWell(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const KullaniciProfiliEkrani()),
-                );
-              },
-              borderRadius: BorderRadius.circular(18),
-              child: const CircleAvatar(
-                radius: 18,
-                backgroundColor: Color(0xFFFFF5DC),
-                child: Icon(Icons.person, color: Color(0xFF3A3000), size: 22),
-              ),
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: Colors.black,
       body: GestureDetector(
-        onDoubleTap: _sepeteEkleVeBildir,
-        onLongPress: () => radar.dinlemeyiBaslat(sepet: sepet, profil: profil),
-        onHorizontalDragEnd: (_) => radar.ekranKaydirildi(profil),
-        onVerticalDragEnd: (details) {
-          if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
-            _fenerDegistir();
-          }
-        },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 1. Canlı Bilgilendirme Kutusu (Amber Yellow Box)
-              Container(
-                padding: const EdgeInsets.all(16),
+        behavior: HitTestBehavior.opaque,
+        onTap: _ekranaDokunuldu,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Arka Planda Canlı Kamera (Görmeyen için gereksiz yere göz almasın diye yarı saydam)
+            if (_kameraHazir && _yerelKameraDenetleyici != null)
+              Opacity(
+                opacity: 0.35,
+                child: CameraPreview(_yerelKameraDenetleyici!),
+              )
+            else
+              Container(color: Colors.black),
+
+            // 2. Üst Bar: Minimal ve Temiz
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFD600),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.record_voice_over_rounded, color: Colors.black, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'SESLİ ALIŞVERİŞ MODU',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Ayarlar',
+                        icon: const Icon(Icons.settings_rounded, color: Color(0xFFFFD600), size: 28),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const AyarlarEkrani()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // 3. Merkez: Devasa Nabız Atan Mikrofon ve Durum
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBuilder(
+                    animation: _pulseController,
+                    builder: (context, child) {
+                      final scale = 1.0 + (_pulseController.value * 0.12);
+                      return Transform.scale(
+                        scale: scale,
+                        child: Container(
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD600),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFD600).withValues(alpha: 0.5),
+                                blurRadius: 28,
+                                spreadRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            radar.konusuyor
+                                ? Icons.volume_up_rounded
+                                : (radar.durum == RadarDurumu.dinliyor
+                                    ? Icons.mic_rounded
+                                    : Icons.filter_center_focus_rounded),
+                            color: Colors.black,
+                            size: 54,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFFFD600), width: 1.5),
+                    ),
+                    child: Text(
+                      radar.konusuyor
+                          ? 'Asistan Konuşuyor...'
+                          : (radar.durum == RadarDurumu.dinliyor
+                              ? 'Sizi Dinliyorum...'
+                              : 'Etiket Taranıyor...'),
+                      style: const TextStyle(
+                        color: Color(0xFFFFD600),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 4. Alt Bölge: Az Görenler / Yanındakiler İçin 30 Punto Devasa Sarı Yazı
+            Positioned(
+              bottom: 32,
+              left: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD600),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  color: const Color(0xFF141414).withValues(alpha: 0.95),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFFFD600), width: 2),
+                  boxShadow: const [
                     BoxShadow(
-                      color: const Color(0xFFFFD600).withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: Colors.black87,
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.volume_up, color: Colors.black, size: 28),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            '“${radar.asistanMesaji}”',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              height: 1.25,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.only(top: 8),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    if (radar.kullaniciMetni.isNotEmpty) ...[
+                      Row(
                         children: [
-                          const Row(
-                            children: [
-                              Icon(Icons.straighten, color: Colors.black, size: 20),
-                              SizedBox(width: 6),
-                              Text(
-                                'Mesafe: 15 cm',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Fiyat: 24,90 ₺',
-                              style: TextStyle(
-                                color: Color(0xFFFFD600),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // 2. Radar & Ses Dalgaları Çekirdek Alanı
-              Container(
-                height: 250,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F1F22),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFFFD600).withValues(alpha: 0.2),
-                    width: 2,
-                  ),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Dönen Radar Halkaları
-                    AnimatedBuilder(
-                      animation: _animController,
-                      builder: (context, child) {
-                        return Transform.rotate(
-                          angle: _animController.value * 2 * 3.14159,
-                          child: CustomPaint(
-                            size: const Size(200, 200),
-                            painter: _RadarHalkalariRessami(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // Merkez Hedef ve Dinamik Ses Dalgaları
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF0E0E11),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54,
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.filter_center_focus,
-                            color: Color(0xFFFFD600),
-                            size: 38,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0E0E11).withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: _waveformHeights.map((h) {
-                              return AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
-                                width: 8,
-                                height: h,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFD600),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Alt Telemetri Rozetleri
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF353438),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.vibration, color: Color(0xFFFFD600), size: 18),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Haptik:',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    'ÇOK YAKIN',
-                                    style: TextStyle(
-                                      color: Color(0xFFFFD600),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          const Icon(Icons.person_outline_rounded, color: Colors.white70, size: 18),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1B1B1E),
-                                borderRadius: BorderRadius.circular(8),
+                            child: Text(
+                              '“${radar.kullaniciMetni}”',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
                               ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.graphic_eq, color: Color(0xFF60F587), size: 18),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        '1.200 Hz',
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    'Kilitlendi',
-                                    style: TextStyle(
-                                      color: Color(0xFF60F587),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // 3. Tespit Edilen Ürün Önizleme Kartı (Dokun & Dinle)
-              InkWell(
-                onTap: () {
-                  _sesliGeriBildirim('Tespit edilen ürün: Sütaş Tam Yağlı Süt 1 Litre. Fiyat: 24 lira 90 kuruş.');
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2A2A2D),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0E0E11),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'TESPİT EDİLEN ÜRÜN',
-                              style: TextStyle(
-                                color: Color(0xFFFFD600),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              if (radar.sonBulunanUrun != null) {
-                                SesliAsistanServisi().konus(
-                                  '${radar.sonBulunanUrun!.ad}, ${radar.sonBulunanUrun!.birimFiyat.toStringAsFixed(2)} lira.',
-                                );
-                              } else {
-                                SesliAsistanServisi().konus('Henüz bir ürün algılanmadı.');
-                              }
-                            },
-                            child: const Row(
-                              children: [
-                                Icon(Icons.replay, color: Color(0xFFFFD600), size: 20),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Dinle',
-                                  style: TextStyle(
-                                    color: Color(0xFFFFD600),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              radar.sonBulunanUrun?.ad ?? 'Etiket Taranıyor...',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            radar.sonBulunanUrun != null
-                                ? '${radar.sonBulunanUrun!.birimFiyat.toStringAsFixed(2)} ₺'
-                                : '--.-- ₺',
+                    ],
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.auto_awesome, color: Color(0xFFFFD600), size: 26),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            radar.asistanMesaji,
                             style: const TextStyle(
                               color: Color(0xFFFFD600),
-                              fontSize: 28,
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
+                              height: 1.3,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      const Row(
-                        children: [
-                          Icon(Icons.touch_app, color: Colors.white54, size: 18),
-                          SizedBox(width: 6),
-                          Text(
-                            'Ürün detayını dinlemek için dokunun',
-                            style: TextStyle(color: Colors.white54, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // 4. Dev Dokunsal Sepete Ekleme Alanı (Tactile Zone)
-              InkWell(
-                onTap: () => _dokunmaIsle(context),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 160),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFD600),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFD600).withValues(alpha: 0.35),
-                        blurRadius: 18,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.ads_click, color: Colors.black.withValues(alpha: 0.8), size: 30),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'HER YERE DOKUNABİLİRSİNİZ',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'SEPETE EKLEMEK İÇİN ÇİFT DOKUN',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '24,90 ₺',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.record_voice_over, color: Colors.black, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'Sesli Onay: “Sütaş Süt sepete eklenecek”',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // 5. Dokunsal Hareket İpuçları Kutusu
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1B1B1E),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.swipe_up, color: Color(0xFFFFD600), size: 24),
-                            SizedBox(width: 10),
-                            Text(
-                              'Yukarı Kaydır:',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          _fenerAcik ? 'Feneri Kapat' : 'Feneri Aç',
-                          style: const TextStyle(color: Colors.white70, fontSize: 15),
                         ),
                       ],
                     ),
-                    const Divider(color: Color(0xFF2A2A2D), height: 24),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.pinch, color: Color(0xFFFFD600), size: 24),
-                            SizedBox(width: 10),
-                            Text(
-                              'İki Parmakla Dokun:',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          'Yeniden Tara',
-                          style: TextStyle(color: Colors.white70, fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 80),
-            ],
-          ),
-        ),
-      ),
-
-      bottomNavigationBar: Container(
-        height: 84,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0E0E11),
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withValues(alpha: 0.1),
-              width: 1,
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                color: const Color(0xFF2A2A2D),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.radar, color: Color(0xFFFFD600), size: 32),
-                    SizedBox(height: 4),
-                    Text(
-                      'Radar',
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Sadece konuşarak "Evet", "Ekle", "Kalsın", "Sepette ne var" diyebilirsiniz.',
                       style: TextStyle(
-                        color: Color(0xFFFFD600),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                        color: Colors.white60,
+                        fontSize: 13,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SepetEkrani(),
-                    ),
-                  );
-                },
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.shopping_basket, color: Colors.white70, size: 30),
-                    SizedBox(height: 4),
-                    Text(
-                      'Sepet',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SesliAsistanDiyalogEkrani(),
-                    ),
-                  );
-                },
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.mic, color: Colors.white70, size: 30),
-                    SizedBox(height: 4),
-                    Text(
-                      'Asistan',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AyarlarEkrani(),
-                    ),
-                  );
-                },
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.settings, color: Colors.white70, size: 30),
-                    SizedBox(height: 4),
-                    Text(
-                      'Ayarlar',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
@@ -874,22 +360,4 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
       ),
     );
   }
-}
-
-class _RadarHalkalariRessami extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFFFD600).withValues(alpha: 0.35)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    canvas.drawCircle(center, 90, paint);
-    canvas.drawCircle(center, 60, paint..strokeWidth = 1.5);
-    canvas.drawCircle(center, 35, paint..strokeWidth = 1.0);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../modeller/fiyat_tanima_sonucu.dart';
 import '../modeller/profil_modeli.dart';
@@ -6,7 +7,7 @@ import '../servisler/sesli_asistan_servisi.dart';
 import '../servisler/sesli_komut_servisi.dart';
 import 'sepet_yoneticisi.dart';
 
-/// Görme engelli ve sesli radar modunun anlık durumu
+/// Görme engelli sesli asistan modunun anlık durumu
 enum RadarDurumu {
   bosta,
   dinliyor,
@@ -16,7 +17,7 @@ enum RadarDurumu {
   onaylandi,
 }
 
-/// Görme Engelli Radar ve Sesli Alışveriş Asistanı ViewModel'i
+/// %100 Konuşma ve Ses Odaklı Görme Engelli Asistanı ViewModel'i
 class SesliRadarYoneticisi extends ChangeNotifier {
   final SesliAsistanServisi _asistan = SesliAsistanServisi();
   final SesliKomutServisi _komutServisi = SesliKomutServisi();
@@ -24,23 +25,38 @@ class SesliRadarYoneticisi extends ChangeNotifier {
   RadarDurumu _durum = RadarDurumu.bosta;
   String? _hedefUrun;
   UrunModeli? _sonBulunanUrun;
-  String _asistanMesaji = 'Kamerayı ürün etiketine yönlendirin veya konuşmak için basılı tutun.';
+  String _asistanMesaji = 'Sesli asistan devrede. Kamerayı etiketlere doğru tutun.';
+  String _kullaniciMetni = '';
   int _seciliAdet = 1;
+  bool _konusuyor = false;
 
   RadarDurumu get durum => _durum;
   String? get hedefUrun => _hedefUrun;
   UrunModeli? get sonBulunanUrun => _sonBulunanUrun;
   String get asistanMesaji => _asistanMesaji;
+  String get kullaniciMetni => _kullaniciMetni;
   int get seciliAdet => _seciliAdet;
+  bool get konusuyor => _konusuyor;
 
   /// Açılış karşılama mesajı
-  Future<void> baslat(bool sesliAsistanAcik) async {
+  Future<void> baslat({
+    required bool sesliAsistanAcik,
+    required SepetYoneticisi sepet,
+    required ProfilModeli profil,
+  }) async {
     _durum = RadarDurumu.taraniyor;
-    _asistanMesaji = 'FiyatGöz Sesli Radar aktif. Kamerayı etiketlere doğru gezdirin.';
+    _asistanMesaji = 'Sesli radar devrede. Kamerayı etiketlere doğru tutun, sizi dinliyorum.';
     notifyListeners();
 
     if (sesliAsistanAcik) {
+      _konusuyor = true;
+      notifyListeners();
       await _asistan.konus(_asistanMesaji);
+      _konusuyor = false;
+      notifyListeners();
+
+      // Konuşma bitince dinlemeyi başlat
+      dinlemeyiBaslat(sepet: sepet, profil: profil);
     }
   }
 
@@ -49,12 +65,15 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     required SepetYoneticisi sepet,
     required ProfilModeli profil,
   }) async {
+    if (_konusuyor) return;
     _durum = RadarDurumu.dinliyor;
-    _asistanMesaji = 'Sizi dinliyorum... ("Sepete ekle", "2 adet", "Bütçem ne kadar", "Süt bul")';
     notifyListeners();
 
     await _asistan.dinle(
       onSonuc: (metin, sonMu) async {
+        _kullaniciMetni = metin;
+        notifyListeners();
+
         if (sonMu && metin.isNotEmpty) {
           await _komutuYonet(metin, sepet: sepet, profil: profil);
         }
@@ -69,46 +88,90 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     required ProfilModeli profil,
   }) async {
     final sonuc = _komutServisi.niyetCoz(konusmaMetni);
-    debugPrint('Algılanan sesli komut: $sonuc');
+    debugPrint('Görme Engelli Komut Çözüldü: $sonuc');
 
+    // Eğer bir ürün yeni bulunmuşsa ve kullanıcı onay veya ret veriyorsa:
+    if (_durum == RadarDurumu.urunBulundu && _sonBulunanUrun != null) {
+      // 1. Sepete Ekleme Onayı
+      if (sonuc.tur == KomutTuru.sepeteEkle ||
+          konusmaMetni.toLowerCase().contains('evet') ||
+          konusmaMetni.toLowerCase().contains('ekle') ||
+          konusmaMetni.toLowerCase().contains('al') ||
+          konusmaMetni.toLowerCase().contains('koy')) {
+        
+        final adet = sonuc.adet ?? _seciliAdet;
+        final eklenen = _sonBulunanUrun!.kopyala(adet: adet);
+        sepet.urunEkle(eklenen);
+
+        _asistan.titret(TitresimTuru.basari);
+        _asistanMesaji = '$adet adet ${eklenen.ad} sepete eklendi. Güncel sepet toplamı ${sepet.toplamTutar.toStringAsFixed(2)} lira.';
+        _sonBulunanUrun = null;
+        _seciliAdet = 1;
+        _durum = RadarDurumu.taraniyor;
+        notifyListeners();
+
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
+        return;
+      }
+
+      // 2. İptal / Vazgeçme
+      if (sonuc.tur == KomutTuru.iptal ||
+          konusmaMetni.toLowerCase().contains('hayır') ||
+          konusmaMetni.toLowerCase().contains('kalsın') ||
+          konusmaMetni.toLowerCase().contains('alma') ||
+          konusmaMetni.toLowerCase().contains('boşver')) {
+        
+        _asistan.titret(TitresimTuru.hafif);
+        _asistanMesaji = 'Tamam, eklemedim. Taramaya devam ediyorum.';
+        _sonBulunanUrun = null;
+        _seciliAdet = 1;
+        _durum = RadarDurumu.taraniyor;
+        notifyListeners();
+
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
+        return;
+      }
+    }
+
+    // Genel Komutlar
     switch (sonuc.tur) {
       case KomutTuru.selamlama:
         _asistanMesaji = 'Merhabalar! Kamerayı etiketlere doğru gezdirin, ürün ve fiyatları okuyayım.';
-        notifyListeners();
         _asistan.titret(TitresimTuru.secim);
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.tesekkurVeda:
         _asistanMesaji = 'Rica ederim, iyi alışverişler!';
-        notifyListeners();
         _asistan.titret(TitresimTuru.secim);
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.yardim:
-        _asistanMesaji = 'Kamerayı etiketlere tutun. Çift dokunarak ürünü sepete ekleyebilirsiniz veya basılı tutup bütçenizi sorabilirsiniz.';
-        notifyListeners();
+        _asistanMesaji = 'Ben alışveriş asistanınızım. Kamerayı etiketlere tuttuğunuzda fiyatı okurum ve ekleyeyim mi diye sorarım. "Sepette ne var" veya "Bütçem ne kadar" diyebilirsiniz.';
         _asistan.titret(TitresimTuru.secim);
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.sepetiSifirla:
         sepet.sepetiBosalt();
         _sonBulunanUrun = null;
-        _asistanMesaji = 'Sepet tamamen sıfırlandı.';
-        notifyListeners();
+        _asistanMesaji = 'Sepetiniz tamamen sıfırlandı.';
         _asistan.titret(TitresimTuru.hafif);
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.sepeteEkle:
         if (_sonBulunanUrun != null) {
-          await ekranaCiftDokunuldu(sepet: sepet, profil: profil);
+          final eklenen = _sonBulunanUrun!.kopyala(adet: _seciliAdet);
+          sepet.urunEkle(eklenen);
+          _asistan.titret(TitresimTuru.basari);
+          _asistanMesaji = '${eklenen.ad} sepete eklendi. Toplam ${sepet.toplamTutar.toStringAsFixed(2)} lira.';
+          _sonBulunanUrun = null;
+          await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         } else {
-          _asistanMesaji = 'Henüz algılanmış bir ürün yok. Lütfen önce etiketi taratın.';
-          notifyListeners();
-          if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+          _asistanMesaji = 'Henüz algılanmış bir ürün yok. Kamerayı etikete tutabilirsiniz.';
+          await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         }
         break;
 
@@ -116,9 +179,8 @@ class SesliRadarYoneticisi extends ChangeNotifier {
         if (sonuc.adet != null && sonuc.adet! > 0) {
           _seciliAdet = sonuc.adet!;
           _asistanMesaji = 'Adet $_seciliAdet olarak güncellendi.';
-          notifyListeners();
           _asistan.titret(TitresimTuru.secim);
-          if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+          await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         }
         break;
 
@@ -127,70 +189,103 @@ class SesliRadarYoneticisi extends ChangeNotifier {
         _hedefUrun = null;
         _durum = RadarDurumu.taraniyor;
         _asistanMesaji = 'İptal edildi. Tarama devam ediyor.';
-        notifyListeners();
         _asistan.titret(TitresimTuru.hafif);
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.butceSorgula:
         final harcanan = sepet.toplamTutar;
         final kalan = profil.aylikButce - harcanan;
         if (kalan >= 0) {
-          _asistanMesaji =
-              'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
+          _asistanMesaji = 'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
         } else {
-          _asistanMesaji =
-              'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam sepet tutarınız ${harcanan.toStringAsFixed(2)} lira.';
+          _asistanMesaji = 'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam sepet tutarınız ${harcanan.toStringAsFixed(2)} lira.';
         }
-        notifyListeners();
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.sepetOzeti:
         final adet = sepet.toplamUrunAdedi;
         final cesit = sepet.urunCesitSayisi;
         final toplam = sepet.toplamTutar;
-        _asistanMesaji =
-            'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
-        notifyListeners();
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        if (adet == 0) {
+          _asistanMesaji = 'Sepetiniz şu anda boş.';
+        } else {
+          _asistanMesaji = 'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
+        }
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
 
       case KomutTuru.urunAra:
         if (sonuc.hedefUrun != null) {
           _hedefUrun = sonuc.hedefUrun;
           _durum = RadarDurumu.hedefAraniyor;
-          _asistanMesaji =
-              '${_hedefUrun!} aranıyor. Kamerayı raflardaki etiketlere doğru gezdirin.';
-          notifyListeners();
+          _asistanMesaji = '${_hedefUrun!} aranıyor. Kamerayı raflardaki etiketlere doğru gezdirin.';
           _asistan.titret(TitresimTuru.secim);
-          if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+          await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         }
         break;
 
       case KomutTuru.belirsiz:
-        _asistanMesaji = 'Tam anlayamadım. "Sepete ekle", "Kaç param kaldı" veya "Süt bul" diyebilirsiniz.';
-        notifyListeners();
-        if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
+        // Eğer kullanıcı son ürünü çıkarmak istiyorsa
+        if (konusmaMetni.toLowerCase().contains('çıkar') || konusmaMetni.toLowerCase().contains('sil')) {
+          if (sepet.urunler.isNotEmpty) {
+            final silinen = sepet.urunler.last;
+            sepet.urunSil(silinen.id);
+            _asistanMesaji = 'Son ürün "${silinen.ad}" sepetten çıkarıldı. Güncel toplam ${sepet.toplamTutar.toStringAsFixed(2)} lira.';
+          } else {
+            _asistanMesaji = 'Sepetiniz zaten boş.';
+          }
+        } else {
+          _asistanMesaji = 'Tam anlayamadım. "Sepette ne var", "Ekle", "Kalsın" veya "Bütçem" diyebilirsiniz.';
+        }
+        await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;
     }
   }
 
-  /// Kameradan gelen OCR sonucunu işler ve radar tepkisi verir
+  /// Asistan cevabı seslendirir ve ardından dinlemeye devam eder
+  Future<void> _sesliCevapVer(
+    String mesaj, {
+    required SepetYoneticisi sepet,
+    required ProfilModeli profil,
+  }) async {
+    _konusuyor = true;
+    notifyListeners();
+
+    if (profil.sesliAsistanAcik) {
+      await _asistan.konus(mesaj);
+    }
+
+    _konusuyor = false;
+    notifyListeners();
+
+    // Kullanıcıya tekrar mikrofon açılır
+    dinlemeyiBaslat(sepet: sepet, profil: profil);
+  }
+
+  /// Kameradan gelen OCR sonucunu işler ve kullanıcıya sesli soru yöneltir
   Future<void> etiketAlgilandi(
     FiyatTanimaSonucu sonuc, {
     required ProfilModeli profil,
+    required SepetYoneticisi sepet,
   }) async {
-    if (!sonuc.basarili || sonuc.tespitEdilenFiyat == null) return;
+    if (!sonuc.basarili || sonuc.tespitEdilenFiyat == null || _konusuyor) return;
 
     final urunAdi = sonuc.tespitEdilenUrunAdi ?? 'Market Ürünü';
     final fiyat = sonuc.tespitEdilenFiyat!;
+
+    // Aynı ürünü arka arkaya durmadan tekrar okumasın
+    if (_sonBulunanUrun != null &&
+        _sonBulunanUrun!.ad == urunAdi &&
+        _sonBulunanUrun!.birimFiyat == fiyat) {
+      return;
+    }
 
     // Hedef arama modundaysak kontrol et
     if (_durum == RadarDurumu.hedefAraniyor && _hedefUrun != null) {
       final eslesiyor = urunAdi.toLowerCase().contains(_hedefUrun!.toLowerCase());
       if (!eslesiyor) {
-        // Hedef ürün değil, hafif tık verip geç
         _asistan.titret(TitresimTuru.hafif);
         return;
       }
@@ -205,57 +300,11 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     );
 
     _durum = RadarDurumu.urunBulundu;
-    _asistanMesaji = '$urunAdi, ${fiyat.toStringAsFixed(2)} lira. Sepete eklemek için ekrana çift dokunun.';
+    _asistanMesaji = '$urunAdi, ${fiyat.toStringAsFixed(2)} lira. Sepete ekleyeyim mi?';
     notifyListeners();
 
     _asistan.titret(TitresimTuru.radarKilitlendi);
-    if (profil.sesliAsistanAcik) {
-      await _asistan.konus(_asistanMesaji);
-    }
-  }
-
-  /// Görme engelli kullanıcının ekrana ÇİFT DOKUNMA jesti
-  Future<void> ekranaCiftDokunuldu({
-    required SepetYoneticisi sepet,
-    required ProfilModeli profil,
-  }) async {
-    if (_sonBulunanUrun == null) {
-      _asistanMesaji = 'Sepete eklenecek ürün bulunamadı. Lütfen önce etiketi taratın.';
-      notifyListeners();
-      _asistan.titret(TitresimTuru.hata);
-      if (profil.sesliAsistanAcik) await _asistan.konus(_asistanMesaji);
-      return;
-    }
-
-    sepet.urunEkle(_sonBulunanUrun!.kopyala(adet: _seciliAdet));
-    _asistan.titret(TitresimTuru.basari);
-
-    final eklenen = _sonBulunanUrun!;
-    _asistanMesaji =
-        '${eklenen.ad} sepete eklendi. Toplam sepet tutarı ${sepet.toplamTutar.toStringAsFixed(2)} lira.';
-    
-    _sonBulunanUrun = null;
-    _seciliAdet = 1;
-    _durum = RadarDurumu.taraniyor;
-    notifyListeners();
-
-    if (profil.sesliAsistanAcik) {
-      await _asistan.konus(_asistanMesaji);
-    }
-  }
-
-  /// Sağa kaydırma veya vazgeçme jesti
-  Future<void> ekranKaydirildi(ProfilModeli profil) async {
-    _sonBulunanUrun = null;
-    _seciliAdet = 1;
-    _durum = RadarDurumu.taraniyor;
-    _asistanMesaji = 'Yeni ürün için tarama yapılıyor.';
-    notifyListeners();
-    _asistan.titret(TitresimTuru.hafif);
-
-    if (profil.sesliAsistanAcik) {
-      await _asistan.konus(_asistanMesaji);
-    }
+    await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
   }
 
   @override

@@ -20,7 +20,6 @@ import 'ekranlar/fis_detay/fis_detay_ekrani.dart';
 import 'ekranlar/ayarlar/ayarlar_ekrani.dart';
 import 'ekranlar/fisler/tum_fisler_ekrani.dart';
 import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
-import 'ekranlar/sepet/gorme_engelli_sepet_view.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_paneli.dart';
 import 'modeller/urun_modeli.dart';
@@ -143,19 +142,13 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
     final sepet = context.watch<SepetYoneticisi>();
     final profil = context.watch<ProfilYoneticisi>().profil;
 
-    // Görme Engelli Modu: Kendi dev taktil 3 butonlu alt navigasyonuna sahiptir
+    // Görme Engelli Modu: %100 konuşma ve ses odaklı canlı kamera radarı
     if (profil.profilTuru == ProfilTuru.gormeEngelliModu) {
-      if (_seciliSayfa == 0) {
-        return GormeEngelliRadarKameraView(
-          cameraController: null,
-          onFotoCek: () => _kameraSayfasiniAc(context),
-          onKapat: () => setState(() => _seciliSayfa = 2),
-        );
-      } else if (_seciliSayfa == 1) {
-        return const GormeEngelliSepetView();
-      } else {
-        return const AyarlarEkrani();
-      }
+      return GormeEngelliRadarKameraView(
+        cameraController: null,
+        onFotoCek: () {},
+        onKapat: () {},
+      );
     }
 
     final sayfalar = [
