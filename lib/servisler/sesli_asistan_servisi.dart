@@ -39,8 +39,18 @@ class SesliAsistanServisi {
     if (_ttsHazir) return;
     try {
       _tts = FlutterTts();
-      await _tts!.setLanguage('tr-TR');
-      await _tts!.setSpeechRate(0.5); // Doğal ve anlaşılır konuşma hızı
+      // Konuşmanın bitmesini bekleme ayarı (STT ile çakışmayı ve kesilmeyi engeller)
+      await _tts!.awaitSpeakCompletion(true);
+
+      // Türkçe dil desteğini garantiye alıyoruz
+      final bool trTrVar = await _tts!.isLanguageAvailable('tr-TR') ?? false;
+      if (trTrVar) {
+        await _tts!.setLanguage('tr-TR');
+      } else {
+        await _tts!.setLanguage('tr');
+      }
+
+      await _tts!.setSpeechRate(0.48); // Anlaşılır ve net Türkçe diksiyon hızı
       await _tts!.setPitch(1.0);
       await _tts!.setVolume(1.0);
 
@@ -70,15 +80,20 @@ class SesliAsistanServisi {
       if (!_ttsHazir) {
         await ttsBaslat();
       }
-      if (_konusuyor) {
-        await durdur();
+
+      // Mikrofon dinliyorsa önce susturuyoruz ki ses çakışmasın veya kesilmesin
+      if (_dinliyor) {
+        await dinlemeyiDurdur();
       }
 
       final hazirMetin = _seslendirilecekMetniHazirla(hamMetin);
       debugPrint('TTS Okunuyor: "$hazirMetin"');
+      _konusuyor = true;
       await _tts?.speak(hazirMetin);
     } catch (e) {
       debugPrint('Sesli okuma hatası: $e');
+    } finally {
+      _konusuyor = false;
     }
   }
 
