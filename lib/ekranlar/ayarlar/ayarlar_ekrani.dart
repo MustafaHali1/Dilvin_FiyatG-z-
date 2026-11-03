@@ -374,58 +374,67 @@ class AyarlarEkrani extends StatelessWidget {
     final bool koyuTema = yonetici.kolayMod;
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: koyuTema ? const Color(0xFF1E1E1E) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(Olculer.yariCapBuyuk)),
       ),
       builder: (context) {
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(Olculer.boslukBuyuk),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Renk Körlüğü Türünü Seç',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: koyuTema ? Colors.white : UygulamaRenkleri.koyuYazi,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(Olculer.boslukBuyuk),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Renk Körlüğü Türünü Seç',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: koyuTema ? Colors.white : UygulamaRenkleri.koyuYazi,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Uygulama renkleri seçtiğin tıbbi palete göre anında güncellenir.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: koyuTema ? Colors.white70 : UygulamaRenkleri.griYazi,
+                  const SizedBox(height: 6),
+                  Text(
+                    'Uygulama renkleri seçtiğin tıbbi palete göre anında güncellenir.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: koyuTema ? Colors.white70 : UygulamaRenkleri.griYazi,
+                    ),
                   ),
-                ),
-                const SizedBox(height: Olculer.boslukOrta),
+                  const SizedBox(height: Olculer.boslukOrta),
 
-                // 1. Deuteranopia
-                _renkKoruTurSatiri(
-                  context: context,
-                  yonetici: yonetici,
-                  tur: RenkKorluguTuru.deuteranopi,
-                  palet: RenkKorluguPaleti.deuteranopia,
-                ),
-                // 2. Protanopia
-                _renkKoruTurSatiri(
-                  context: context,
-                  yonetici: yonetici,
-                  tur: RenkKorluguTuru.protanopi,
-                  palet: RenkKorluguPaleti.protanopia,
-                ),
-                // 3. Tritanopia
-                _renkKoruTurSatiri(
-                  context: context,
-                  yonetici: yonetici,
-                  tur: RenkKorluguTuru.tritanopi,
-                  palet: RenkKorluguPaleti.tritanopia,
-                ),
-              ],
+                  // 1. Deuteranopia (Yeşil Körlüğü): Mavi, Turuncu, Pembe
+                  _renkKoruTurSatiri(
+                    context: context,
+                    yonetici: yonetici,
+                    tur: RenkKorluguTuru.deuteranopi,
+                    palet: RenkKorluguPaleti.deuteranopia,
+                    renkIsimleri: const ['Mavi', 'Turuncu', 'Pembe'],
+                  ),
+                  // 2. Protanopia (Kırmızı Körlüğü): Koyu Mavi, Açık Mavi, Turuncu
+                  _renkKoruTurSatiri(
+                    context: context,
+                    yonetici: yonetici,
+                    tur: RenkKorluguTuru.protanopi,
+                    palet: RenkKorluguPaleti.protanopia,
+                    renkIsimleri: const ['Koyu Mavi', 'Açık Mavi', 'Turuncu'],
+                  ),
+                  // 3. Tritanopia (Mavi-Sarı Körlüğü): Zümrüt, Kızıl, Pembe
+                  _renkKoruTurSatiri(
+                    context: context,
+                    yonetici: yonetici,
+                    tur: RenkKorluguTuru.tritanopi,
+                    palet: RenkKorluguPaleti.tritanopia,
+                    renkIsimleri: const ['Zümrüt', 'Kızıl', 'Pembe'],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -472,13 +481,9 @@ class AyarlarEkrani extends StatelessWidget {
     required ProfilYoneticisi yonetici,
     required RenkKorluguTuru tur,
     required RenkKorluguPaleti palet,
+    required List<String> renkIsimleri,
   }) {
     final bool seciliMi = yonetici.profil.renkKorluguTuru == tur;
-
-    // Her türün kendine ait 3 kontrastlı renk etiketi (Primary, Secondary, Accent)
-    final Color accentRenk = tur == RenkKorluguTuru.protanopi
-        ? palet.info // Açık Mavi #56B4E9
-        : (tur == RenkKorluguTuru.tritanopi ? palet.warning : palet.error); // Magenta #CC79A7
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -523,9 +528,9 @@ class AyarlarEkrani extends StatelessWidget {
             spacing: 6,
             runSpacing: 4,
             children: [
-              _kontrastliRozet(etiket: 'Primary', renk: palet.primary),
-              _kontrastliRozet(etiket: 'Secondary', renk: palet.secondary),
-              _kontrastliRozet(etiket: 'Accent', renk: accentRenk),
+              _kontrastliRozet(etiket: renkIsimleri[0], renk: palet.primary),
+              _kontrastliRozet(etiket: renkIsimleri[1], renk: palet.secondary),
+              _kontrastliRozet(etiket: renkIsimleri[2], renk: palet.accent),
             ],
           ),
         ),

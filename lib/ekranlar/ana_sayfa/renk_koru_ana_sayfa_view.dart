@@ -37,9 +37,6 @@ class RenkKoruAnaSayfaView extends StatefulWidget {
 class _RenkKoruAnaSayfaViewState extends State<RenkKoruAnaSayfaView> {
   String _arama = '';
   bool _gecmisFislerAcik = true;
-  int _seciliFiltreIndex = 0;
-
-  final List<String> _filtreler = ['Tümü', 'Kasım 2026', 'Ekim 2026'];
 
   @override
   Widget build(BuildContext context) {
@@ -162,36 +159,6 @@ class _RenkKoruAnaSayfaViewState extends State<RenkKoruAnaSayfaView> {
                   borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
                   borderSide: const BorderSide(color: UygulamaRenkleri.cizgi),
                 ),
-              ),
-            ),
-            const SizedBox(height: Olculer.boslukOrta),
-
-            // Filtre Çipleri
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(_filtreler.length, (index) {
-                  final secili = _seciliFiltreIndex == index;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(_filtreler[index]),
-                      selected: secili,
-                      selectedColor: palet.primary.withValues(alpha: 0.15),
-                      labelStyle: TextStyle(
-                        color: secili ? palet.primary : UygulamaRenkleri.koyuYazi,
-                        fontWeight: secili ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      side: BorderSide(
-                        color: secili ? palet.primary : UygulamaRenkleri.cizgi,
-                      ),
-                      backgroundColor: Colors.white,
-                      onSelected: (val) {
-                        if (val) setState(() => _seciliFiltreIndex = index);
-                      },
-                    ),
-                  );
-                }),
               ),
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
