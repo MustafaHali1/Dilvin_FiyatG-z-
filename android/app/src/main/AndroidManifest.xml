@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <application
-        android:label="fiyatgoz"
+        android:label="Dilvin · SepetGöz"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

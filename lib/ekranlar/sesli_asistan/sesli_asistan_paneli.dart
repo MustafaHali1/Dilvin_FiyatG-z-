@@ -86,7 +86,7 @@ class _SesliAsistanPaneliState extends State<SesliAsistanPaneli> {
               break;
 
             case KomutTuru.yardim:
-              yanit = 'Fiyatları söyleyebilir, sepetinizi yönetebilir ve bütçenizi hesaplayabilirim.';
+              yanit = 'Ben Dilvin · SepetGöz Asistanı. Fiyatları söyleyebilir, sepetinizi yönetebilir ve bütçenizi hesaplayabilirim.';
               break;
 
             case KomutTuru.sepetiSifirla:

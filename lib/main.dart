@@ -26,9 +26,10 @@ import 'ekranlar/sesli_asistan/sesli_asistan_paneli.dart';
 import 'modeller/urun_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await KameraServisi.baslat();
+  // Kamera donanımını arayüzün ilk çizimini geciktirmeden arka planda başlatıyoruz
+  KameraServisi.baslat();
 
   runApp(
     MultiProvider(
@@ -52,7 +53,7 @@ class FiyatGozUygulamasi extends StatelessWidget {
     final profil = context.watch<ProfilYoneticisi>().profil;
 
     return MaterialApp(
-      title: 'FiyatGöz',
+      title: 'Dilvin · SepetGöz',
       debugShowCheckedModeBanner: false,
       theme: TemaFabrikasi.olustur(profil),
       home: const UygulamaGirisKontrolcusu(),

@@ -41,7 +41,7 @@ class AsistanVeriSeti {
     'olur', 'oldu', 'kabul', 'kabul et', 'uyar', 'anlaştık', 'anlastik',
     'yolla gelsin', 'yaz tahtaya', 'yaz bunu', 'yaz listeye', 'lazım bu', 'lazim bu',
     'iş görür', 'is gorur', 'geç sepete', 'gec sepete', 'hadi alalım', 'hadi alalim',
-    'bunu seçtim', 'bunu sectim'
+    'bunu seçtim', 'bunu sectim','sepetimi onayla'
   };
 
   // =========================================================================
@@ -90,8 +90,10 @@ class AsistanVeriSeti {
     'sepet doldu mu', 'toplam ne kadar', 'toplam tutar', 'toplam ne tuttu',
     'ne kadar tuttu', 'hesap ne kadar', 'hesap nedir', 'hesap ne tuttu',
     'borcumuz ne', 'borç ne kadar', 'borc ne kadar', 'kaça patladı', 'kaca patladi',
-    'kaç para tuttu', 'kac para tuttu', 'fatura ne kadar', 'kasa toplamı', 'kasa toplami'
-  };
+    'kaç para tuttu', 'kac para tuttu', 'fatura ne kadar','kasa toplamı', 'kasa toplami'
+
+    };
+
 
   // =========================================================================
   // 🧹 7. SEPETİ TAMAMEN SIFIRLAMA
