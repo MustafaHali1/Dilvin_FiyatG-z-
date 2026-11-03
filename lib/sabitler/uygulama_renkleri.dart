@@ -63,7 +63,7 @@ class RenkKorluguPaleti {
     required this.turAciklamasi,
   });
 
-  // 1. Deuteranopia (Yeşil Körlüğü): Mavi, Turuncu ve Pembe (Kullanıcı Talebi: Mavi, Turuncu ve Pembe)
+  // 1. Deuteranopia (Yeşil Körlüğü): Mavi, Turuncu ve Pembe
   static const deuteranopia = RenkKorluguPaleti(
     primary: Color(0xFF0072B2),   // Mavi
     secondary: Color(0xFFE69F00), // Turuncu
@@ -73,10 +73,10 @@ class RenkKorluguPaleti {
     warning: Color(0xFFE69F00),   // Turuncu
     info: Color(0xFFCC79A7),      // Pembe
     turAdi: 'Deuteranopi',
-    turAciklamasi: 'Yeşil Körlüğü (Mavi, Turuncu, Pembe)',
+    turAciklamasi: 'Yeşil Körlüğü',
   );
 
-  // 2. Protanopia (Kırmızı Körlüğü): Koyu Mavi, Açık Mavi ve Turuncu (Kullanıcı Talebi: Koyu Mavi, Açık Mavi, Turuncu)
+  // 2. Protanopia (Kırmızı Körlüğü): Koyu Mavi, Açık Mavi ve Turuncu
   static const protanopia = RenkKorluguPaleti(
     primary: Color(0xFF0072B2),   // Koyu Mavi
     secondary: Color(0xFF56B4E9), // Açık Mavi
@@ -86,7 +86,7 @@ class RenkKorluguPaleti {
     warning: Color(0xFFE69F00),   // Turuncu
     info: Color(0xFF56B4E9),      // Açık Mavi
     turAdi: 'Protanopi',
-    turAciklamasi: 'Kırmızı Körlüğü (Koyu Mavi, Açık Mavi, Turuncu)',
+    turAciklamasi: 'Kırmızı Körlüğü',
   );
 
   // 3. Tritanopia (Mavi-Sarı Körlüğü): Zümrüt Yeşili, Kızıl ve Pembe
@@ -99,7 +99,7 @@ class RenkKorluguPaleti {
     warning: Color(0xFFD55E00),   // Kızıl
     info: Color(0xFF009E73),      // Zümrüt
     turAdi: 'Tritanopi',
-    turAciklamasi: 'Mavi-Sarı Körlüğü (Zümrüt, Kızıl, Pembe)',
+    turAciklamasi: 'Mavi-Sarı Körlüğü',
   );
 
   static RenkKorluguPaleti getir(RenkKorluguTuru tur) {

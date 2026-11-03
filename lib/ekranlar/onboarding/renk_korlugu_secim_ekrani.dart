@@ -45,10 +45,10 @@ class _RenkKorluguSecimEkraniState extends State<RenkKorluguSecimEkrani> {
                 style: MetinStilleri.govde(),
               ),
               const SizedBox(height: Olculer.boslukBuyuk),
-              // 1. Deuteranopi (Yeşil Körlüğü): Mavi, Turuncu, Pembe
+              // 1. Deuteranopi (Yeşil Körlüğü)
               _TurKarti(
                 baslik: 'Yeşili ayırt edemiyorum',
-                turAdi: 'Deuteranopi (Mavi, Turuncu, Pembe)',
+                turAdi: 'Deuteranopi (Yeşil Körlüğü)',
                 ornekRenkler: const [
                   Color(0xFF0072B2), // Mavi
                   Color(0xFFE69F00), // Turuncu
@@ -57,10 +57,10 @@ class _RenkKorluguSecimEkraniState extends State<RenkKorluguSecimEkrani> {
                 seciliMi: _seciliTur == RenkKorluguTuru.deuteranopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.deuteranopi),
               ),
-              // 2. Protanopi (Kırmızı Körlüğü): Koyu Mavi, Açık Mavi, Turuncu
+              // 2. Protanopi (Kırmızı Körlüğü)
               _TurKarti(
                 baslik: 'Kırmızıyı ayırt edemiyorum',
-                turAdi: 'Protanopi (Koyu Mavi, Açık Mavi, Turuncu)',
+                turAdi: 'Protanopi (Kırmızı Körlüğü)',
                 ornekRenkler: const [
                   Color(0xFF0072B2), // Koyu Mavi
                   Color(0xFF56B4E9), // Açık Mavi
@@ -69,10 +69,10 @@ class _RenkKorluguSecimEkraniState extends State<RenkKorluguSecimEkrani> {
                 seciliMi: _seciliTur == RenkKorluguTuru.protanopi,
                 onDokunuldu: () => setState(() => _seciliTur = RenkKorluguTuru.protanopi),
               ),
-              // 3. Tritanopi (Mavi-Sarı Körlüğü): Zümrüt Yeşili, Kızıl, Pembe
+              // 3. Tritanopi (Mavi-Sarı Körlüğü)
               _TurKarti(
                 baslik: 'Mavi ve sarıyı ayırt edemiyorum',
-                turAdi: 'Tritanopi (Zümrüt, Kızıl, Pembe)',
+                turAdi: 'Tritanopi (Mavi-Sarı Körlüğü)',
                 ornekRenkler: const [
                   Color(0xFF009E73), // Zümrüt Yeşili
                   Color(0xFFD55E00), // Kızıl Turuncu
