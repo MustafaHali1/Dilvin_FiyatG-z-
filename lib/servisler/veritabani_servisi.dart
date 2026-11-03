@@ -71,110 +71,20 @@ class VeritabaniServisi {
         final simdi = DateTime.now();
         await db.insert('kullanici', {
           'id': 1,
-          'ad_soyad': 'Ahmet Yılmaz',
-          'eposta': 'ahmet.yilmaz@fiyatgoz.com',
+          'ad_soyad': 'Kullanıcı',
+          'eposta': 'kullanici@sepetgoz.com',
           'eposta_bulteni_aktif': 1,
           'kayit_tarihi': simdi.toIso8601String(),
         });
-
-        // Başlangıç örnek fişleri ve ürünleri
-        await _ornekVerileriEkle(db, simdi);
       },
     );
   }
 
-  Future<void> _ornekVerileriEkle(Database db, DateTime simdi) async {
-    // Fiş 1: Migros
-    final fis1Tarih = simdi.subtract(const Duration(days: 1));
-    await db.insert('fisler', {
-      'id': 'FG-84920',
-      'market_adi': 'Migros',
-      'aciklama': 'Migros Haftalık Alışveriş',
-      'tarih': fis1Tarih.toIso8601String(),
-      'toplam_tutar': 222.50,
-      'toplam_indirim': 10.00,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-101',
-      'fis_id': 'FG-84920',
-      'ad': 'Sütaş Tam Yağlı Süt 1L',
-      'birim_fiyat': 24.90,
-      'eski_fiyat': 29.90,
-      'adet': 2,
-      'ai_tanidi': 1,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-102',
-      'fis_id': 'FG-84920',
-      'ad': 'Halk Ekmek 250g',
-      'birim_fiyat': 8.00,
-      'adet': 3,
-      'ai_tanidi': 0,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-103',
-      'fis_id': 'FG-84920',
-      'ad': 'Ezine Beyaz Peynir 500g',
-      'birim_fiyat': 148.70,
-      'adet': 1,
-      'ai_tanidi': 0,
-    });
-
-    // Fiş 2: BİM
-    final fis2Tarih = simdi.subtract(const Duration(days: 3));
-    await db.insert('fisler', {
-      'id': 'FG-84110',
-      'market_adi': 'BİM',
-      'aciklama': 'BİM Temizlik ve Kahvaltı',
-      'tarih': fis2Tarih.toIso8601String(),
-      'toplam_tutar': 154.80,
-      'toplam_indirim': 15.00,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-201',
-      'fis_id': 'FG-84110',
-      'ad': 'Gezen Tavuk Yumurtası 10\'lu',
-      'birim_fiyat': 64.90,
-      'eski_fiyat': 79.90,
-      'adet': 1,
-      'ai_tanidi': 1,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-202',
-      'fis_id': 'FG-84110',
-      'ad': 'Yüzey Temizleyici 1.5L',
-      'birim_fiyat': 89.90,
-      'adet': 1,
-      'ai_tanidi': 0,
-    });
-
-    // Fiş 3: A101
-    final fis3Tarih = simdi.subtract(const Duration(days: 7));
-    await db.insert('fisler', {
-      'id': 'FG-83540',
-      'market_adi': 'A101',
-      'aciklama': 'A101 Manav & Süt',
-      'tarih': fis3Tarih.toIso8601String(),
-      'toplam_tutar': 101.00,
-      'toplam_indirim': 8.00,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-301',
-      'fis_id': 'FG-83540',
-      'ad': 'Amasya Elma 1kg',
-      'birim_fiyat': 29.50,
-      'eski_fiyat': 33.50,
-      'adet': 2,
-      'ai_tanidi': 0,
-    });
-    await db.insert('fis_urunleri', {
-      'id': 'U-302',
-      'fis_id': 'FG-83540',
-      'ad': 'Doğal Yoğurt 1kg',
-      'birim_fiyat': 42.00,
-      'adet': 1,
-      'ai_tanidi': 1,
-    });
+  /// Veritabanındaki sahte ve örnek test fişlerini tamamen temizler
+  Future<void> sahteVerileriTemizle() async {
+    final db = await veritabani;
+    await db.delete('fis_urunleri');
+    await db.delete('fisler');
   }
 
   // ==================== KULLANICI İŞLEMLERİ ====================

@@ -18,8 +18,8 @@ class KullaniciModeli {
   factory KullaniciModeli.varsayilan() {
     return KullaniciModeli(
       id: 1,
-      adSoyad: 'Ahmet Yılmaz',
-      eposta: 'ahmet.yilmaz@fiyatgoz.com',
+      adSoyad: 'Kullanıcı',
+      eposta: 'kullanici@sepetgoz.com',
       epostaBulteniAktif: true,
       kayitTarihi: DateTime.now(),
     );

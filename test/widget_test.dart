@@ -7,6 +7,7 @@ import 'package:fiyatgoz/yoneticiler/fis_yoneticisi.dart';
 import 'package:fiyatgoz/yoneticiler/kullanici_yoneticisi.dart';
 import 'package:fiyatgoz/yoneticiler/fiyat_onay_yoneticisi.dart';
 import 'package:fiyatgoz/modeller/kullanici_modeli.dart';
+import 'package:fiyatgoz/modeller/profil_modeli.dart';
 import 'package:fiyatgoz/modeller/fis_modeli.dart';
 import 'package:fiyatgoz/modeller/urun_modeli.dart';
 import 'package:fiyatgoz/modeller/fiyat_tanima_sonucu.dart';
@@ -65,6 +66,23 @@ void main() {
       expect(fis.toplamIndirim, 10.0);
       expect(fis.toplamUrunAdedi, 3);
     });
+
+    test('ProfilModeli bütçe dönemi ve tarih hesaplamaları doğru çalışmalı', () {
+      final baslangic = DateTime(2026, 11, 1);
+      final bitis = DateTime(2026, 11, 30, 23, 59, 59);
+
+      final profil = ProfilModeli(
+        aylikButce: 7500.0,
+        butceBaslangicTarihi: baslangic,
+        butceBitisTarihi: bitis,
+      );
+
+      expect(profil.aylikButce, 7500.0);
+      expect(profil.etkinButceBaslangic, baslangic);
+      expect(profil.etkinButceBitis, bitis);
+      expect(profil.butceDonemiFormatli, '1 Kas - 30 Kas');
+      expect(profil.kalanGunSayisi, greaterThanOrEqualTo(0));
+    });
   });
 
   group('Fiyat Tanıma ve OCR Modelleri Testi', () {
@@ -109,7 +127,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      await tester.pumpAndSettle(const Duration(milliseconds: 1500));
       expect(find.byType(FiyatGozUygulamasi), findsOneWidget);
     });
   });

@@ -99,10 +99,12 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
 
             // Canlı SQLite Bütçe Özet Kartı (Kayıtlı Fiş ve Bu Hafta Tıklanabilir)
             ButceOzetKarti(
-              harcanan: fisYoneticisi.buAyHarcama,
+              harcanan: fisYoneticisi.donemHarcamasi(profilYoneticisi.profil),
               butce: profilYoneticisi.profil.aylikButce,
               fisSayisi: fisYoneticisi.fisSayisi,
               buHaftaHarcanan: fisYoneticisi.buHaftaHarcama,
+              donemEtiketi: profilYoneticisi.profil.butceDonemiFormatli,
+              kalanGun: profilYoneticisi.profil.kalanGunSayisi,
               onKayitliFisTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(

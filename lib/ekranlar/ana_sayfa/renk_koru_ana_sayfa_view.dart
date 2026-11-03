@@ -114,11 +114,13 @@ class _RenkKoruAnaSayfaViewState extends State<RenkKoruAnaSayfaView> {
 
             // Canlı SQLite Bütçe Özet Kartı (Palet Rengi Vurgulu)
             ButceOzetKarti(
-              harcanan: fisYoneticisi.buAyHarcama,
+              harcanan: fisYoneticisi.donemHarcamasi(profilYoneticisi.profil),
               butce: profilYoneticisi.profil.aylikButce,
               fisSayisi: fisYoneticisi.fisSayisi,
               buHaftaHarcanan: fisYoneticisi.buHaftaHarcama,
               vurguRengi: palet.primary,
+              donemEtiketi: profilYoneticisi.profil.butceDonemiFormatli,
+              kalanGun: profilYoneticisi.profil.kalanGunSayisi,
               onKayitliFisTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(

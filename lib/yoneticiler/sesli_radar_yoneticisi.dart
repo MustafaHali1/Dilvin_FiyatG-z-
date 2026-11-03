@@ -231,12 +231,14 @@ class SesliRadarYoneticisi extends ChangeNotifier {
         break;
 
       case KomutTuru.butceSorgula:
+        final kalanGun = profil.kalanGunSayisi;
+        final donem = profil.butceDonemiFormatli;
         final harcanan = sepet.toplamTutar;
         final kalan = profil.aylikButce - harcanan;
         if (kalan >= 0) {
-          _asistanMesaji = 'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
+          _asistanMesaji = '$donem dönemi bütçeniz ${profil.aylikButce.toStringAsFixed(0)} lira. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira ve dönemin bitmesine $kalanGun gün var.';
         } else {
-          _asistanMesaji = 'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam sepet tutarınız ${harcanan.toStringAsFixed(2)} lira.';
+          _asistanMesaji = '$donem dönemi bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutarınız ${harcanan.toStringAsFixed(2)} lira.';
         }
         await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
         break;

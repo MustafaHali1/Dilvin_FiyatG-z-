@@ -123,10 +123,11 @@ class _KullaniciProfiliEkraniState extends State<KullaniciProfiliEkrani> {
             // 2. Alışveriş & Tasarruf İstatistik Kartı
             _AlisverisIstatistikKarti(
               toplamFis: fisYoneticisi.fisSayisi,
-              buAyHarcama: fisYoneticisi.buAyHarcama,
+              buAyHarcama: fisYoneticisi.donemHarcamasi(profil),
               toplamTasarruf: fisYoneticisi.toplamTasarruf,
               anaRenk: anaRenk,
               kolayMod: kolayMod,
+              donemEtiketi: profil.butceDonemiFormatli,
             ),
             const SizedBox(height: Olculer.boslukBuyuk),
 
@@ -295,6 +296,7 @@ class _AlisverisIstatistikKarti extends StatelessWidget {
   final double toplamTasarruf;
   final Color anaRenk;
   final bool kolayMod;
+  final String? donemEtiketi;
 
   const _AlisverisIstatistikKarti({
     required this.toplamFis,
@@ -302,6 +304,7 @@ class _AlisverisIstatistikKarti extends StatelessWidget {
     required this.toplamTasarruf,
     required this.anaRenk,
     required this.kolayMod,
+    this.donemEtiketi,
   });
 
   @override
@@ -323,13 +326,19 @@ class _AlisverisIstatistikKarti extends StatelessWidget {
             children: [
               Icon(Icons.analytics_outlined, color: anaRenk, size: 24),
               const SizedBox(width: 8),
-              Text(
-                'HARCAMA VE KÂR RAPORU',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.8,
-                  fontSize: 13,
-                  color: kolayMod ? UygulamaRenkleri.kolayModSari : anaRenk,
+              Expanded(
+                child: Text(
+                  donemEtiketi != null
+                      ? 'HARCAMA RAPORU ($donemEtiketi)'
+                      : 'HARCAMA VE KÂR RAPORU',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                    fontSize: 13,
+                    color: kolayMod ? UygulamaRenkleri.kolayModSari : anaRenk,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -349,7 +358,7 @@ class _AlisverisIstatistikKarti extends StatelessWidget {
               const SizedBox(width: Olculer.boslukOrta),
               Expanded(
                 child: _MetrikKutusu(
-                  baslik: 'Bu Ayki Harcama',
+                  baslik: 'Dönem Harcaması',
                   deger: '${buAyHarcama.toStringAsFixed(2)} ₺',
                   kolayMod: kolayMod,
                   ikon: Icons.credit_card_rounded,

@@ -11,6 +11,8 @@ class ButceOzetKarti extends StatelessWidget {
   final int fisSayisi;
   final double buHaftaHarcanan;
   final Color? vurguRengi;
+  final String? donemEtiketi;
+  final int? kalanGun;
   final VoidCallback? onKayitliFisTap;
   final VoidCallback? onBuHaftaTap;
 
@@ -18,16 +20,18 @@ class ButceOzetKarti extends StatelessWidget {
     super.key,
     required this.harcanan,
     required this.butce,
-    this.fisSayisi = 14,
-    this.buHaftaHarcanan = 840.20,
+    this.fisSayisi = 0,
+    this.buHaftaHarcanan = 0.0,
     this.vurguRengi,
+    this.donemEtiketi,
+    this.kalanGun,
     this.onKayitliFisTap,
     this.onBuHaftaTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final yuzde = (harcanan / butce).clamp(0.0, 1.0);
+    final yuzde = butce > 0 ? (harcanan / butce).clamp(0.0, 1.0) : 0.0;
     final kalan = butce - harcanan;
     final etkinVurgu = vurguRengi ?? UygulamaRenkleri.anaZumrut;
 
@@ -59,18 +63,32 @@ class ButceOzetKarti extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.wallet_rounded, size: 14, color: etkinVurgu),
-                    const SizedBox(width: 4),
+                    Icon(Icons.calendar_today_rounded, size: 14, color: etkinVurgu),
+                    const SizedBox(width: 6),
                     Text(
-                      'Bu Ay Harcanan',
-                      style: MetinStilleri.aciklama(renk: Colors.white70),
+                      donemEtiketi != null ? 'Dönem: $donemEtiketi' : 'Bu Ay Harcanan',
+                      style: MetinStilleri.aciklama(renk: Colors.white),
                     ),
                   ],
                 ),
               ),
-              Text(
-                'Bütçe: ${butce.toStringAsFixed(0)} ₺',
-                style: MetinStilleri.aciklama(renk: Colors.white60),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Bütçe: ${butce.toStringAsFixed(0)} ₺',
+                    style: MetinStilleri.aciklama(renk: Colors.white70),
+                  ),
+                  if (kalanGun != null)
+                    Text(
+                      '$kalanGun gün kaldı',
+                      style: TextStyle(
+                        color: etkinVurgu,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                ],
               ),
             ],
           ),

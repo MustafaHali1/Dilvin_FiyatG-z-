@@ -146,12 +146,14 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
         break;
 
       case KomutTuru.butceSorgula:
+        final kalanGun = profil.kalanGunSayisi;
+        final donem = profil.butceDonemiFormatli;
         final harcanan = sepet.toplamTutar;
         final kalan = profil.aylikButce - harcanan;
         if (kalan >= 0) {
-          yanit = 'Şu ana kadar ${harcanan.toStringAsFixed(2)} lira harcadınız. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira.';
+          yanit = '$donem dönemi bütçeniz ${profil.aylikButce.toStringAsFixed(0)} lira. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira ve dönemin bitmesine $kalanGun gün var.';
         } else {
-          yanit = 'Bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
+          yanit = '$donem dönemi bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
         }
         break;
 

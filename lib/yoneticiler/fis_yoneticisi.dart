@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../modeller/fis_modeli.dart';
 import '../modeller/urun_modeli.dart';
+import '../modeller/profil_modeli.dart';
 import '../servisler/veritabani_servisi.dart';
 
 /// Alışveriş fişlerini ve bütçe/tasarruf istatistiklerini SQLite üzerinden yöneten ViewModel
@@ -43,6 +44,22 @@ class FisYoneticisi extends ChangeNotifier {
 
     try {
       final fisler = await _db.tumFisleriGetir();
+
+      // Eski sahte başlangıç verilerini temizliyoruz
+      final sahteVarMi = fisler.any(
+        (f) => f.id == 'FG-84920' || f.id == 'FG-84110' || f.id == 'FG-83540',
+      );
+      if (sahteVarMi) {
+        await _db.sahteVerileriTemizle();
+        final temizFisler = await _db.tumFisleriGetir();
+        _fisler = temizFisler;
+        _buAyHarcama = 0.0;
+        _toplamTasarruf = 0.0;
+        _yukleniyor = false;
+        notifyListeners();
+        return;
+      }
+
       final buAy = await _db.buAykiToplamHarcama();
       final tasarruf = await _db.toplamTasarruf();
 
@@ -55,6 +72,39 @@ class FisYoneticisi extends ChangeNotifier {
       _yukleniyor = false;
       notifyListeners();
     }
+  }
+
+  /// Belirli bir tarih aralığındaki toplam harcamayı hesaplar
+  double donemHarcamasiGetir({required DateTime baslangic, required DateTime bitis}) {
+    return _fisler
+        .where((f) => !f.tarih.isBefore(baslangic) && !f.tarih.isAfter(bitis))
+        .fold(0.0, (toplam, f) => toplam + f.toplamTutar);
+  }
+
+  /// Belirli bir tarih aralığındaki fişleri filtreler
+  List<FisModeli> donemFisleriGetir({required DateTime baslangic, required DateTime bitis}) {
+    return _fisler
+        .where((f) => !f.tarih.isBefore(baslangic) && !f.tarih.isAfter(bitis))
+        .toList();
+  }
+
+  /// Aktif profilin bütçe dönemine göre harcama tutarı
+  double donemHarcamasi(ProfilModeli profil) {
+    return donemHarcamasiGetir(
+      baslangic: profil.etkinButceBaslangic,
+      bitis: profil.etkinButceBitis,
+    );
+  }
+
+  /// Aktif profilin bütçe dönemine göre kalan bütçesi
+  double kalanButce(ProfilModeli profil) {
+    return profil.aylikButce - donemHarcamasi(profil);
+  }
+
+  /// Aktif profilin bütçe kullanım oranı (0.0 - 1.0)
+  double butceIlerleme(ProfilModeli profil) {
+    if (profil.aylikButce <= 0) return 0.0;
+    return (donemHarcamasi(profil) / profil.aylikButce).clamp(0.0, 1.0);
   }
 
   /// Sepetteki ürünlerden yeni bir fiş oluşturup SQLite veritabanına kaydeder

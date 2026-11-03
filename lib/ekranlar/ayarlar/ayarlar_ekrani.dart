@@ -149,26 +149,44 @@ class AyarlarEkrani extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Aylık Bütçe Hedefi',
-                      style: TextStyle(
-                        fontSize: kolayMod ? 18 : 15,
-                        fontWeight: FontWeight.bold,
-                        color: anaMetinRengi,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Bütçe Hedefi ve Dönemi',
+                        style: TextStyle(
+                          fontSize: kolayMod ? 18 : 15,
+                          fontWeight: FontWeight.bold,
+                          color: anaMetinRengi,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${profil.aylikButce.toStringAsFixed(0)} ₺',
-                      style: TextStyle(
-                        fontSize: kolayMod ? 22 : 14,
-                        fontWeight: FontWeight.w900,
-                        color: kolayMod ? UygulamaRenkleri.kolayModSari : altMetinRengi,
+                      const SizedBox(height: 2),
+                      Text(
+                        '${profil.aylikButce.toStringAsFixed(0)} ₺',
+                        style: TextStyle(
+                          fontSize: kolayMod ? 22 : 17,
+                          fontWeight: FontWeight.w900,
+                          color: kolayMod ? UygulamaRenkleri.kolayModSari : temaVurguRengi,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.date_range_rounded, size: 13, color: altMetinRengi),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${profil.butceDonemiFormatli} (${profil.kalanGunSayisi} gün kaldı)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: altMetinRengi,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 TextButton(
                   onPressed: () => _butceDuzenleDiyalogu(context, profilYoneticisi),
@@ -176,7 +194,7 @@ class AyarlarEkrani extends StatelessWidget {
                     foregroundColor: temaVurguRengi,
                   ),
                   child: Text(
-                    'Değiştir',
+                    'Düzenle',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: kolayMod ? 16 : 14,
@@ -765,34 +783,115 @@ class AyarlarEkrani extends StatelessWidget {
 
   void _butceDuzenleDiyalogu(BuildContext context, ProfilYoneticisi yonetici) {
     final denetleyici = TextEditingController(text: yonetici.profil.aylikButce.toStringAsFixed(0));
+    DateTime baslangic = yonetici.profil.etkinButceBaslangic;
+    DateTime bitis = yonetici.profil.etkinButceBitis;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Aylık Bütçe Hedefi'),
-        content: TextField(
-          controller: denetleyici,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Bütçe Tutarı (₺)',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final yeni = double.tryParse(denetleyici.text);
-              if (yeni != null && yeni > 0) {
-                yonetici.butceAyarla(yeni);
-              }
-              Navigator.of(context).pop();
-            },
-            child: const Text('Kaydet'),
-          ),
-        ],
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setState) {
+          final gunFarki = bitis.difference(baslangic).inDays + 1;
+          const aylar = [
+            '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+            'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
+          ];
+          final aralikStr = '${baslangic.day} ${aylar[baslangic.month]} - ${bitis.day} ${aylar[bitis.month]} ${bitis.year}';
+
+          return AlertDialog(
+            title: const Text('Bütçe ve Tarih Aralığı'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: denetleyici,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Bütçe Tutarı (₺)',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.account_balance_wallet_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Bütçe Dönemi (Başlangıç - Bitiş)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: () async {
+                      final secilen = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2023),
+                        lastDate: DateTime(2030),
+                        initialDateRange: DateTimeRange(start: baslangic, end: bitis),
+                        helpText: 'Bütçe Başlangıç ve Bitiş Tarihini Seçin',
+                        saveText: 'Seç',
+                      );
+                      if (secilen != null) {
+                        setState(() {
+                          baslangic = DateTime(secilen.start.year, secilen.start.month, secilen.start.day);
+                          bitis = DateTime(secilen.end.year, secilen.end.month, secilen.end.day, 23, 59, 59);
+                        });
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_month_rounded, color: UygulamaRenkleri.anaZumrut, size: 22),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  aralikStr,
+                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                ),
+                                Text(
+                                  '$gunFarki gün süreli bütçe planı',
+                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.edit_calendar_outlined, size: 18),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(),
+                child: const Text('İptal'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final yeni = double.tryParse(denetleyici.text);
+                  if (yeni != null && yeni > 0) {
+                    yonetici.butceAraligiAyarla(
+                      yeniButce: yeni,
+                      baslangic: baslangic,
+                      bitis: bitis,
+                    );
+                  }
+                  Navigator.of(dialogCtx).pop();
+                },
+                child: const Text('Kaydet'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

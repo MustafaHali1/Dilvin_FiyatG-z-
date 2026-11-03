@@ -13,6 +13,8 @@ class ProfilYoneticisi extends ChangeNotifier {
   static const String _keyProfilTuru = 'ayar_profil_turu';
   static const String _keyRenkKoruTuru = 'ayar_renk_koru_turu';
   static const String _keyAylikButce = 'ayar_aylik_butce';
+  static const String _keyButceBaslangic = 'ayar_butce_baslangic';
+  static const String _keyButceBitis = 'ayar_butce_bitis';
   static const String _keyKurulumTamamlandi = 'ayar_kurulum_tamamlandi';
   static const String _keySesliAsistan = 'ayar_sesli_asistan';
   static const String _keyTitresim = 'ayar_titresim';
@@ -39,10 +41,22 @@ class ProfilYoneticisi extends ChangeNotifier {
       final profilIndex = prefs.getInt(_keyProfilTuru);
       final renkKoruIndex = prefs.getInt(_keyRenkKoruTuru);
       final butce = prefs.getDouble(_keyAylikButce);
+      final baslangicStr = prefs.getString(_keyButceBaslangic);
+      final bitisStr = prefs.getString(_keyButceBitis);
       final kurulum = prefs.getBool(_keyKurulumTamamlandi);
       final sesli = prefs.getBool(_keySesliAsistan);
       final titresim = prefs.getBool(_keyTitresim);
       final yaziBoyutu = prefs.getDouble(_keyYaziBoyutu);
+
+      DateTime? baslangicTarihi;
+      if (baslangicStr != null) {
+        try { baslangicTarihi = DateTime.parse(baslangicStr); } catch (_) {}
+      }
+
+      DateTime? bitisTarihi;
+      if (bitisStr != null) {
+        try { bitisTarihi = DateTime.parse(bitisStr); } catch (_) {}
+      }
 
       _profil = _profil.kopyala(
         profilTuru: profilIndex != null && profilIndex < ProfilTuru.values.length
@@ -52,6 +66,8 @@ class ProfilYoneticisi extends ChangeNotifier {
             ? RenkKorluguTuru.values[renkKoruIndex]
             : RenkKorluguTuru.deuteranopi,
         aylikButce: butce ?? 5000.0,
+        butceBaslangicTarihi: baslangicTarihi,
+        butceBitisTarihi: bitisTarihi,
         sesliAsistanAcik: sesli ?? true,
         titresimAcik: titresim ?? true,
         yaziBoyutu: yaziBoyutu ?? 16.0,
@@ -113,6 +129,25 @@ class ProfilYoneticisi extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_keyAylikButce, yeniButce);
+    } catch (_) {}
+  }
+
+  Future<void> butceAraligiAyarla({
+    required double yeniButce,
+    required DateTime baslangic,
+    required DateTime bitis,
+  }) async {
+    _profil = _profil.kopyala(
+      aylikButce: yeniButce,
+      butceBaslangicTarihi: baslangic,
+      butceBitisTarihi: bitis,
+    );
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(_keyAylikButce, yeniButce);
+      await prefs.setString(_keyButceBaslangic, baslangic.toIso8601String());
+      await prefs.setString(_keyButceBitis, bitis.toIso8601String());
     } catch (_) {}
   }
 

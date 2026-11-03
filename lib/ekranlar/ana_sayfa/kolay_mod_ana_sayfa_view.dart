@@ -45,10 +45,10 @@ class _KolayModAnaSayfaViewState extends State<KolayModAnaSayfaView> {
         ? kullanici.adSoyad.split(' ').first
         : 'Kullanıcı';
 
-    final double harcananTutar = fisYoneticisi.buAyHarcama;
+    final double harcananTutar = fisYoneticisi.donemHarcamasi(profil);
     final double butce = profil.aylikButce > 0 ? profil.aylikButce : 5000.0;
-    final double kalanButce = butce - harcananTutar;
-    final double ilerleme = (harcananTutar / butce).clamp(0.0, 1.0);
+    final double kalanButce = fisYoneticisi.kalanButce(profil);
+    final double ilerleme = fisYoneticisi.butceIlerleme(profil);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -127,7 +127,10 @@ class _KolayModAnaSayfaViewState extends State<KolayModAnaSayfaView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('BU AY HARCANAN', style: MetinStilleri.govdeKalin(renk: Colors.white)),
+                      Text(
+                        'DÖNEM: ${profil.butceDonemiFormatli.toUpperCase()}',
+                        style: MetinStilleri.govdeKalin(renk: Colors.white).copyWith(fontSize: 13),
+                      ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
@@ -136,7 +139,7 @@ class _KolayModAnaSayfaViewState extends State<KolayModAnaSayfaView> {
                           border: Border.all(color: UygulamaRenkleri.kolayModSari),
                         ),
                         child: Text(
-                          '%${(ilerleme * 100).toInt()} Kullanıldı',
+                          '${profil.kalanGunSayisi} Gün · %${(ilerleme * 100).toInt()}',
                           style: const TextStyle(
                             color: UygulamaRenkleri.kolayModSari,
                             fontWeight: FontWeight.bold,
