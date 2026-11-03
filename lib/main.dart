@@ -22,6 +22,7 @@ import 'ekranlar/fisler/tum_fisler_ekrani.dart';
 import 'ekranlar/kamera/gorme_engelli_radar_kamera_view.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_diyalog_ekrani.dart';
 import 'ekranlar/sesli_asistan/sesli_asistan_paneli.dart';
+import 'ekranlar/splash/splash_ekrani.dart';
 import 'modeller/urun_modeli.dart';
 import 'modeller/profil_modeli.dart';
 
@@ -61,19 +62,25 @@ class FiyatGozUygulamasi extends StatelessWidget {
 }
 
 /// Ilk acilista Onboarding ve Test akislarini yoneten ara katman
-class UygulamaGirisKontrolcusu extends StatelessWidget {
+class UygulamaGirisKontrolcusu extends StatefulWidget {
   const UygulamaGirisKontrolcusu({super.key});
+
+  @override
+  State<UygulamaGirisKontrolcusu> createState() => _UygulamaGirisKontrolcusuState();
+}
+
+class _UygulamaGirisKontrolcusuState extends State<UygulamaGirisKontrolcusu> {
+  bool _splashBitti = false;
 
   @override
   Widget build(BuildContext context) {
     final yonetici = context.watch<ProfilYoneticisi>();
 
-    if (!yonetici.yuklendi) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF00A86B),
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+    if (!_splashBitti || !yonetici.yuklendi) {
+      return SplashEkrani(
+        onHazir: () {
+          if (mounted) setState(() => _splashBitti = true);
+        },
       );
     }
 
