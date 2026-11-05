@@ -9,6 +9,7 @@ import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/kullanici_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
 import '../../servisler/gemini_asistan_servisi.dart';
+import '../../servisler/sesli_asistan_servisi.dart';
 import '../profil/kullanici_profili_ekrani.dart';
 import '../onboarding/okuma_testi_ekrani.dart';
 import '../onboarding/renk_korlugu_secim_ekrani.dart';
@@ -322,9 +323,8 @@ class AyarlarEkrani extends StatelessWidget {
                   activeTrackColor: temaVurguRengi.withValues(alpha: 0.45),
                   onChanged: (val) {
                     profilYoneticisi.titresimDegistir(val);
-                    if (val) {
-                      HapticFeedback.vibrate();
-                    }
+                    // Düğmeye basıldığı anda (açarken veya kapatırken) Android donanım motorunu anında sarsar!
+                    SesliAsistanServisi.fizikselTitret(sureMs: 250);
                   },
                 ),
                 if (profil.profilTuru == ProfilTuru.standart) ...[

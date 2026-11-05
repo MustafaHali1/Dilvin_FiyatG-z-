@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'sesli_asistan_servisi.dart';
 
 /// Sistem düzeyinde Android bildirimlerini (Bütçe eşiği, aşımı, dönem hatırlatıcısı) yöneten servis sınıfı (Singleton)
 class BildirimServisi {
@@ -75,6 +76,7 @@ class BildirimServisi {
         body: 'Dönem bütçenizin %$yuzde kadarı harcandı (${harcanan.toStringAsFixed(0)} ₺). Kalan bütçeniz: ${kalan.toStringAsFixed(0)} ₺.',
         notificationDetails: _bildirimDetaylari(kritik: false, titresim: titresim),
       );
+      if (titresim) SesliAsistanServisi.fizikselTitret(sureMs: 250);
     } catch (e) {
       debugPrint('Bütçe eşik bildirimi hatası: $e');
     }
@@ -95,6 +97,7 @@ class BildirimServisi {
         body: 'Belirlediğiniz ${butce.toStringAsFixed(0)} ₺ bütçe limitini ${asim.toStringAsFixed(0)} ₺ aştınız! Toplam harcama: ${harcanan.toStringAsFixed(0)} ₺.',
         notificationDetails: _bildirimDetaylari(kritik: true, titresim: titresim),
       );
+      if (titresim) SesliAsistanServisi.fizikselTitret(sureMs: 400);
     } catch (e) {
       debugPrint('Bütçe aşım bildirimi hatası: $e');
     }

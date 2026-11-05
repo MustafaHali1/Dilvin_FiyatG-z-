@@ -233,6 +233,8 @@ class SesliAsistanServisi {
 
   bool _titresimAcik = true;
 
+  static const MethodChannel _titresimKanali = MethodChannel('com.fiyatgoz/titresim');
+
   /// Global titreşim durumunu ayarlar
   void titresimAyarla(bool acik) {
     _titresimAcik = acik;
@@ -240,27 +242,40 @@ class SesliAsistanServisi {
 
   bool get titresimAcik => _titresimAcik;
 
-  /// Donanımsal haptik titreşim üretir (park sensörü / buton bildirimi)
+  /// Doğrudan Android işletim sistemi Vibrator donanımını tetikler.
+  /// Xiaomi MIUI/HyperOS dokunmatik ayarı kapalı olsa dahi motoru fiziksel olarak çalıştırır.
+  static Future<void> fizikselTitret({int sureMs = 200}) async {
+    try {
+      await _titresimKanali.invokeMethod('titret', {'sure': sureMs});
+    } catch (_) {
+      HapticFeedback.vibrate();
+    }
+  }
+
+  /// Donanımsal titreşim üretir (park sensörü / buton bildirimi)
   void titret(TitresimTuru tur) {
     if (!_titresimAcik) return; // Kullanıcı ayarlarından kapattıysa ASLA titremez!
     try {
+      int sureMs = 120;
       switch (tur) {
         case TitresimTuru.hafif:
-          HapticFeedback.lightImpact();
+        case TitresimTuru.secim:
+          sureMs = 80;
+          HapticFeedback.selectionClick();
           break;
         case TitresimTuru.orta:
+          sureMs = 180;
           HapticFeedback.mediumImpact();
           break;
         case TitresimTuru.agir:
         case TitresimTuru.basari:
         case TitresimTuru.hata:
         case TitresimTuru.radarKilitlendi:
+          sureMs = 280;
           HapticFeedback.vibrate();
           break;
-        case TitresimTuru.secim:
-          HapticFeedback.selectionClick();
-          break;
       }
+      fizikselTitret(sureMs: sureMs);
     } catch (e) {
       debugPrint('Titreşim hatası: $e');
     }
