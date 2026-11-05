@@ -111,8 +111,13 @@ class _SesliAsistanPaneliState extends State<SesliAsistanPaneli> {
     final sepet = context.read<SepetYoneticisi>();
     final profil = context.read<ProfilYoneticisi>().profil;
 
-    final komut = komutServisi.niyetCoz(metin);
-    String yanit = '';
+    final komut = await komutServisi.niyetCozAkilli(
+      metin,
+      kalanButce: profil.aylikButce - sepet.toplamTutar,
+      sepetTutar: sepet.toplamTutar,
+      sepetAdet: sepet.toplamUrunAdedi,
+    );
+    String yanit = komut.asistanCevabi ?? '';
 
     switch (komut.tur) {
       case KomutTuru.selamlama:

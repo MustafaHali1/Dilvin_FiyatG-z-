@@ -10,6 +10,7 @@ import '../../yoneticiler/kullanici_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
 import '../../servisler/gemini_asistan_servisi.dart';
 import '../../servisler/sesli_asistan_servisi.dart';
+import '../../servisler/bildirim_servisi.dart';
 import '../profil/kullanici_profili_ekrani.dart';
 import '../onboarding/okuma_testi_ekrani.dart';
 import '../onboarding/renk_korlugu_secim_ekrani.dart';
@@ -399,6 +400,133 @@ class AyarlarEkrani extends StatelessWidget {
               ),
               trailing: Icon(Icons.chevron_right_rounded, color: altMetinRengi),
               onTap: () => _geminiKeyDiyalogu(context),
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukBuyuk),
+
+          // Canlı Sistem Testleri & Hocaya Sunum Bölümü
+          Text(
+            'CANLI SİSTEM TESTLERİ (HOCAYA SUNUM)',
+            style: TextStyle(
+              color: baslikBolumRengi,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukKucuk),
+          Container(
+            decoration: BoxDecoration(
+              color: kartRengi,
+              borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              border: Border.all(color: kartBorderRengi, width: kolayMod ? 1.5 : 1),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.notifications_active_outlined, color: UygulamaRenkleri.anaZumrut),
+                  title: Text(
+                    'Bütçe %80 Eşik Bildirimini Test Et',
+                    style: TextStyle(
+                      fontSize: kolayMod ? 18 : 15,
+                      fontWeight: FontWeight.bold,
+                      color: anaMetinRengi,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Telefonun üst bildirim çubuğuna anında gerçek uyarı fırlatır',
+                    style: TextStyle(color: altMetinRengi),
+                  ),
+                  trailing: Icon(Icons.play_arrow_rounded, color: temaVurguRengi),
+                  onTap: () async {
+                    await BildirimServisi().butceEsikUyarisi(
+                      harcanan: 4000,
+                      butce: 5000,
+                      kalan: 1000,
+                      yuzde: 80,
+                      titresim: profil.titresimAcik,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('🔔 %80 Bütçe bildirimi üst bara gönderildi!')),
+                      );
+                    }
+                  },
+                ),
+                Divider(height: 1, color: kartBorderRengi),
+                ListTile(
+                  leading: const Icon(Icons.warning_amber_rounded, color: UygulamaRenkleri.tehlikeKirmizi),
+                  title: Text(
+                    'Bütçe Aşım Bildirimini (%100+) Test Et',
+                    style: TextStyle(
+                      fontSize: kolayMod ? 18 : 15,
+                      fontWeight: FontWeight.bold,
+                      color: anaMetinRengi,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Limit aşıldığında çıkan acil durum bildirimini tetikler',
+                    style: TextStyle(color: altMetinRengi),
+                  ),
+                  trailing: const Icon(Icons.play_arrow_rounded, color: UygulamaRenkleri.tehlikeKirmizi),
+                  onTap: () async {
+                    await BildirimServisi().butceAsimUyarisi(
+                      harcanan: 5350,
+                      butce: 5000,
+                      asim: 350,
+                      titresim: profil.titresimAcik,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('🚨 Bütçe aşım bildirimi üst bara gönderildi!')),
+                      );
+                    }
+                  },
+                ),
+                Divider(height: 1, color: kartBorderRengi),
+                ListTile(
+                  leading: Icon(Icons.vibration_rounded, color: temaVurguRengi),
+                  title: Text(
+                    'Donanımsal Titreşim Motorunu Test Et',
+                    style: TextStyle(
+                      fontSize: kolayMod ? 18 : 15,
+                      fontWeight: FontWeight.bold,
+                      color: anaMetinRengi,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Telefonun titreşim motorunu doğrudan 400ms çalıştırır',
+                    style: TextStyle(color: altMetinRengi),
+                  ),
+                  trailing: Icon(Icons.touch_app_rounded, color: temaVurguRengi),
+                  onTap: () async {
+                    await SesliAsistanServisi.fizikselTitret(sureMs: 400);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('📳 Donanım titreşim motoru tetiklendi!')),
+                      );
+                    }
+                  },
+                ),
+                Divider(height: 1, color: kartBorderRengi),
+                ListTile(
+                  leading: const Icon(Icons.psychology_outlined, color: UygulamaRenkleri.anaZumrut),
+                  title: Text(
+                    'Gemini Yapay Zekayı Canlı Test Et',
+                    style: TextStyle(
+                      fontSize: kolayMod ? 18 : 15,
+                      fontWeight: FontWeight.bold,
+                      color: anaMetinRengi,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Gemini bağlantısını ve serbest konuşma niyetini sına',
+                    style: TextStyle(color: altMetinRengi),
+                  ),
+                  trailing: Icon(Icons.auto_awesome, color: temaVurguRengi),
+                  onTap: () => _geminiCanliTest(context),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
@@ -1077,6 +1205,79 @@ class AyarlarEkrani extends StatelessWidget {
               }
             },
             child: const Text('Sil', style: TextStyle(color: UygulamaRenkleri.tehlikeKirmizi)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _geminiCanliTest(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            SizedBox(width: 12),
+            Text('Gemini 1.5 Flash ile test cümlesi çözümleniyor...'),
+          ],
+        ),
+        duration: Duration(seconds: 4),
+      ),
+    );
+
+    final baslangic = DateTime.now();
+    final sonuc = await GeminiAsistanServisi().niyetCoz(
+      metin: 'Bana 2 ekmek ver bi de sepet kaç para tuttu',
+    );
+    final gecenSure = DateTime.now().difference(baslangic).inMilliseconds;
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: UygulamaRenkleri.anaZumrut),
+            SizedBox(width: 8),
+            Text('Gemini Canlı Testi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              GeminiAsistanServisi.apiKeyVarMi
+                  ? '✅ API Durumu: Aktif (Gemini 1.5 Flash)'
+                  : '⚠️ API Durumu: Anahtar Yok (Yerel Kural Modu)',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: GeminiAsistanServisi.apiKeyVarMi ? UygulamaRenkleri.anaZumrut : Colors.orange,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('⏱️ Yanıt Süresi: $gecenSure ms'),
+            const SizedBox(height: 8),
+            Text('🎯 Tespit Edilen Komut: ${sonuc?.komut ?? "BELİRSİZ"}'),
+            if (sonuc?.hedefUrun != null) Text('📦 Ürün: ${sonuc!.hedefUrun}'),
+            if (sonuc?.adet != null) Text('🔢 Adet: ${sonuc!.adet}'),
+            const SizedBox(height: 10),
+            Text(
+              '💬 Yanıt: "${sonuc?.cevap.isNotEmpty == true ? sonuc!.cevap : "Yerel kural uygulandı."}"',
+              style: const TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Tamam'),
           ),
         ],
       ),

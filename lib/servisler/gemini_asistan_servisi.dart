@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../sabitler/api_anahtari.dart';
 import 'veritabani_servisi.dart';
 
 /// Gemini tarafından çözülen niyet ve konuşma sonucu modeli
@@ -42,11 +44,27 @@ class GeminiAsistanServisi {
   static String _apiKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
   static Future<void> anahtarYukle() async {
-    // 1. Proje kök dizinindeki yerel gemini_api_key.txt dosyasından oku (varsa)
+    // 1. Doğrudan lib/sabitler/api_anahtari.dart dosyasından oku
+    if (kGizliGeminiApiKey.trim().isNotEmpty) {
+      _apiKey = kGizliGeminiApiKey.trim();
+      return;
+    }
+
+    // 2. APK içine gömülen assets/gemini_api_key.txt dosyasından oku
+    try {
+      final assetKey = await rootBundle.loadString('assets/gemini_api_key.txt');
+      final temiz = assetKey.replaceAll(RegExp(r'#.*'), '').trim();
+      if (temiz.isNotEmpty) {
+        _apiKey = temiz;
+        return;
+      }
+    } catch (_) {}
+
+    // 3. Proje kök dizinindeki yerel gemini_api_key.txt dosyasından oku
     try {
       final dosya = File('gemini_api_key.txt');
       if (await dosya.exists()) {
-        final icerik = (await dosya.readAsString()).trim();
+        final icerik = (await dosya.readAsString()).replaceAll(RegExp(r'#.*'), '').trim();
         if (icerik.isNotEmpty) {
           _apiKey = icerik;
           return;
@@ -54,7 +72,7 @@ class GeminiAsistanServisi {
       }
     } catch (_) {}
 
-    // 2. Cihaz hafızasındaki SharedPreferences'tan oku
+    // 4. Cihaz hafızasındaki SharedPreferences'tan oku
     try {
       final prefs = await SharedPreferences.getInstance();
       final key = prefs.getString('ayar_gemini_api_key');

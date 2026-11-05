@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../sabitler/sesli_komut_lugati.dart';
 import 'gemini_asistan_servisi.dart';
 
@@ -139,70 +140,71 @@ class SesliKomutServisi {
   }
 
   /// Asenkron Hibrit Niyet Çözümleyici:
-  /// 1. Önce hızlı yerel kuralları çalıştırır (0 ms).
-  /// 2. Belirsizse ve internet/Gemini aktifse Gemini LLM'e sorar.
-  /// 3. Sonucu SQLite tablosuna (`ogrenilen_kaliplar`) kaydederek sistemi eğitir.
+  /// 1. İnternet ve Gemini API anahtarı varsa: Her şeyi Gemini çözer, şiveleri anlar, samimi Türkçe yanıt üretir ve yerel SQLite'ı eğitir.
+  /// 2. İnternet yoksa veya istek başarısız olursa: Eski kural tabanlı motor + daha önce Gemini'den öğrenilen SQLite hafızası devreye girer (0 ms, %100 internetsiz).
   Future<SesliKomutSonucu> niyetCozAkilli(
     String hamMetin, {
     double? kalanButce,
     double? sepetTutar,
     int? sepetAdet,
   }) async {
-    // 1. Yerel kural motorunu dene
-    final yerelSonuc = niyetCoz(hamMetin);
-    if (yerelSonuc.tur != KomutTuru.belirsiz) {
-      return yerelSonuc;
+    // 1. İNTERNET VE GEMINI AKTİFSE: Önce Gemini Çözer ve Yerel Hafızayı Eğitir
+    if (GeminiAsistanServisi.apiKeyVarMi) {
+      try {
+        final gemini = GeminiAsistanServisi();
+        final geminiSonuc = await gemini.niyetCoz(
+          metin: hamMetin,
+          kalanButce: kalanButce,
+          sepetTutar: sepetTutar,
+          sepetAdet: sepetAdet,
+        );
+
+        if (geminiSonuc != null) {
+          KomutTuru eslesenTur = KomutTuru.belirsiz;
+          switch (geminiSonuc.komut) {
+            case 'BUTCE_SORGULA':
+              eslesenTur = KomutTuru.butceSorgula;
+              break;
+            case 'SEPETE_EKLE':
+              eslesenTur = KomutTuru.sepeteEkle;
+              break;
+            case 'SEPET_DOKUMU':
+              eslesenTur = KomutTuru.sepetOzeti;
+              break;
+            case 'URUN_ARA':
+              eslesenTur = KomutTuru.urunAra;
+              break;
+            case 'IPTAL':
+              eslesenTur = KomutTuru.iptal;
+              break;
+            default:
+              eslesenTur = KomutTuru.belirsiz;
+          }
+
+          if (eslesenTur != KomutTuru.belirsiz) {
+            return SesliKomutSonucu(
+              tur: eslesenTur,
+              hedefUrun: geminiSonuc.hedefUrun,
+              adet: geminiSonuc.adet,
+              hamMetin: hamMetin,
+              asistanCevabi: geminiSonuc.cevap.isNotEmpty ? geminiSonuc.cevap : null,
+            );
+          } else if (geminiSonuc.cevap.isNotEmpty) {
+            return SesliKomutSonucu(
+              tur: KomutTuru.belirsiz,
+              hamMetin: hamMetin,
+              asistanCevabi: geminiSonuc.cevap,
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint('Gemini bağlantı hatası, yerel kurallara dönülüyor: $e');
+      }
     }
 
-    // 2. Yerel yakalayamadıysa Gemini Akıllı Asistanı ve SQLite Belleğini dene
-    final gemini = GeminiAsistanServisi();
-    final geminiSonuc = await gemini.niyetCoz(
-      metin: hamMetin,
-      kalanButce: kalanButce,
-      sepetTutar: sepetTutar,
-      sepetAdet: sepetAdet,
-    );
-
-    if (geminiSonuc != null) {
-      KomutTuru eslesenTur = KomutTuru.belirsiz;
-      switch (geminiSonuc.komut) {
-        case 'BUTCE_SORGULA':
-          eslesenTur = KomutTuru.butceSorgula;
-          break;
-        case 'SEPETE_EKLE':
-          eslesenTur = KomutTuru.sepeteEkle;
-          break;
-        case 'SEPET_DOKUMU':
-          eslesenTur = KomutTuru.sepetOzeti;
-          break;
-        case 'URUN_ARA':
-          eslesenTur = KomutTuru.urunAra;
-          break;
-        case 'IPTAL':
-          eslesenTur = KomutTuru.iptal;
-          break;
-        default:
-          eslesenTur = KomutTuru.belirsiz;
-      }
-
-      if (eslesenTur != KomutTuru.belirsiz) {
-        return SesliKomutSonucu(
-          tur: eslesenTur,
-          hedefUrun: geminiSonuc.hedefUrun,
-          adet: geminiSonuc.adet,
-          hamMetin: hamMetin,
-          asistanCevabi: geminiSonuc.cevap.isNotEmpty ? geminiSonuc.cevap : null,
-        );
-      } else if (geminiSonuc.cevap.isNotEmpty) {
-        return SesliKomutSonucu(
-          tur: KomutTuru.belirsiz,
-          hamMetin: hamMetin,
-          asistanCevabi: geminiSonuc.cevap,
-        );
-      }
-    }
-
-    return yerelSonuc;
+    // 2. İNTERNETSİZ DURUMDA (VEYA GEMINI OLMADIĞINDA):
+    // Eski kural tabanlı yerel motor (0ms gecikme, sıfır internet bağımlılığı)
+    return niyetCoz(hamMetin);
   }
 
   /// Metinden ürün arama niyetini ayıklar

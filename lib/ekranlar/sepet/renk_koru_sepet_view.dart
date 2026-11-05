@@ -73,9 +73,19 @@ class RenkKoruSepetView extends StatelessWidget {
     );
 
     asistan.dinle(
-      onSonuc: (metin, sonMu) {
+      onSonuc: (metin, sonMu) async {
         if (sonMu && metin.isNotEmpty) {
-          final sonuc = komutServisi.niyetCoz(metin);
+          final sonuc = await komutServisi.niyetCozAkilli(
+            metin,
+            kalanButce: profil.aylikButce - sepet.toplamTutar,
+            sepetTutar: sepet.toplamTutar,
+            sepetAdet: sepet.toplamUrunAdedi,
+          );
+          if (sonuc.asistanCevabi != null && sonuc.asistanCevabi!.isNotEmpty) {
+            asistan.konus(sonuc.asistanCevabi!);
+            return;
+          }
+          if (!context.mounted) return;
           switch (sonuc.tur) {
             case KomutTuru.sepetOzeti:
               _sepetiSesliOku(context);

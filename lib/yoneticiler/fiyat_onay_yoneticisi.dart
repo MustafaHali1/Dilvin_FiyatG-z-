@@ -99,7 +99,7 @@ class FiyatOnayYoneticisi extends ChangeNotifier {
           _dinleniyor = false;
           notifyListeners();
 
-          final komut = _komutServisi.niyetCoz(metin);
+          final komut = await _komutServisi.niyetCozAkilli(metin);
           switch (komut.tur) {
             case KomutTuru.adetBelirle:
               if (komut.adet != null) {
