@@ -60,6 +60,18 @@ class GeminiAsistanServisi {
       }
     } catch (_) {}
 
+    // 2.1. Cihaz hafızasındaki /sdcard/gemini_api_key.txt dosyasından oku (varsa)
+    try {
+      final sdcard = File('/sdcard/gemini_api_key.txt');
+      if (await sdcard.exists()) {
+        final icerik = (await sdcard.readAsString()).replaceAll(RegExp(r'#.*'), '').trim();
+        if (icerik.isNotEmpty) {
+          _apiKey = icerik;
+          return;
+        }
+      }
+    } catch (_) {}
+
     // 3. Proje kök dizinindeki yerel gemini_api_key.txt dosyasından oku
     try {
       final dosya = File('gemini_api_key.txt');
