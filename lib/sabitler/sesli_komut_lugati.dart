@@ -61,9 +61,9 @@ class AsistanVeriSeti {
     'dursun şimdilik', 'dursun simdilik'
   };
 
-  // =========================================================================
+  // ========================================================================
   // 💰 5. BÜTÇE, LİMİT VE KALAN PARA SORGULARI
-  // =========================================================================
+  // ========================================================================
   static final Set<String> butceSorgulari = {
     'bütçem', 'butcem', 'bütçe ne kadar', 'butce ne kadar', 'kalan bütçe', 'kalan butce',
     'bütçe durumu', 'bütçede ne var', 'bütçe ne durumda', 'param kaldı mı', 'param kaldi mi',

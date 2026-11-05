@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
@@ -307,7 +308,14 @@ class AyarlarEkrani extends StatelessWidget {
                   value: profil.titresimAcik,
                   activeThumbColor: temaVurguRengi,
                   activeTrackColor: temaVurguRengi.withValues(alpha: 0.45),
-                  onChanged: (val) => profilYoneticisi.titresimDegistir(val),
+                  onChanged: (val) {
+                    if (val) {
+                      HapticFeedback.heavyImpact();
+                    } else {
+                      HapticFeedback.selectionClick();
+                    }
+                    profilYoneticisi.titresimDegistir(val);
+                  },
                 ),
               ],
             ),

@@ -3,6 +3,7 @@ import '../modeller/fis_modeli.dart';
 import '../modeller/urun_modeli.dart';
 import '../modeller/profil_modeli.dart';
 import '../servisler/veritabani_servisi.dart';
+import '../servisler/bildirim_servisi.dart';
 
 /// Alışveriş fişlerini ve bütçe/tasarruf istatistiklerini SQLite üzerinden yöneten ViewModel
 class FisYoneticisi extends ChangeNotifier {
@@ -107,11 +108,45 @@ class FisYoneticisi extends ChangeNotifier {
     return (donemHarcamasi(profil) / profil.aylikButce).clamp(0.0, 1.0);
   }
 
+  /// Bütçe kontrolü yapar ve eşik aşılmışsa Android bildirimini otomatik tetikler
+  Future<void> butceKontrolVeBildir(ProfilModeli profil) async {
+    final harcanan = donemHarcamasi(profil);
+    final butce = profil.aylikButce;
+    if (butce <= 0) return;
+
+    final oran = harcanan / butce;
+    final kalan = butce - harcanan;
+
+    if (oran >= 1.0) {
+      await BildirimServisi().butceAsimUyarisi(
+        harcanan: harcanan,
+        butce: butce,
+        asim: harcanan - butce,
+      );
+    } else if (oran >= 0.80) {
+      await BildirimServisi().butceEsikUyarisi(
+        harcanan: harcanan,
+        butce: butce,
+        kalan: kalan,
+        yuzde: (oran * 100).toInt(),
+      );
+    }
+
+    // Dönem sonu 3 gün kontrolü
+    if (profil.kalanGunSayisi <= 3 && profil.kalanGunSayisi > 0) {
+      await BildirimServisi().donemSonuHatirlatici(
+        kalanGun: profil.kalanGunSayisi,
+        kalanButce: kalan,
+      );
+    }
+  }
+
   /// Sepetteki ürünlerden yeni bir fiş oluşturup SQLite veritabanına kaydeder
   Future<FisModeli> sepettenFisOlusturVeKaydet({
     required List<UrunModeli> urunler,
     String? marketAdi,
     String? aciklama,
+    ProfilModeli? profil,
   }) async {
     final rastgeleNo = (DateTime.now().millisecondsSinceEpoch % 90000) + 10000;
     final fisId = 'FG-$rastgeleNo';
@@ -126,6 +161,11 @@ class FisYoneticisi extends ChangeNotifier {
 
     await _db.fisEkle(yeniFis);
     await verileriYukle();
+
+    if (profil != null) {
+      await butceKontrolVeBildir(profil);
+    }
+
     return yeniFis;
   }
 
