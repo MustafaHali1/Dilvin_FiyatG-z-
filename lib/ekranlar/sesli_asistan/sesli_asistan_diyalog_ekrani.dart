@@ -124,64 +124,88 @@ class _SesliAsistanDiyalogEkraniState extends State<SesliAsistanDiyalogEkrani> {
     final sepet = context.read<SepetYoneticisi>();
     final profil = context.read<ProfilYoneticisi>().profil;
 
-    final komut = komutServisi.niyetCoz(metin);
+    final komut = await komutServisi.niyetCozAkilli(
+      metin,
+      kalanButce: profil.aylikButce - sepet.toplamTutar,
+      sepetTutar: sepet.toplamTutar,
+      sepetAdet: sepet.toplamUrunAdedi,
+    );
     String yanit = '';
 
     switch (komut.tur) {
       case KomutTuru.selamlama:
-        yanit = 'Merhabalar! Alışverişinizde size yardımcı olmak için buradayım. Fiyat sorabilir, sepetinizi veya bütçenizi kontrol edebilirsiniz.';
+        yanit = komut.asistanCevabi ??
+            'Merhabalar! Alışverişinizde size yardımcı olmak için buradayım. Fiyat sorabilir, sepetinizi veya bütçenizi kontrol edebilirsiniz.';
         break;
 
       case KomutTuru.tesekkurVeda:
-        yanit = 'Rica ederim, her zaman buradayım! İyi alışverişler dilerim.';
+        yanit = komut.asistanCevabi ??
+            'Rica ederim, her zaman buradayım! İyi alışverişler dilerim.';
         break;
 
       case KomutTuru.yardim:
-        yanit = 'Ben Dilvin · SepetGöz Asistanı. Ürün etiketlerini okuyabilir, sepetinizi hesaplayabilir, bütçenizi takip edebilir ve aradığınız ürünleri bulabilirim.';
+        yanit = komut.asistanCevabi ??
+            'Ben Dilvin · SepetGöz Asistanı. Ürün etiketlerini okuyabilir, sepetinizi hesaplayabilir, bütçenizi takip edebilir ve aradığınız ürünleri bulabilirim.';
         break;
 
       case KomutTuru.sepetiSifirla:
         sepet.sepetiBosalt();
-        yanit = 'Sepetiniz tamamen temizlendi, baştan başlıyoruz.';
+        yanit = komut.asistanCevabi ?? 'Sepetiniz tamamen temizlendi, baştan başlıyoruz.';
         break;
 
       case KomutTuru.butceSorgula:
-        final kalanGun = profil.kalanGunSayisi;
-        final donem = profil.butceDonemiFormatli;
-        final harcanan = sepet.toplamTutar;
-        final kalan = profil.aylikButce - harcanan;
-        if (kalan >= 0) {
-          yanit = '$donem dönemi bütçeniz ${profil.aylikButce.toStringAsFixed(0)} lira. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira ve dönemin bitmesine $kalanGun gün var.';
+        if (komut.asistanCevabi != null && komut.asistanCevabi!.isNotEmpty) {
+          yanit = komut.asistanCevabi!;
         } else {
-          yanit = '$donem dönemi bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
+          final kalanGun = profil.kalanGunSayisi;
+          final donem = profil.butceDonemiFormatli;
+          final harcanan = sepet.toplamTutar;
+          final kalan = profil.aylikButce - harcanan;
+          if (kalan >= 0) {
+            yanit =
+                '$donem dönemi bütçeniz ${profil.aylikButce.toStringAsFixed(0)} lira. Kalan bütçeniz ${kalan.toStringAsFixed(2)} lira ve dönemin bitmesine $kalanGun gün var.';
+          } else {
+            yanit =
+                '$donem dönemi bütçenizi ${(-kalan).toStringAsFixed(2)} lira aştınız! Toplam tutar: ${harcanan.toStringAsFixed(2)} lira.';
+          }
         }
         break;
 
       case KomutTuru.sepetOzeti:
-        final adet = sepet.toplamUrunAdedi;
-        final cesit = sepet.urunCesitSayisi;
-        final toplam = sepet.toplamTutar;
-        if (adet == 0) {
-          yanit = 'Sepetiniz şu anda boş.';
+        if (komut.asistanCevabi != null && komut.asistanCevabi!.isNotEmpty) {
+          yanit = komut.asistanCevabi!;
         } else {
-          yanit = 'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
+          final adet = sepet.toplamUrunAdedi;
+          final cesit = sepet.urunCesitSayisi;
+          final toplam = sepet.toplamTutar;
+          if (adet == 0) {
+            yanit = 'Sepetiniz şu anda boş.';
+          } else {
+            yanit =
+                'Sepetinizde $cesit farklı ürün, toplam $adet adet var. Genel toplam ${toplam.toStringAsFixed(2)} lira.';
+          }
         }
         break;
 
       case KomutTuru.urunAra:
-        yanit = '${komut.hedefUrun} aramak için kamera vizörünü açabilirsiniz.';
+        yanit = komut.asistanCevabi ??
+            '${komut.hedefUrun ?? "Ürünü"} aramak için kamera vizörünü açabilirsiniz.';
         break;
 
       case KomutTuru.sepeteEkle:
-        yanit = 'Sepetinizdeki ürünler onaylandı.';
+        yanit = komut.asistanCevabi ?? 'Sepetinizdeki ürünler onaylandı.';
         break;
 
       case KomutTuru.iptal:
-        yanit = 'İşlem iptal edildi.';
+        yanit = komut.asistanCevabi ?? 'İşlem iptal edildi.';
         break;
 
       default:
-        yanit = 'Tam anlayamadım. "Sepette ne var" veya "Bütçem ne kadar" diyebilirsiniz.';
+        if (komut.asistanCevabi != null && komut.asistanCevabi!.isNotEmpty) {
+          yanit = komut.asistanCevabi!;
+        } else {
+          yanit = 'Tam anlayamadım. "Sepette ne var" veya "Bütçem ne kadar" diyebilirsiniz.';
+        }
         break;
     }
 

@@ -4,6 +4,7 @@ import 'sabitler/tema_fabrikasi.dart';
 import 'sabitler/uygulama_renkleri.dart';
 import 'servisler/kamera_servisi.dart';
 import 'servisler/bildirim_servisi.dart';
+import 'servisler/gemini_asistan_servisi.dart';
 import 'yoneticiler/sepet_yoneticisi.dart';
 import 'yoneticiler/profil_yoneticisi.dart';
 import 'yoneticiler/fis_yoneticisi.dart';
@@ -32,6 +33,7 @@ void main() {
   // Kamera donanımını ve bildirim servisini arka planda başlatıyoruz
   KameraServisi.baslat();
   BildirimServisi().baslat();
+  GeminiAsistanServisi.anahtarYukle();
 
   runApp(
     MultiProvider(

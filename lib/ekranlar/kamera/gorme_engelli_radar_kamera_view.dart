@@ -11,6 +11,7 @@ import '../../yoneticiler/sesli_radar_yoneticisi.dart';
 import '../../servisler/kamera_servisi.dart';
 import '../../servisler/fiyat_tanima_servisi.dart';
 import '../../servisler/resim_kirpma_servisi.dart';
+import '../../servisler/gemini_asistan_servisi.dart';
 import '../ayarlar/ayarlar_ekrani.dart';
 
 /// %100 Ses ve Konuşma Odaklı Görme Engelli Radarı & Canlı Kamera Ekranı
@@ -178,6 +179,23 @@ class _GormeEngelliRadarKameraViewState extends State<GormeEngelliRadarKameraVie
             final profil = context.read<ProfilYoneticisi>().profil;
             final sepet = context.read<SepetYoneticisi>();
             await radar.etiketAlgilandi(sonuc, profil: profil, sepet: sepet);
+          } else if (mounted && (radar.durum == RadarDurumu.hedefAraniyor || radar.hedefUrun != null)) {
+            // Hedef ürün aranıyor ("Bana süt bul" vb.) ve yerel OCR etiketi yakalayamadıysa
+            // Gemini Vision AI ile raftaki ürünü ve fiyatı analiz et
+            try {
+              final bytes = await resim.readAsBytes();
+              final visionMetin = await GeminiAsistanServisi().goruntudenUrunVeFiyatCoz(
+                resimBytes: bytes,
+                arananUrun: radar.hedefUrun,
+              );
+              if (mounted && visionMetin != null && visionMetin.isNotEmpty) {
+                final profil = context.read<ProfilYoneticisi>().profil;
+                final sepet = context.read<SepetYoneticisi>();
+                await radar.visionSonucuDuyur(visionMetin, sepet: sepet, profil: profil);
+              }
+            } catch (e) {
+              debugPrint('Gemini Vision hatası: $e');
+            }
           }
         }
       } catch (e) {

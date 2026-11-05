@@ -124,7 +124,12 @@ class SesliRadarYoneticisi extends ChangeNotifier {
     required SepetYoneticisi sepet,
     required ProfilModeli profil,
   }) async {
-    final sonuc = _komutServisi.niyetCoz(konusmaMetni);
+    final sonuc = await _komutServisi.niyetCozAkilli(
+      konusmaMetni,
+      kalanButce: profil.aylikButce - sepet.toplamTutar,
+      sepetTutar: sepet.toplamTutar,
+      sepetAdet: sepet.toplamUrunAdedi,
+    );
     debugPrint('Görme Engelli Komut Çözüldü: $sonuc');
 
     // Eğer bir ürün yeni bulunmuşsa ve kullanıcı onay veya ret veriyorsa:
@@ -275,6 +280,8 @@ class SesliRadarYoneticisi extends ChangeNotifier {
           } else {
             _asistanMesaji = 'Sepetiniz zaten boş.';
           }
+        } else if (sonuc.asistanCevabi != null && sonuc.asistanCevabi!.isNotEmpty) {
+          _asistanMesaji = sonuc.asistanCevabi!;
         } else {
           _asistanMesaji = 'Tam anlayamadım. "Sepette ne var", "Ekle", "Kalsın" veya "Bütçem" diyebilirsiniz.';
         }
@@ -353,6 +360,19 @@ class SesliRadarYoneticisi extends ChangeNotifier {
 
     _asistan.titret(TitresimTuru.radarKilitlendi);
     await _sesliCevapVer(_asistanMesaji, sepet: sepet, profil: profil);
+  }
+
+  /// Gemini Vision tarafından çözülen görsel sahne / ürün analiz sonucunu seslendirir
+  Future<void> visionSonucuDuyur(
+    String aciklama, {
+    required SepetYoneticisi sepet,
+    required ProfilModeli profil,
+  }) async {
+    if (_konusuyor || _durum == RadarDurumu.urunBulundu) return;
+    _asistanMesaji = aciklama;
+    notifyListeners();
+    _asistan.titret(TitresimTuru.radarKilitlendi);
+    await _sesliCevapVer(aciklama, sepet: sepet, profil: profil);
   }
 
   @override

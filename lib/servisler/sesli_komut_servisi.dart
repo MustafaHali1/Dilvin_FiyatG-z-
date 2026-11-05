@@ -1,4 +1,5 @@
 import '../sabitler/sesli_komut_lugati.dart';
+import 'gemini_asistan_servisi.dart';
 
 /// Sesli asistan tarafından çözülen niyet (Intent) türleri
 enum KomutTuru {
@@ -21,17 +22,19 @@ class SesliKomutSonucu {
   final int? adet;
   final String? hedefUrun;
   final String hamMetin;
+  final String? asistanCevabi;
 
   const SesliKomutSonucu({
     required this.tur,
     this.adet,
     this.hedefUrun,
     required this.hamMetin,
+    this.asistanCevabi,
   });
 
   @override
   String toString() =>
-      'SesliKomutSonucu(tur: $tur, adet: $adet, hedefUrun: $hedefUrun, hamMetin: "$hamMetin")';
+      'SesliKomutSonucu(tur: $tur, adet: $adet, hedefUrun: $hedefUrun, hamMetin: "$hamMetin", asistanCevabi: "$asistanCevabi")';
 }
 
 /// Kullanıcının Türkçe serbest konuşma cümlelerini kurallı komutlara ve niyetlere (NLU) dönüştüren zeki motor
@@ -133,6 +136,73 @@ class SesliKomutServisi {
       tur: KomutTuru.belirsiz,
       hamMetin: hamMetin,
     );
+  }
+
+  /// Asenkron Hibrit Niyet Çözümleyici:
+  /// 1. Önce hızlı yerel kuralları çalıştırır (0 ms).
+  /// 2. Belirsizse ve internet/Gemini aktifse Gemini LLM'e sorar.
+  /// 3. Sonucu SQLite tablosuna (`ogrenilen_kaliplar`) kaydederek sistemi eğitir.
+  Future<SesliKomutSonucu> niyetCozAkilli(
+    String hamMetin, {
+    double? kalanButce,
+    double? sepetTutar,
+    int? sepetAdet,
+  }) async {
+    // 1. Yerel kural motorunu dene
+    final yerelSonuc = niyetCoz(hamMetin);
+    if (yerelSonuc.tur != KomutTuru.belirsiz) {
+      return yerelSonuc;
+    }
+
+    // 2. Yerel yakalayamadıysa Gemini Akıllı Asistanı ve SQLite Belleğini dene
+    final gemini = GeminiAsistanServisi();
+    final geminiSonuc = await gemini.niyetCoz(
+      metin: hamMetin,
+      kalanButce: kalanButce,
+      sepetTutar: sepetTutar,
+      sepetAdet: sepetAdet,
+    );
+
+    if (geminiSonuc != null) {
+      KomutTuru eslesenTur = KomutTuru.belirsiz;
+      switch (geminiSonuc.komut) {
+        case 'BUTCE_SORGULA':
+          eslesenTur = KomutTuru.butceSorgula;
+          break;
+        case 'SEPETE_EKLE':
+          eslesenTur = KomutTuru.sepeteEkle;
+          break;
+        case 'SEPET_DOKUMU':
+          eslesenTur = KomutTuru.sepetOzeti;
+          break;
+        case 'URUN_ARA':
+          eslesenTur = KomutTuru.urunAra;
+          break;
+        case 'IPTAL':
+          eslesenTur = KomutTuru.iptal;
+          break;
+        default:
+          eslesenTur = KomutTuru.belirsiz;
+      }
+
+      if (eslesenTur != KomutTuru.belirsiz) {
+        return SesliKomutSonucu(
+          tur: eslesenTur,
+          hedefUrun: geminiSonuc.hedefUrun,
+          adet: geminiSonuc.adet,
+          hamMetin: hamMetin,
+          asistanCevabi: geminiSonuc.cevap.isNotEmpty ? geminiSonuc.cevap : null,
+        );
+      } else if (geminiSonuc.cevap.isNotEmpty) {
+        return SesliKomutSonucu(
+          tur: KomutTuru.belirsiz,
+          hamMetin: hamMetin,
+          asistanCevabi: geminiSonuc.cevap,
+        );
+      }
+    }
+
+    return yerelSonuc;
   }
 
   /// Metinden ürün arama niyetini ayıklar

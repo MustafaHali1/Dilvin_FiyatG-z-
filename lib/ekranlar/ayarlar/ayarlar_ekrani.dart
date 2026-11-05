@@ -8,6 +8,7 @@ import '../../modeller/profil_modeli.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../../yoneticiler/kullanici_yoneticisi.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
+import '../../servisler/gemini_asistan_servisi.dart';
 import '../profil/kullanici_profili_ekrani.dart';
 import '../onboarding/okuma_testi_ekrani.dart';
 import '../onboarding/renk_korlugu_secim_ekrani.dart';
@@ -354,6 +355,52 @@ class AyarlarEkrani extends StatelessWidget {
                   ),
                 ],
               ],
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukBuyuk),
+
+          // Yapay Zeka Motoru Bölümü
+          Text(
+            'YAPAY ZEKA VE GEMINI MOTORU',
+            style: TextStyle(
+              color: baslikBolumRengi,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: Olculer.boslukKucuk),
+          Container(
+            decoration: BoxDecoration(
+              color: kartRengi,
+              borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+              border: Border.all(color: kartBorderRengi, width: kolayMod ? 1.5 : 1),
+            ),
+            child: ListTile(
+              leading: Icon(
+                Icons.auto_awesome,
+                color: temaVurguRengi,
+              ),
+              title: Text(
+                'Gemini Yapay Zeka Asistanı',
+                style: TextStyle(
+                  fontSize: kolayMod ? 18 : 15,
+                  fontWeight: FontWeight.bold,
+                  color: anaMetinRengi,
+                ),
+              ),
+              subtitle: Text(
+                GeminiAsistanServisi.apiKeyVarMi
+                    ? 'Bağlantı Hazır • Kendi kendini eğiten yerel hafıza devrede'
+                    : 'İnternetsiz yerel kurallar aktif (API anahtarı ekleyebilirsiniz)',
+                style: TextStyle(
+                  color: GeminiAsistanServisi.apiKeyVarMi
+                      ? UygulamaRenkleri.anaZumrut
+                      : altMetinRengi,
+                ),
+              ),
+              trailing: Icon(Icons.chevron_right_rounded, color: altMetinRengi),
+              onTap: () => _geminiKeyDiyalogu(context),
             ),
           ),
           const SizedBox(height: Olculer.boslukBuyuk),
@@ -936,6 +983,76 @@ class AyarlarEkrani extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _geminiKeyDiyalogu(BuildContext context) {
+    final controller = TextEditingController(text: GeminiAsistanServisi.apiKey);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: UygulamaRenkleri.anaZumrut),
+            SizedBox(width: 8),
+            Text('Gemini API Anahtarı', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Google Gemini 1.5 Flash ile şiveleri, serbest konuşmaları ve görme engelli sahne analizini aktifleştirmek için API anahtarınızı girin.',
+              style: TextStyle(fontSize: 13, color: UygulamaRenkleri.griYazi),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'AIzaSy...',
+                border: OutlineInputBorder(),
+                isDense: true,
+                labelText: 'API Key',
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Not: Anahtar girilmediğinde sistem internetsiz yerel kurallar ve SQLite hafızası ile çalışmaya devam eder.',
+              style: TextStyle(fontSize: 11, color: UygulamaRenkleri.griYazi, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Vazgeç'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: UygulamaRenkleri.anaZumrut,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              final key = controller.text.trim();
+              await GeminiAsistanServisi.apiKeyKaydet(key);
+              if (ctx.mounted) {
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      key.isNotEmpty
+                          ? 'Gemini API anahtarı kaydedildi ve aktif edildi.'
+                          : 'API anahtarı temizlendi. Yerel kurallar aktif.',
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
       ),
     );
   }

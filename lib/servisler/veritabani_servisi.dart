@@ -28,6 +28,17 @@ class VeritabaniServisi {
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
+      onOpen: (db) async {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS ogrenilen_kaliplar (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ham_metin TEXT NOT NULL UNIQUE,
+            niyet TEXT NOT NULL,
+            hedef_urun TEXT,
+            eklenme_tarihi TEXT NOT NULL
+          )
+        ''');
+      },
       onCreate: (db, version) async {
         // 1. Kullanıcı Tablosu
         await db.execute('''
@@ -85,6 +96,44 @@ class VeritabaniServisi {
     final db = await veritabani;
     await db.delete('fis_urunleri');
     await db.delete('fisler');
+  }
+
+  // ==================== KENDİ KENDİNİ EĞİTEN ŞABLONLAR (EDGE DISTILLATION) ====================
+
+  /// Öğrenilmiş kalıbı yerel veritabanında arar (İnternetsiz ortamda sıfır gecikmeyle çalışır)
+  Future<Map<String, dynamic>?> ogrenilenKalipGetir(String metin) async {
+    final db = await veritabani;
+    final temiz = metin.trim().toLowerCase();
+    final sonuclar = await db.query(
+      'ogrenilen_kaliplar',
+      where: 'ham_metin = ?',
+      whereArgs: [temiz],
+      limit: 1,
+    );
+    if (sonuclar.isNotEmpty) {
+      return sonuclar.first;
+    }
+    return null;
+  }
+
+  /// Gemini'nin çözdüğü yeni şive/cümle niyetini yerel SQLite hafızasına kalıcı olarak işler
+  Future<void> kalipOgren({
+    required String metin,
+    required String niyet,
+    String? hedefUrun,
+  }) async {
+    final db = await veritabani;
+    final temiz = metin.trim().toLowerCase();
+    await db.insert(
+      'ogrenilen_kaliplar',
+      {
+        'ham_metin': temiz,
+        'niyet': niyet,
+        'hedef_urun': hedefUrun,
+        'eklenme_tarihi': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
   }
 
   // ==================== KULLANICI İŞLEMLERİ ====================
