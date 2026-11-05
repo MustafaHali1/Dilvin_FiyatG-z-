@@ -19,6 +19,7 @@ class ProfilYoneticisi extends ChangeNotifier {
   static const String _keySesliAsistan = 'ayar_sesli_asistan';
   static const String _keyTitresim = 'ayar_titresim';
   static const String _keyYaziBoyutu = 'ayar_yazi_boyutu';
+  static const String _keyKaranlikMod = 'ayar_karanlik_mod';
 
   ProfilYoneticisi() {
     _tercihleriYukle();
@@ -47,6 +48,7 @@ class ProfilYoneticisi extends ChangeNotifier {
       final sesli = prefs.getBool(_keySesliAsistan);
       final titresim = prefs.getBool(_keyTitresim);
       final yaziBoyutu = prefs.getDouble(_keyYaziBoyutu);
+      final karanlik = prefs.getBool(_keyKaranlikMod);
 
       DateTime? baslangicTarihi;
       if (baslangicStr != null) {
@@ -71,6 +73,7 @@ class ProfilYoneticisi extends ChangeNotifier {
         sesliAsistanAcik: sesli ?? true,
         titresimAcik: titresim ?? true,
         yaziBoyutu: yaziBoyutu ?? 16.0,
+        karanlikModAcik: karanlik ?? false,
       );
 
       _kurulumTamamlandi = kurulum ?? false;
@@ -166,6 +169,15 @@ class ProfilYoneticisi extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyTitresim, acik);
+    } catch (_) {}
+  }
+
+  Future<void> karanlikModAyarla(bool acik) async {
+    _profil = _profil.kopyala(karanlikModAcik: acik);
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyKaranlikMod, acik);
     } catch (_) {}
   }
 }

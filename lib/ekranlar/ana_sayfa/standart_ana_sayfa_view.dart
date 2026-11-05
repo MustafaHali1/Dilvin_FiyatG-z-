@@ -42,6 +42,13 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
     final kullaniciYoneticisi = context.watch<KullaniciYoneticisi>();
     final profilYoneticisi = context.watch<ProfilYoneticisi>();
 
+    final bool koyuTema = profilYoneticisi.profil.karanlikModAcik;
+    final Color zemin = koyuTema ? const Color(0xFF0F172A) : UygulamaRenkleri.arkaPlan;
+    final Color yaziAna = koyuTema ? Colors.white : UygulamaRenkleri.koyuYazi;
+    final Color yaziAlt = koyuTema ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi;
+    final Color aramaZemin = koyuTema ? const Color(0xFF1E293B) : Colors.white;
+    final Color cizgi = koyuTema ? const Color(0xFF334155) : UygulamaRenkleri.cizgi;
+
     final kullaniciAdi = kullaniciYoneticisi.kullanici.adSoyad.split(' ').first;
     final fisler = fisYoneticisi.fisler;
 
@@ -52,7 +59,7 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: UygulamaRenkleri.arkaPlan,
+      backgroundColor: zemin,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(Olculer.boslukBuyuk),
@@ -65,11 +72,11 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Merhaba $kullaniciAdi 👋', style: MetinStilleri.baslik1()),
+                      Text('Merhaba $kullaniciAdi 👋', style: MetinStilleri.baslik1(renk: yaziAna)),
                       const SizedBox(height: 2),
                       Text(
                         'Alışveriş harcamalarını kolayca takip et',
-                        style: MetinStilleri.aciklama(),
+                        style: MetinStilleri.aciklama(renk: yaziAlt),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -86,9 +93,9 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.person_rounded, color: UygulamaRenkleri.anaKoyu, size: 24),
+                  icon: Icon(Icons.person_rounded, color: koyuTema ? Colors.white : UygulamaRenkleri.anaKoyu, size: 24),
                   style: IconButton.styleFrom(
-                    backgroundColor: UygulamaRenkleri.anaAcik,
+                    backgroundColor: koyuTema ? const Color(0xFF1E293B) : UygulamaRenkleri.anaAcik,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
                   ),
                   tooltip: 'Kullanıcı Profili',
@@ -131,19 +138,21 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
             // Arama Çubuğu
             TextField(
               onChanged: (val) => setState(() => _arama = val.trim()),
+              style: TextStyle(color: yaziAna),
               decoration: InputDecoration(
                 hintText: 'Fiş veya market ara...',
-                prefixIcon: const Icon(Icons.search_rounded, color: UygulamaRenkleri.griYazi),
+                hintStyle: TextStyle(color: yaziAlt),
+                prefixIcon: Icon(Icons.search_rounded, color: yaziAlt),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: aramaZemin,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                  borderSide: const BorderSide(color: UygulamaRenkleri.cizgi),
+                  borderSide: BorderSide(color: cizgi),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                  borderSide: const BorderSide(color: UygulamaRenkleri.cizgi),
+                  borderSide: BorderSide(color: cizgi),
                 ),
               ),
             ),
@@ -165,7 +174,7 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                 child: Row(
                   children: [
-                    Text('Geçmiş Fişler', style: MetinStilleri.baslik2()),
+                    Text('Geçmiş Fişler', style: MetinStilleri.baslik2(renk: yaziAna)),
                     const SizedBox(width: 6),
                     AnimatedRotation(
                       turns: _gecmisFislerAcik ? 0.0 : -0.25,
@@ -179,7 +188,7 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                     const Spacer(),
                     Text(
                       '${filtrelenmis.length} Fiş',
-                      style: MetinStilleri.aciklama(renk: UygulamaRenkleri.anaKoyu),
+                      style: MetinStilleri.aciklama(renk: koyuTema ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.anaKoyu),
                     ),
                   ],
                 ),
@@ -193,19 +202,19 @@ class _StandartAnaSayfaViewState extends State<StandartAnaSayfaView> {
                 Container(
                   padding: const EdgeInsets.all(Olculer.boslukBuyuk),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: aramaZemin,
                     borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                    border: Border.all(color: UygulamaRenkleri.cizgi),
+                    border: Border.all(color: cizgi),
                   ),
                   child: Column(
                     children: [
                       const Icon(Icons.receipt_long_outlined, size: 48, color: UygulamaRenkleri.griYazi),
                       const SizedBox(height: 8),
-                      Text('Henüz Kayıtlı Fiş Yok', style: MetinStilleri.govdeKalin()),
+                      Text('Henüz Kayıtlı Fiş Yok', style: MetinStilleri.govdeKalin(renk: yaziAna)),
                       const SizedBox(height: 4),
                       Text(
                         'Sepeti tamamlayıp ilk alışveriş fişinizi kaydedin.',
-                        style: MetinStilleri.aciklama(),
+                        style: MetinStilleri.aciklama(renk: yaziAlt),
                         textAlign: TextAlign.center,
                       ),
                     ],

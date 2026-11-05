@@ -33,13 +33,24 @@ class AyarlarEkrani extends StatelessWidget {
         ? UygulamaRenkleri.kolayModSari
         : (renkKoruModu ? palet.primary : UygulamaRenkleri.anaZumrut);
 
-    final Color arkaPlanRengi = kolayMod ? Colors.black : UygulamaRenkleri.arkaPlan;
-    final Color kartRengi = kolayMod ? const Color(0xFF1E1E1E) : Colors.white;
-    final Color kartBorderRengi = kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.cizgi;
-    final Color anaMetinRengi = kolayMod ? Colors.white : UygulamaRenkleri.koyuYazi;
-    final Color altMetinRengi = kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi;
-    final Color baslikBolumRengi = kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.griYazi;
-    final Color ikonRengi = kolayMod ? UygulamaRenkleri.kolayModSari : (renkKoruModu ? palet.primary : UygulamaRenkleri.anaKoyu);
+    final bool koyuTemaAktif = kolayMod || (profil.profilTuru == ProfilTuru.standart && profil.karanlikModAcik);
+    final Color arkaPlanRengi = kolayMod
+        ? Colors.black
+        : (koyuTemaAktif ? const Color(0xFF0F172A) : UygulamaRenkleri.arkaPlan);
+    final Color kartRengi = kolayMod
+        ? const Color(0xFF1E1E1E)
+        : (koyuTemaAktif ? const Color(0xFF1E293B) : Colors.white);
+    final Color kartBorderRengi = kolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : (koyuTemaAktif ? const Color(0xFF334155) : UygulamaRenkleri.cizgi);
+    final Color anaMetinRengi = koyuTemaAktif ? Colors.white : UygulamaRenkleri.koyuYazi;
+    final Color altMetinRengi = koyuTemaAktif ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi;
+    final Color baslikBolumRengi = kolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : (koyuTemaAktif ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi);
+    final Color ikonRengi = kolayMod
+        ? UygulamaRenkleri.kolayModSari
+        : (renkKoruModu ? palet.primary : (koyuTemaAktif ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.anaKoyu));
 
     return Scaffold(
       backgroundColor: arkaPlanRengi,
@@ -48,11 +59,11 @@ class AyarlarEkrani extends StatelessWidget {
           'Ayarlar',
           style: kolayMod
               ? MetinStilleri.kolayModBaslik()
-              : MetinStilleri.baslik2(),
+              : MetinStilleri.baslik2(renk: anaMetinRengi),
         ),
-        backgroundColor: kolayMod ? Colors.black : Colors.white,
+        backgroundColor: kolayMod ? Colors.black : (koyuTemaAktif ? const Color(0xFF0F172A) : Colors.white),
         elevation: 0,
-        iconTheme: IconThemeData(color: kolayMod ? UygulamaRenkleri.kolayModSari : Colors.black),
+        iconTheme: IconThemeData(color: kolayMod ? UygulamaRenkleri.kolayModSari : (koyuTemaAktif ? Colors.white : Colors.black)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),
@@ -317,6 +328,31 @@ class AyarlarEkrani extends StatelessWidget {
                     profilYoneticisi.titresimDegistir(val);
                   },
                 ),
+                if (profil.profilTuru == ProfilTuru.standart) ...[
+                  Divider(height: 1, color: kartBorderRengi),
+                  SwitchListTile(
+                    secondary: Icon(Icons.dark_mode_outlined, color: ikonRengi),
+                    title: Text(
+                      'Karanlık Tema (Dark Mode)',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: anaMetinRengi,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Standart mod için göz yormayan gece mavisi teması',
+                      style: TextStyle(color: altMetinRengi),
+                    ),
+                    value: profil.karanlikModAcik,
+                    activeThumbColor: temaVurguRengi,
+                    activeTrackColor: temaVurguRengi.withValues(alpha: 0.45),
+                    onChanged: (val) {
+                      HapticFeedback.selectionClick();
+                      profilYoneticisi.karanlikModAyarla(val);
+                    },
+                  ),
+                ],
               ],
             ),
           ),

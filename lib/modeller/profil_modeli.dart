@@ -24,6 +24,7 @@ class ProfilModeli {
   final double aylikButce;
   final DateTime? butceBaslangicTarihi;
   final DateTime? butceBitisTarihi;
+  final bool karanlikModAcik;
 
   const ProfilModeli({
     this.profilTuru = ProfilTuru.standart,
@@ -35,6 +36,7 @@ class ProfilModeli {
     this.aylikButce = 5000.0,
     this.butceBaslangicTarihi,
     this.butceBitisTarihi,
+    this.karanlikModAcik = false,
   });
 
   DateTime get etkinButceBaslangic {
@@ -75,6 +77,7 @@ class ProfilModeli {
     double? aylikButce,
     DateTime? butceBaslangicTarihi,
     DateTime? butceBitisTarihi,
+    bool? karanlikModAcik,
   }) {
     return ProfilModeli(
       profilTuru: profilTuru ?? this.profilTuru,
@@ -86,6 +89,7 @@ class ProfilModeli {
       aylikButce: aylikButce ?? this.aylikButce,
       butceBaslangicTarihi: butceBaslangicTarihi ?? this.butceBaslangicTarihi,
       butceBitisTarihi: butceBitisTarihi ?? this.butceBitisTarihi,
+      karanlikModAcik: karanlikModAcik ?? this.karanlikModAcik,
     );
   }
 }
