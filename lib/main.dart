@@ -189,6 +189,8 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
 
     final isKolayMod = profil.profilTuru == ProfilTuru.kolayMod;
     final isRenkKoru = profil.profilTuru == ProfilTuru.renkKoruModu;
+    final isKoyuStandart = profil.profilTuru == ProfilTuru.standart && profil.karanlikModAcik;
+    final isKoyu = isKolayMod || isKoyuStandart;
     final palet = RenkKorluguPaleti.getir(profil.renkKorluguTuru);
     final isAsistanAcik = profil.sesliAsistanAcik;
 
@@ -197,14 +199,24 @@ class _AnaGezintiIskeletiState extends State<AnaGezintiIskeleti> {
         : (isRenkKoru ? palet.primary : UygulamaRenkleri.anaZumrut);
 
     return Scaffold(
+      backgroundColor: isKolayMod
+          ? Colors.black
+          : (isKoyuStandart
+              ? const Color(0xFF0F172A)
+              : (isRenkKoru ? const Color(0xFFF8FAFC) : UygulamaRenkleri.arkaPlan)),
       body: sayfalar[_seciliSayfa.clamp(0, sayfalar.length - 1)],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isKolayMod ? Colors.black : Colors.white,
+          color: isKolayMod
+              ? Colors.black
+              : (isKoyuStandart ? const Color(0xFF0F172A) : Colors.white),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: isKoyuStandart
+              ? const Border(top: BorderSide(color: Color(0xFF1E293B), width: 1.5))
+              : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isKolayMod ? 0.3 : 0.08),
+              color: Colors.black.withValues(alpha: isKoyu ? 0.35 : 0.08),
               blurRadius: 18,
               offset: const Offset(0, -4),
             ),

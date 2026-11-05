@@ -231,8 +231,18 @@ class SesliAsistanServisi {
     }
   }
 
+  bool _titresimAcik = true;
+
+  /// Global titreşim durumunu ayarlar
+  void titresimAyarla(bool acik) {
+    _titresimAcik = acik;
+  }
+
+  bool get titresimAcik => _titresimAcik;
+
   /// Donanımsal haptik titreşim üretir (park sensörü / buton bildirimi)
   void titret(TitresimTuru tur) {
+    if (!_titresimAcik) return; // Kullanıcı ayarlarından kapattıysa ASLA titremez!
     try {
       switch (tur) {
         case TitresimTuru.hafif:
@@ -242,32 +252,13 @@ class SesliAsistanServisi {
           HapticFeedback.mediumImpact();
           break;
         case TitresimTuru.agir:
-          HapticFeedback.heavyImpact();
+        case TitresimTuru.basari:
+        case TitresimTuru.hata:
+        case TitresimTuru.radarKilitlendi:
+          HapticFeedback.vibrate();
           break;
         case TitresimTuru.secim:
           HapticFeedback.selectionClick();
-          break;
-        case TitresimTuru.basari:
-          HapticFeedback.mediumImpact();
-          Future.delayed(const Duration(milliseconds: 100), () {
-            HapticFeedback.mediumImpact();
-          });
-          break;
-        case TitresimTuru.hata:
-          HapticFeedback.heavyImpact();
-          Future.delayed(const Duration(milliseconds: 120), () {
-            HapticFeedback.heavyImpact();
-          });
-          break;
-        case TitresimTuru.radarKilitlendi:
-          // Güçlü ardışık 3 titreşim: Hedef etiket tam merkezde kilitlendi
-          HapticFeedback.heavyImpact();
-          Future.delayed(const Duration(milliseconds: 80), () {
-            HapticFeedback.heavyImpact();
-            Future.delayed(const Duration(milliseconds: 80), () {
-              HapticFeedback.heavyImpact();
-            });
-          });
           break;
       }
     } catch (e) {

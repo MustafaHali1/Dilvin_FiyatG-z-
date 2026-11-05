@@ -22,13 +22,19 @@ class SepetUrunKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyu = Theme.of(context).brightness == Brightness.dark;
+    final kartRengi = isKoyu ? const Color(0xFF1E293B) : UygulamaRenkleri.kartBeyaz;
+    final borderRengi = isKoyu ? const Color(0xFF334155) : UygulamaRenkleri.cizgi;
+    final iconKutuRengi = isKoyu ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+    final adetKutuRengi = isKoyu ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+
     return Container(
       margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
       padding: const EdgeInsets.all(Olculer.boslukOrta),
       decoration: BoxDecoration(
-        color: UygulamaRenkleri.kartBeyaz,
+        color: kartRengi,
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-        border: Border.all(color: UygulamaRenkleri.cizgi),
+        border: Border.all(color: borderRengi),
       ),
       child: Row(
         children: [
@@ -36,12 +42,12 @@ class SepetUrunKarti extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: iconKutuRengi,
               borderRadius: BorderRadius.circular(Olculer.yariCapKucuk),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.inventory_2_outlined,
-              color: UygulamaRenkleri.griYazi,
+              color: isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi,
             ),
           ),
           const SizedBox(width: Olculer.boslukOrta),
@@ -51,14 +57,18 @@ class SepetUrunKarti extends StatelessWidget {
               children: [
                 Text(
                   urun.ad,
-                  style: MetinStilleri.govdeKalin(),
+                  style: MetinStilleri.govdeKalin(
+                    renk: isKoyu ? Colors.white : UygulamaRenkleri.koyuYazi,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${urun.birimFiyat.toStringAsFixed(2)} ₺ × ${urun.adet} adet',
-                  style: MetinStilleri.aciklama(),
+                  style: MetinStilleri.aciklama(
+                    renk: isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi,
+                  ),
                 ),
               ],
             ),
@@ -70,9 +80,9 @@ class SepetUrunKarti extends StatelessWidget {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: adetKutuRengi,
                   borderRadius: BorderRadius.circular(Olculer.yariCapTam),
-                  border: Border.all(color: UygulamaRenkleri.cizgi),
+                  border: Border.all(color: borderRengi),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

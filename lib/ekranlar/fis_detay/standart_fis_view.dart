@@ -23,12 +23,20 @@ class StandartFisView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyu = Theme.of(context).brightness == Brightness.dark;
+    final zeminRengi = isKoyu ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
+    final kartRengi = isKoyu ? const Color(0xFF1E293B) : Colors.white;
+    final cizgiRengi = isKoyu ? const Color(0xFF334155) : Colors.black26;
+    final anaYaziRengi = isKoyu ? Colors.white : Colors.black;
+    final altYaziRengi = isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: zeminRengi,
       appBar: AppBar(
-        title: Text('Dijital Fiş Detayı', style: MetinStilleri.baslik2()),
+        title: Text('Dijital Fiş Detayı', style: MetinStilleri.baslik2(renk: anaYaziRengi)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: isKoyu ? Colors.white : Colors.black87),
         actions: [
           IconButton(
             tooltip: 'Sesli Asistan',
@@ -38,12 +46,12 @@ class StandartFisView extends StatelessWidget {
           IconButton(
             tooltip: 'PDF Paylaş',
             onPressed: onPaylas,
-            icon: const Icon(Icons.share_rounded),
+            icon: Icon(Icons.share_rounded, color: isKoyu ? Colors.white : null),
           ),
           IconButton(
             tooltip: 'Fişi Sesli Oku',
             onPressed: onSesliOku,
-            icon: const Icon(Icons.volume_up_rounded),
+            icon: Icon(Icons.volume_up_rounded, color: isKoyu ? Colors.white : null),
           ),
         ],
       ),
@@ -52,11 +60,12 @@ class StandartFisView extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(Olculer.boslukBuyuk),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: kartRengi,
             borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+            border: isKoyu ? Border.all(color: const Color(0xFF334155)) : null,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: Colors.black.withValues(alpha: isKoyu ? 0.3 : 0.06),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -68,13 +77,13 @@ class StandartFisView extends StatelessWidget {
               const SizedBox(height: Olculer.boslukKucuk),
               Text(
                 'FİYATGÖZ ALIŞVERİŞ FİŞİ',
-                style: MetinStilleri.baslik2().copyWith(fontFamily: 'monospace', letterSpacing: 1.2),
+                style: MetinStilleri.baslik2(renk: anaYaziRengi).copyWith(fontFamily: 'monospace', letterSpacing: 1.2),
               ),
               Text(
                 'Tarih: ${fis.tarih.day}.${fis.tarih.month}.${fis.tarih.year}',
-                style: MetinStilleri.aciklama().copyWith(fontFamily: 'monospace'),
+                style: MetinStilleri.aciklama(renk: altYaziRengi).copyWith(fontFamily: 'monospace'),
               ),
-              const Divider(height: 32, thickness: 1, color: Colors.black26),
+              Divider(height: 32, thickness: 1, color: cizgiRengi),
 
               for (final urun in fis.urunler)
                 Padding(
@@ -85,22 +94,22 @@ class StandartFisView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           '${urun.ad} x${urun.adet}',
-                          style: MetinStilleri.govde().copyWith(fontFamily: 'monospace'),
+                          style: MetinStilleri.govde(renk: anaYaziRengi).copyWith(fontFamily: 'monospace'),
                         ),
                       ),
                       Text(
                         '${urun.toplamTutar.toStringAsFixed(2)} ₺',
-                        style: MetinStilleri.govdeKalin().copyWith(fontFamily: 'monospace'),
+                        style: MetinStilleri.govdeKalin(renk: anaYaziRengi).copyWith(fontFamily: 'monospace'),
                       ),
                     ],
                   ),
                 ),
 
-              const Divider(height: 32, thickness: 1, color: Colors.black26),
+              Divider(height: 32, thickness: 1, color: cizgiRengi),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('TOPLAM:', style: MetinStilleri.baslik1().copyWith(fontFamily: 'monospace')),
+                  Text('TOPLAM:', style: MetinStilleri.baslik1(renk: anaYaziRengi).copyWith(fontFamily: 'monospace')),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Align(

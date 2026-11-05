@@ -122,6 +122,7 @@ class FisYoneticisi extends ChangeNotifier {
         harcanan: harcanan,
         butce: butce,
         asim: harcanan - butce,
+        titresim: profil.titresimAcik,
       );
     } else if (oran >= 0.80) {
       await BildirimServisi().butceEsikUyarisi(
@@ -129,6 +130,7 @@ class FisYoneticisi extends ChangeNotifier {
         butce: butce,
         kalan: kalan,
         yuzde: (oran * 100).toInt(),
+        titresim: profil.titresimAcik,
       );
     }
 
@@ -137,6 +139,7 @@ class FisYoneticisi extends ChangeNotifier {
       await BildirimServisi().donemSonuHatirlatici(
         kalanGun: profil.kalanGunSayisi,
         kalanButce: kalan,
+        titresim: profil.titresimAcik,
       );
     }
   }

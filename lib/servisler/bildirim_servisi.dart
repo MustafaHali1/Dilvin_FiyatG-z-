@@ -45,7 +45,7 @@ class BildirimServisi {
     }
   }
 
-  NotificationDetails _bildirimDetaylari({bool kritik = false}) {
+  NotificationDetails _bildirimDetaylari({bool kritik = false, bool titresim = true}) {
     final androidDetails = AndroidNotificationDetails(
       _kanalId,
       _kanalAdi,
@@ -53,7 +53,7 @@ class BildirimServisi {
       importance: kritik ? Importance.max : Importance.high,
       priority: kritik ? Priority.max : Priority.high,
       showWhen: true,
-      enableVibration: true,
+      enableVibration: titresim,
       styleInformation: const BigTextStyleInformation(''),
     );
     return NotificationDetails(android: androidDetails);
@@ -65,6 +65,7 @@ class BildirimServisi {
     required double butce,
     required double kalan,
     required int yuzde,
+    bool titresim = true,
   }) async {
     await baslat();
     try {
@@ -72,7 +73,7 @@ class BildirimServisi {
         id: 101,
         title: '⚠️ Bütçe Uyarısı (%$yuzde)',
         body: 'Dönem bütçenizin %$yuzde kadarı harcandı (${harcanan.toStringAsFixed(0)} ₺). Kalan bütçeniz: ${kalan.toStringAsFixed(0)} ₺.',
-        notificationDetails: _bildirimDetaylari(kritik: false),
+        notificationDetails: _bildirimDetaylari(kritik: false, titresim: titresim),
       );
     } catch (e) {
       debugPrint('Bütçe eşik bildirimi hatası: $e');
@@ -84,6 +85,7 @@ class BildirimServisi {
     required double harcanan,
     required double butce,
     required double asim,
+    bool titresim = true,
   }) async {
     await baslat();
     try {
@@ -91,7 +93,7 @@ class BildirimServisi {
         id: 102,
         title: '🚨 Bütçe Limiti Aşıldı!',
         body: 'Belirlediğiniz ${butce.toStringAsFixed(0)} ₺ bütçe limitini ${asim.toStringAsFixed(0)} ₺ aştınız! Toplam harcama: ${harcanan.toStringAsFixed(0)} ₺.',
-        notificationDetails: _bildirimDetaylari(kritik: true),
+        notificationDetails: _bildirimDetaylari(kritik: true, titresim: titresim),
       );
     } catch (e) {
       debugPrint('Bütçe aşım bildirimi hatası: $e');
@@ -102,6 +104,7 @@ class BildirimServisi {
   Future<void> donemSonuHatirlatici({
     required int kalanGun,
     required double kalanButce,
+    bool titresim = true,
   }) async {
     await baslat();
     try {
@@ -109,7 +112,7 @@ class BildirimServisi {
         id: 103,
         title: '📅 Bütçe Dönem Sonu Yaklaşıyor',
         body: 'Bütçe döneminizin bitmesine $kalanGun gün kaldı. Kalan bütçeniz: ${kalanButce.toStringAsFixed(0)} ₺.',
-        notificationDetails: _bildirimDetaylari(kritik: false),
+        notificationDetails: _bildirimDetaylari(kritik: false, titresim: titresim),
       );
     } catch (e) {
       debugPrint('Dönem sonu bildirimi hatası: $e');
@@ -117,7 +120,7 @@ class BildirimServisi {
   }
 
   /// Haftalık tasarruf ve indirim özeti bildirimi
-  Future<void> haftalikTasarrufOzeti({required double tasarruf}) async {
+  Future<void> haftalikTasarrufOzeti({required double tasarruf, bool titresim = true}) async {
     if (tasarruf <= 0) return;
     await baslat();
     try {
@@ -125,7 +128,7 @@ class BildirimServisi {
         id: 104,
         title: '🎉 Haftalık İndirim Kazancınız',
         body: 'Tebrikler! SepetGöz ile bu hafta toplam ${tasarruf.toStringAsFixed(2)} ₺ tasarruf elde ettiniz.',
-        notificationDetails: _bildirimDetaylari(kritik: false),
+        notificationDetails: _bildirimDetaylari(kritik: false, titresim: titresim),
       );
     } catch (e) {
       debugPrint('Haftalık tasarruf bildirimi hatası: $e');

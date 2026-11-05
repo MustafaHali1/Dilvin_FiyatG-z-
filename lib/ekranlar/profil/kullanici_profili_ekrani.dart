@@ -82,11 +82,15 @@ class _KullaniciProfiliEkraniState extends State<KullaniciProfiliEkrani> {
 
     final kolayMod = profil.profilTuru == ProfilTuru.kolayMod;
     final renkKoru = profil.profilTuru == ProfilTuru.renkKoruModu;
+    final isKoyuStandart = profil.profilTuru == ProfilTuru.standart && profil.karanlikModAcik;
+    final isKoyu = kolayMod || isKoyuStandart;
     final palet = profilYoneticisi.renkPaleti;
 
     final arkaPlan = kolayMod
         ? Colors.black
-        : (renkKoru ? const Color(0xFFF8FAFC) : UygulamaRenkleri.arkaPlan);
+        : (isKoyuStandart
+            ? const Color(0xFF0F172A)
+            : (renkKoru ? const Color(0xFFF8FAFC) : UygulamaRenkleri.arkaPlan));
 
     final anaRenk = kolayMod
         ? UygulamaRenkleri.kolayModSari
@@ -99,11 +103,11 @@ class _KullaniciProfiliEkraniState extends State<KullaniciProfiliEkrani> {
           'Kullanıcı Profili',
           style: kolayMod
               ? MetinStilleri.kolayModBaslik(renk: Colors.white)
-              : MetinStilleri.baslik2(),
+              : MetinStilleri.baslik2(renk: isKoyu ? Colors.white : UygulamaRenkleri.koyuYazi),
         ),
-        backgroundColor: kolayMod ? Colors.black : Colors.white,
+        backgroundColor: arkaPlan,
         elevation: 0,
-        iconTheme: IconThemeData(color: kolayMod ? Colors.white : Colors.black87),
+        iconTheme: IconThemeData(color: isKoyu ? Colors.white : Colors.black87),
       ),
       body: SafeArea(
         child: ListView(
@@ -192,13 +196,20 @@ class _ProfilAvatarKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyuStandart = Theme.of(context).brightness == Brightness.dark && !kolayMod;
+    final isKoyu = isKoyuStandart || kolayMod;
+
     return Container(
       padding: const EdgeInsets.all(Olculer.boslukBuyuk),
       decoration: BoxDecoration(
-        color: kolayMod ? const Color(0xFF1E1E1E) : Colors.white,
+        color: kolayMod
+            ? const Color(0xFF1E1E1E)
+            : (isKoyuStandart ? const Color(0xFF1E293B) : Colors.white),
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
         border: Border.all(
-          color: kolayMod ? Colors.white24 : UygulamaRenkleri.cizgi,
+          color: kolayMod
+              ? Colors.white24
+              : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
           width: kolayMod ? 2 : 1,
         ),
       ),
@@ -225,14 +236,14 @@ class _ProfilAvatarKarti extends StatelessWidget {
                   adSoyad,
                   style: kolayMod
                       ? MetinStilleri.kolayModBaslik(renk: Colors.white)
-                      : MetinStilleri.baslik2(),
+                      : MetinStilleri.baslik2(renk: isKoyu ? Colors.white : UygulamaRenkleri.koyuYazi),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   eposta,
                   style: TextStyle(
                     fontSize: 14,
-                    color: kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi,
+                    color: kolayMod ? Colors.white70 : (isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -309,13 +320,20 @@ class _AlisverisIstatistikKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyuStandart = Theme.of(context).brightness == Brightness.dark && !kolayMod;
+    final isKoyu = isKoyuStandart || kolayMod;
+
     return Container(
       padding: const EdgeInsets.all(Olculer.boslukBuyuk),
       decoration: BoxDecoration(
-        color: kolayMod ? const Color(0xFF1E1E1E) : Colors.white,
+        color: kolayMod
+            ? const Color(0xFF1E1E1E)
+            : (isKoyuStandart ? const Color(0xFF1E293B) : Colors.white),
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
         border: Border.all(
-          color: kolayMod ? Colors.white24 : UygulamaRenkleri.cizgi,
+          color: kolayMod
+              ? Colors.white24
+              : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
           width: kolayMod ? 2 : 1,
         ),
       ),
@@ -335,7 +353,7 @@ class _AlisverisIstatistikKarti extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
                     fontSize: 13,
-                    color: kolayMod ? UygulamaRenkleri.kolayModSari : anaRenk,
+                    color: kolayMod ? UygulamaRenkleri.kolayModSari : (isKoyu ? Colors.white : anaRenk),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -439,12 +457,21 @@ class _MetrikKutusu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyuStandart = Theme.of(context).brightness == Brightness.dark && !kolayMod;
+    final isKoyu = isKoyuStandart || kolayMod;
+
     return Container(
       padding: const EdgeInsets.all(Olculer.boslukOrta),
       decoration: BoxDecoration(
-        color: kolayMod ? const Color(0xFF2A2A2A) : const Color(0xFFF8FAFC),
+        color: kolayMod
+            ? const Color(0xFF2A2A2A)
+            : (isKoyuStandart ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-        border: Border.all(color: kolayMod ? Colors.white12 : UygulamaRenkleri.cizgi),
+        border: Border.all(
+          color: kolayMod
+              ? Colors.white12
+              : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,7 +482,9 @@ class _MetrikKutusu extends StatelessWidget {
             baslik,
             style: TextStyle(
               fontSize: 12,
-              color: kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi,
+              color: kolayMod
+                  ? Colors.white70
+                  : (isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi),
             ),
           ),
           const SizedBox(height: 2),
@@ -464,7 +493,7 @@ class _MetrikKutusu extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: kolayMod ? Colors.white : UygulamaRenkleri.koyuYazi,
+              color: isKoyu ? Colors.white : UygulamaRenkleri.koyuYazi,
             ),
           ),
         ],
@@ -491,13 +520,20 @@ class _KullaniciFormKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyuStandart = Theme.of(context).brightness == Brightness.dark && !kolayMod;
+    final isKoyu = isKoyuStandart || kolayMod;
+
     return Container(
       padding: const EdgeInsets.all(Olculer.boslukBuyuk),
       decoration: BoxDecoration(
-        color: kolayMod ? const Color(0xFF1E1E1E) : Colors.white,
+        color: kolayMod
+            ? const Color(0xFF1E1E1E)
+            : (isKoyuStandart ? const Color(0xFF1E293B) : Colors.white),
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
         border: Border.all(
-          color: kolayMod ? Colors.white24 : UygulamaRenkleri.cizgi,
+          color: kolayMod
+              ? Colors.white24
+              : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
           width: kolayMod ? 2 : 1,
         ),
       ),
@@ -517,16 +553,22 @@ class _KullaniciFormKarti extends StatelessWidget {
           TextField(
             controller: adSoyadKontrolcu,
             onChanged: onChanged,
-            style: TextStyle(color: kolayMod ? Colors.white : Colors.black87),
+            style: TextStyle(color: isKoyu ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               labelText: 'Ad Soyad',
-              labelStyle: TextStyle(color: kolayMod ? Colors.white70 : Colors.black54),
+              labelStyle: TextStyle(color: isKoyu ? const Color(0xFF94A3B8) : Colors.black54),
               prefixIcon: Icon(Icons.person_outline, color: anaRenk),
               filled: true,
-              fillColor: kolayMod ? const Color(0xFF2A2A2A) : const Color(0xFFF8FAFC),
+              fillColor: kolayMod
+                  ? const Color(0xFF2A2A2A)
+                  : (isKoyuStandart ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                borderSide: BorderSide(color: kolayMod ? Colors.white24 : UygulamaRenkleri.cizgi),
+                borderSide: BorderSide(
+                  color: kolayMod
+                      ? Colors.white24
+                      : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
@@ -539,16 +581,22 @@ class _KullaniciFormKarti extends StatelessWidget {
             controller: epostaKontrolcu,
             onChanged: onChanged,
             keyboardType: TextInputType.emailAddress,
-            style: TextStyle(color: kolayMod ? Colors.white : Colors.black87),
+            style: TextStyle(color: isKoyu ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               labelText: 'E-Posta Adresi',
-              labelStyle: TextStyle(color: kolayMod ? Colors.white70 : Colors.black54),
+              labelStyle: TextStyle(color: isKoyu ? const Color(0xFF94A3B8) : Colors.black54),
               prefixIcon: Icon(Icons.email_outlined, color: anaRenk),
               filled: true,
-              fillColor: kolayMod ? const Color(0xFF2A2A2A) : const Color(0xFFF8FAFC),
+              fillColor: kolayMod
+                  ? const Color(0xFF2A2A2A)
+                  : (isKoyuStandart ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                borderSide: BorderSide(color: kolayMod ? Colors.white24 : UygulamaRenkleri.cizgi),
+                borderSide: BorderSide(
+                  color: kolayMod
+                      ? Colors.white24
+                      : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
@@ -578,13 +626,20 @@ class _EpostaBulteniKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isKoyuStandart = Theme.of(context).brightness == Brightness.dark && !kolayMod;
+    final isKoyu = isKoyuStandart || kolayMod;
+
     return Container(
       padding: const EdgeInsets.all(Olculer.boslukBuyuk),
       decoration: BoxDecoration(
-        color: kolayMod ? const Color(0xFF1E1E1E) : Colors.white,
+        color: kolayMod
+            ? const Color(0xFF1E1E1E)
+            : (isKoyuStandart ? const Color(0xFF1E293B) : Colors.white),
         borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
         border: Border.all(
-          color: kolayMod ? Colors.white24 : UygulamaRenkleri.cizgi,
+          color: kolayMod
+              ? Colors.white24
+              : (isKoyuStandart ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
           width: kolayMod ? 2 : 1,
         ),
       ),
@@ -619,14 +674,14 @@ class _EpostaBulteniKarti extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
-                color: kolayMod ? Colors.white : Colors.black87,
+                color: isKoyu ? Colors.white : Colors.black87,
               ),
             ),
             subtitle: Text(
               'En ucuz market ürünleri, aktüel kataloglar ve kaçırılmayacak fırsatlar haftalık olarak e-posta adresinize gönderilir.',
               style: TextStyle(
                 fontSize: 12,
-                color: kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi,
+                color: isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi,
               ),
             ),
             value: aktif,

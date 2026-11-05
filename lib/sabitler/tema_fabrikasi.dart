@@ -13,7 +13,7 @@ class TemaFabrikasi {
       case ProfilTuru.gormeEngelliModu:
         return _kolayModTemasi(); // Yüksek kontrast ve büyük odak
       case ProfilTuru.standart:
-        return _standartTema();
+        return profil.karanlikModAcik ? _standartKaranlikTema() : _standartTema();
     }
   }
 
@@ -29,6 +29,29 @@ class TemaFabrikasi {
         backgroundColor: Colors.white,
         foregroundColor: UygulamaRenkleri.koyuYazi,
         elevation: 0,
+      ),
+    );
+  }
+
+  // 1.1 STANDART KARANLIK TEMA (Gece Mavisi & Zümrüt M3)
+  static ThemeData _standartKaranlikTema() {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorSchemeSeed: UygulamaRenkleri.anaZumrut,
+      scaffoldBackgroundColor: const Color(0xFF0F172A),
+      cardColor: const Color(0xFF1E293B),
+      canvasColor: const Color(0xFF0F172A),
+      dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF1E293B)),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF0F172A),
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Color(0xFF0F172A),
+        selectedItemColor: UygulamaRenkleri.anaZumrut,
+        unselectedItemColor: Color(0xFF94A3B8),
       ),
     );
   }

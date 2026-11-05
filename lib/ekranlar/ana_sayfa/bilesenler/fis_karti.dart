@@ -20,8 +20,11 @@ class FisKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final etkinVurgu = vurguRengi ?? UygulamaRenkleri.anaKoyu;
-    final zeminRengi = vurguRengi != null ? vurguRengi!.withValues(alpha: 0.1) : UygulamaRenkleri.anaAcik;
+    final isKoyu = Theme.of(context).brightness == Brightness.dark;
+    final etkinVurgu = vurguRengi ?? (isKoyu ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.anaKoyu);
+    final zeminRengi = vurguRengi != null
+        ? vurguRengi!.withValues(alpha: 0.1)
+        : (isKoyu ? const Color(0xFF334155) : UygulamaRenkleri.anaAcik);
 
     return InkWell(
       onTap: onDokunuldu,
@@ -30,9 +33,9 @@ class FisKarti extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: Olculer.boslukOrta),
         padding: const EdgeInsets.all(Olculer.boslukOrta),
         decoration: BoxDecoration(
-          color: UygulamaRenkleri.kartBeyaz,
+          color: isKoyu ? const Color(0xFF1E293B) : UygulamaRenkleri.kartBeyaz,
           borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-          border: Border.all(color: UygulamaRenkleri.cizgi),
+          border: Border.all(color: isKoyu ? const Color(0xFF334155) : UygulamaRenkleri.cizgi),
         ),
         child: Row(
           children: [
@@ -55,7 +58,9 @@ class FisKarti extends StatelessWidget {
                 children: [
                   Text(
                     fis.aciklama,
-                    style: MetinStilleri.govdeKalin(),
+                    style: MetinStilleri.govdeKalin(
+                      renk: isKoyu ? Colors.white : UygulamaRenkleri.koyuYazi,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -65,18 +70,22 @@ class FisKarti extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                          color: isKoyu ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           fis.marketAdi,
-                          style: MetinStilleri.aciklama(renk: const Color(0xFF475569)),
+                          style: MetinStilleri.aciklama(
+                            renk: isKoyu ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '${fis.toplamUrunAdedi} ürün',
-                        style: MetinStilleri.aciklama(),
+                        style: MetinStilleri.aciklama(
+                          renk: isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi,
+                        ),
                       ),
                     ],
                   ),
@@ -85,9 +94,9 @@ class FisKarti extends StatelessWidget {
             ),
             FiyatEtiketi(tutar: fis.toplamTutar, boyut: 17),
             const SizedBox(width: 4),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: UygulamaRenkleri.griYazi,
+              color: isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi,
             ),
           ],
         ),

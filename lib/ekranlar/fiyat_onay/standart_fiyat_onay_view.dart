@@ -25,28 +25,36 @@ class StandartFiyatOnayView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final yonetici = context.watch<FiyatOnayYoneticisi>();
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final isKoyu = profil.karanlikModAcik;
     final seciliFiyat = yonetici.seciliFiyat;
     final adaylar = yonetici.adayFiyatlar;
 
+    final Color zemin = isKoyu ? const Color(0xFF0F172A) : UygulamaRenkleri.arkaPlan;
+    final Color inputZemin = isKoyu ? const Color(0xFF1E293B) : Colors.white;
+    final Color inputBorder = isKoyu ? const Color(0xFF334155) : UygulamaRenkleri.cizgi;
+    final Color anaYazi = isKoyu ? Colors.white : Colors.black87;
+    final Color altYazi = isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi;
+
     return Scaffold(
-      backgroundColor: UygulamaRenkleri.arkaPlan,
+      backgroundColor: zemin,
       appBar: AppBar(
-        title: Text('Fiyat Onayı', style: MetinStilleri.baslik2()),
-        backgroundColor: Colors.white,
+        title: Text('Fiyat Onayı', style: MetinStilleri.baslik2(renk: anaYazi)),
+        backgroundColor: zemin,
         elevation: 0,
+        iconTheme: IconThemeData(color: isKoyu ? Colors.white : Colors.black87),
         actions: [
           IconButton(
             tooltip: 'Sesli Asistan',
             icon: Icon(
               yonetici.dinleniyor
                   ? Icons.mic
-                  : (context.watch<ProfilYoneticisi>().profil.sesliAsistanAcik
+                  : (profil.sesliAsistanAcik
                       ? Icons.mic_none_rounded
                       : Icons.mic_off_rounded),
               color: yonetici.dinleniyor ? Colors.red : UygulamaRenkleri.anaZumrut,
             ),
             onPressed: () {
-              final profil = context.read<ProfilYoneticisi>().profil;
               if (!profil.sesliAsistanAcik) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -67,7 +75,7 @@ class StandartFiyatOnayView extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close_rounded),
+            icon: Icon(Icons.close_rounded, color: isKoyu ? Colors.white : null),
           ),
         ],
       ),
@@ -91,22 +99,25 @@ class StandartFiyatOnayView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(Olculer.boslukOrta),
               decoration: BoxDecoration(
-                color: UygulamaRenkleri.anaAcik,
+                color: isKoyu ? const Color(0xFF1E293B) : UygulamaRenkleri.anaAcik,
                 borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
                 border: Border.all(color: UygulamaRenkleri.anaZumrut),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: UygulamaRenkleri.anaKoyu),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: UygulamaRenkleri.anaZumrut),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Etiket yapay zekâ ile taranıyor...',
-                      style: TextStyle(color: UygulamaRenkleri.anaKoyu, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: isKoyu ? Colors.white : UygulamaRenkleri.anaKoyu,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -119,8 +130,9 @@ class StandartFiyatOnayView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(Olculer.boslukBuyuk),
             decoration: BoxDecoration(
-              color: UygulamaRenkleri.anaKoyu,
+              color: isKoyu ? const Color(0xFF1E293B) : UygulamaRenkleri.anaKoyu,
               borderRadius: BorderRadius.circular(Olculer.yariCapBuyuk),
+              border: isKoyu ? Border.all(color: const Color(0xFF334155)) : null,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,11 +186,20 @@ class StandartFiyatOnayView extends StatelessWidget {
           // 4. Ürün Adı Düzenleme Kutusu
           TextField(
             controller: yonetici.urunAdiDenetleyici,
+            style: TextStyle(color: anaYazi),
             decoration: InputDecoration(
               labelText: 'Ürün Adı',
+              labelStyle: TextStyle(color: altYazi),
               filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
+              fillColor: inputZemin,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                borderSide: BorderSide(color: inputBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                borderSide: BorderSide(color: inputBorder),
+              ),
             ),
           ),
           const SizedBox(height: Olculer.boslukOrta),
@@ -187,22 +208,31 @@ class StandartFiyatOnayView extends StatelessWidget {
           TextField(
             controller: yonetici.fiyatDenetleyici,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: TextStyle(color: anaYazi),
             onChanged: (val) {
               final d = double.tryParse(val.replaceAll(',', '.'));
               if (d != null) yonetici.fiyatSec(d);
             },
             decoration: InputDecoration(
               labelText: 'Birim Fiyat (₺)',
+              labelStyle: TextStyle(color: altYazi),
               filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Olculer.yariCapOrta)),
+              fillColor: inputZemin,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                borderSide: BorderSide(color: inputBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
+                borderSide: BorderSide(color: inputBorder),
+              ),
             ),
           ),
 
           // 6. Algılanan Aday Fiyat Çipleri (Varsa)
           if (adaylar.length > 1) ...[
             const SizedBox(height: Olculer.boslukOrta),
-            Text('Algılanan Diğer Fiyatlar:', style: MetinStilleri.aciklama()),
+            Text('Algılanan Diğer Fiyatlar:', style: MetinStilleri.aciklama(renk: altYazi)),
             const SizedBox(height: 6),
             Wrap(
               spacing: 8,
@@ -211,9 +241,12 @@ class StandartFiyatOnayView extends StatelessWidget {
                 return ChoiceChip(
                   label: Text('${f.toStringAsFixed(2)} ₺'),
                   selected: secili,
-                  selectedColor: UygulamaRenkleri.anaAcik,
+                  selectedColor: isKoyu ? UygulamaRenkleri.anaZumrut.withValues(alpha: 0.3) : UygulamaRenkleri.anaAcik,
+                  backgroundColor: isKoyu ? const Color(0xFF1E293B) : null,
                   labelStyle: TextStyle(
-                    color: secili ? UygulamaRenkleri.anaKoyu : UygulamaRenkleri.koyuYazi,
+                    color: secili
+                        ? (isKoyu ? Colors.white : UygulamaRenkleri.anaKoyu)
+                        : (isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.koyuYazi),
                     fontWeight: secili ? FontWeight.bold : FontWeight.normal,
                   ),
                   onSelected: (_) => yonetici.fiyatSec(f),
@@ -227,24 +260,24 @@ class StandartFiyatOnayView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(Olculer.boslukOrta),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: inputZemin,
               borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-              border: Border.all(color: UygulamaRenkleri.cizgi),
+              border: Border.all(color: inputBorder),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Adet Seçimi', style: MetinStilleri.govdeKalin()),
+                Text('Adet Seçimi', style: MetinStilleri.govdeKalin(renk: anaYazi)),
                 Row(
                   children: [
                     IconButton(
                       onPressed: yonetici.adet > 1 ? yonetici.adetAzalt : null,
-                      icon: const Icon(Icons.remove_circle_outline),
+                      icon: Icon(Icons.remove_circle_outline, color: isKoyu ? Colors.white70 : null),
                     ),
-                    Text('${yonetici.adet}', style: MetinStilleri.baslik2()),
+                    Text('${yonetici.adet}', style: MetinStilleri.baslik2(renk: anaYazi)),
                     IconButton(
                       onPressed: yonetici.adetArtir,
-                      icon: const Icon(Icons.add_circle_outline),
+                      icon: Icon(Icons.add_circle_outline, color: isKoyu ? Colors.white70 : null),
                     ),
                   ],
                 ),

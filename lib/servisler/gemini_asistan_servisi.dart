@@ -42,11 +42,25 @@ class GeminiAsistanServisi {
   static String _apiKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
   static Future<void> anahtarYukle() async {
+    // 1. Proje kök dizinindeki yerel gemini_api_key.txt dosyasından oku (varsa)
+    try {
+      final dosya = File('gemini_api_key.txt');
+      if (await dosya.exists()) {
+        final icerik = (await dosya.readAsString()).trim();
+        if (icerik.isNotEmpty) {
+          _apiKey = icerik;
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // 2. Cihaz hafızasındaki SharedPreferences'tan oku
     try {
       final prefs = await SharedPreferences.getInstance();
       final key = prefs.getString('ayar_gemini_api_key');
       if (key != null && key.trim().isNotEmpty) {
         _apiKey = key.trim();
+        return;
       }
     } catch (_) {}
   }

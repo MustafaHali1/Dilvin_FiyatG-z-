@@ -101,11 +101,21 @@ class StandartSepetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profil = context.watch<ProfilYoneticisi>().profil;
+    final bool isKoyu = profil.karanlikModAcik;
+    final Color zeminRengi = isKoyu ? const Color(0xFF0F172A) : UygulamaRenkleri.arkaPlan;
+    final Color barRengi = isKoyu ? const Color(0xFF1E293B) : Colors.white;
+    final Color anaYaziRengi = isKoyu ? Colors.white : UygulamaRenkleri.koyuYazi;
+    final Color altYaziRengi = isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi;
+
     return Scaffold(
-      backgroundColor: UygulamaRenkleri.arkaPlan,
+      backgroundColor: zeminRengi,
       appBar: AppBar(
-        title: Text('Alışveriş Sepeti (${sepet.toplamUrunAdedi} Ürün)', style: MetinStilleri.baslik2()),
-        backgroundColor: Colors.white,
+        title: Text(
+          'Alışveriş Sepeti (${sepet.toplamUrunAdedi} Ürün)',
+          style: MetinStilleri.baslik2(renk: anaYaziRengi),
+        ),
+        backgroundColor: zeminRengi,
         elevation: 0,
         actions: [
           IconButton(
@@ -115,7 +125,11 @@ class StandartSepetView extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => _sepetiSesliOku(context),
-            icon: const Icon(Icons.volume_up_rounded, color: UygulamaRenkleri.anaKoyu, size: 28),
+            icon: Icon(
+              Icons.volume_up_rounded,
+              color: isKoyu ? Colors.white : UygulamaRenkleri.anaKoyu,
+              size: 28,
+            ),
             tooltip: 'Toplamı Sesli Oku',
           ),
         ],
@@ -125,11 +139,15 @@ class StandartSepetView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.shopping_bag_outlined, size: 64, color: UygulamaRenkleri.griYazi),
+                  Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 64,
+                    color: altYaziRengi,
+                  ),
                   const SizedBox(height: Olculer.boslukOrta),
-                  Text('Sepetiniz henüz boş', style: MetinStilleri.baslik2()),
+                  Text('Sepetiniz henüz boş', style: MetinStilleri.baslik2(renk: anaYaziRengi)),
                   const SizedBox(height: Olculer.boslukKucuk),
-                  Text('Fiyat okutarak ürün eklemeye başlayın', style: MetinStilleri.aciklama()),
+                  Text('Fiyat okutarak ürün eklemeye başlayın', style: MetinStilleri.aciklama(renk: altYaziRengi)),
                 ],
               ),
             )
@@ -149,10 +167,11 @@ class StandartSepetView extends StatelessWidget {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(Olculer.boslukBuyuk),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: barRengi,
+          border: isKoyu ? const Border(top: BorderSide(color: Color(0xFF334155), width: 1.5)) : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: isKoyu ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, -4),
             ),
@@ -165,8 +184,12 @@ class StandartSepetView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Genel Toplam', style: MetinStilleri.baslik2()),
-                  FiyatEtiketi(tutar: sepet.genelToplam, boyut: 26, renk: UygulamaRenkleri.anaKoyu),
+                  Text('Genel Toplam', style: MetinStilleri.baslik2(renk: anaYaziRengi)),
+                  FiyatEtiketi(
+                    tutar: sepet.genelToplam,
+                    boyut: 26,
+                    renk: isKoyu ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.anaKoyu,
+                  ),
                 ],
               ),
               const SizedBox(height: Olculer.boslukOrta),

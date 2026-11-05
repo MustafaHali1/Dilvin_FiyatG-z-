@@ -321,12 +321,10 @@ class AyarlarEkrani extends StatelessWidget {
                   activeThumbColor: temaVurguRengi,
                   activeTrackColor: temaVurguRengi.withValues(alpha: 0.45),
                   onChanged: (val) {
-                    if (val) {
-                      HapticFeedback.heavyImpact();
-                    } else {
-                      HapticFeedback.selectionClick();
-                    }
                     profilYoneticisi.titresimDegistir(val);
+                    if (val) {
+                      HapticFeedback.vibrate();
+                    }
                   },
                 ),
                 if (profil.profilTuru == ProfilTuru.standart) ...[

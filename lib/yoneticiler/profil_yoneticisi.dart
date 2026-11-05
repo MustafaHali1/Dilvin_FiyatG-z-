@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../modeller/profil_modeli.dart';
 import '../sabitler/uygulama_renkleri.dart';
+import '../servisler/sesli_asistan_servisi.dart';
 
 /// Kullanıcı profilini, renk körlüğü türünü ve mod geçişlerini
 /// SharedPreferences ile kalıcı olarak yöneten merkezi ViewModel
@@ -75,6 +76,8 @@ class ProfilYoneticisi extends ChangeNotifier {
         yaziBoyutu: yaziBoyutu ?? 16.0,
         karanlikModAcik: karanlik ?? false,
       );
+
+      SesliAsistanServisi().titresimAyarla(titresim ?? true);
 
       _kurulumTamamlandi = kurulum ?? false;
       _yuklendi = true;
@@ -165,6 +168,7 @@ class ProfilYoneticisi extends ChangeNotifier {
 
   Future<void> titresimDegistir(bool acik) async {
     _profil = _profil.kopyala(titresimAcik: acik);
+    SesliAsistanServisi().titresimAyarla(acik);
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();

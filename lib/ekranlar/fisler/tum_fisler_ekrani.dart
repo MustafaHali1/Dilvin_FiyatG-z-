@@ -4,6 +4,7 @@ import '../../sabitler/uygulama_renkleri.dart';
 import '../../sabitler/olculer.dart';
 import '../../sabitler/metin_stilleri.dart';
 import '../../modeller/fis_modeli.dart';
+import '../../modeller/profil_modeli.dart';
 import '../../yoneticiler/fis_yoneticisi.dart';
 import '../../yoneticiler/profil_yoneticisi.dart';
 import '../ana_sayfa/bilesenler/fis_karti.dart';
@@ -56,27 +57,44 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
 
     final toplamTutar = filtrelenmis.fold(0.0, (toplam, f) => toplam + f.toplamTutar);
 
+    final bool isKoyuStandart = profilYoneticisi.profil.profilTuru == ProfilTuru.standart &&
+        profilYoneticisi.profil.karanlikModAcik;
+    final bool isKoyu = kolayMod || isKoyuStandart;
+    final Color zeminRengi = kolayMod
+        ? Colors.black
+        : (isKoyuStandart ? const Color(0xFF0F172A) : UygulamaRenkleri.arkaPlan);
+    final Color ustKutuRengi = kolayMod
+        ? const Color(0xFF1E1E1E)
+        : (isKoyuStandart ? const Color(0xFF1E293B) : Colors.white);
+    final Color aramaKutusuZemini = kolayMod
+        ? Colors.black
+        : (isKoyuStandart ? const Color(0xFF0F172A) : UygulamaRenkleri.arkaPlan);
+    final Color anaYaziRengi = isKoyu ? Colors.white : Colors.black;
+    final Color altYaziRengi = isKoyu ? const Color(0xFF94A3B8) : UygulamaRenkleri.griYazi;
+
     return Scaffold(
-      backgroundColor: kolayMod ? Colors.black : UygulamaRenkleri.arkaPlan,
+      backgroundColor: zeminRengi,
       appBar: AppBar(
         title: Text(
           widget.baslik,
           style: kolayMod
               ? MetinStilleri.kolayModBaslik()
-              : MetinStilleri.baslik2(),
+              : MetinStilleri.baslik2(renk: anaYaziRengi),
         ),
-        backgroundColor: kolayMod ? Colors.black : Colors.white,
+        backgroundColor: zeminRengi,
         elevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(
-          color: kolayMod ? UygulamaRenkleri.kolayModSari : Colors.black,
+          color: kolayMod
+              ? UygulamaRenkleri.kolayModSari
+              : (isKoyuStandart ? Colors.white : Colors.black),
         ),
       ),
       body: Column(
         children: [
           // Arama ve İstatistik Özeti
           Container(
-            color: kolayMod ? const Color(0xFF1E1E1E) : Colors.white,
+            color: ustKutuRengi,
             padding: const EdgeInsets.fromLTRB(
               Olculer.boslukBuyuk,
               0,
@@ -87,27 +105,29 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
               children: [
                 TextField(
                   onChanged: (val) => setState(() => _aramaMetni = val.trim()),
-                  style: TextStyle(color: kolayMod ? Colors.white : Colors.black),
+                  style: TextStyle(color: anaYaziRengi),
                   decoration: InputDecoration(
                     hintText: 'Fiş, market veya ürün ara...',
-                    hintStyle: TextStyle(color: kolayMod ? Colors.white60 : UygulamaRenkleri.griYazi),
+                    hintStyle: TextStyle(color: altYaziRengi),
                     prefixIcon: Icon(
                       Icons.search_rounded,
-                      color: kolayMod ? UygulamaRenkleri.kolayModSari : UygulamaRenkleri.griYazi,
+                      color: kolayMod
+                          ? UygulamaRenkleri.kolayModSari
+                          : (isKoyuStandart ? UygulamaRenkleri.anaZumrut : UygulamaRenkleri.griYazi),
                     ),
                     filled: true,
-                    fillColor: kolayMod ? Colors.black : UygulamaRenkleri.arkaPlan,
+                    fillColor: aramaKutusuZemini,
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                      borderSide: kolayMod
-                          ? const BorderSide(color: Colors.white24)
+                      borderSide: isKoyu
+                          ? BorderSide(color: isKoyuStandart ? const Color(0xFF334155) : Colors.white24)
                           : BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(Olculer.yariCapOrta),
-                      borderSide: kolayMod
-                          ? const BorderSide(color: Colors.white24)
+                      borderSide: isKoyu
+                          ? BorderSide(color: isKoyuStandart ? const Color(0xFF334155) : Colors.white24)
                           : BorderSide.none,
                     ),
                   ),
@@ -119,7 +139,7 @@ class _TumFislerEkraniState extends State<TumFislerEkrani> {
                     Text(
                       '${filtrelenmis.length} Fiş Listeleniyor',
                       style: TextStyle(
-                        color: kolayMod ? Colors.white70 : UygulamaRenkleri.griYazi,
+                        color: altYaziRengi,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
